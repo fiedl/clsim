@@ -245,6 +245,9 @@ void I3CLSimStepToPhotonConverterOpenCL::Initialize()
         
         maxNumOutputPhotons_ = static_cast<uint32_t>(std::min(maxNumWorkitems_*sizeIncreaseFactor, static_cast<std::size_t>(std::numeric_limits<uint32_t>::max())));
     }
+
+    maxNumOutputPhotons_ /= 10000;
+    log_debug("maxNumOutputPhotons_: %zu", maxNumOutputPhotons_);
     
     // set up rng
     log_debug("Setting up RNG for %zu workitems.", maxNumWorkitems_);
