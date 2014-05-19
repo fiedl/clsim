@@ -230,7 +230,12 @@ void I3CLSimLightSourceToStepConverterFlasher::EnqueueLightSource(const I3CLSimL
     // just skip the entry if there are no photons to generate
     if (flasherPulse.GetNumberOfPhotonsNoBias() <= 0.) return;
     
+    log_debug("Number of photons (no bias): %f", flasherPulse.GetNumberOfPhotonsNoBias());
+    
     const double numPhotonsWithBias = flasherPulse.GetNumberOfPhotonsNoBias()*photonNumberCorrectionFactorForBias_;
+    
+    log_debug("numPhotonsWithBias (converted): %f", numPhotonsWithBias);
+    
     if (numPhotonsWithBias <= 0.) return;
     
     uint64_t numPhotons;
@@ -249,7 +254,11 @@ void I3CLSimLightSourceToStepConverterFlasher::EnqueueLightSource(const I3CLSimL
     }
     else
     {
-        numPhotons = static_cast<uint64_t>(randomService_->Poisson(numPhotonsWithBias));
+        if (numPhotonsWithBias == 1.0) {
+          numPhotons = 1.0;
+        } else {
+          numPhotons = static_cast<uint64_t>(randomService_->Poisson(numPhotonsWithBias));
+        }
     }
     if (numPhotons==0) return;
     
