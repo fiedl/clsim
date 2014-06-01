@@ -24,6 +24,9 @@
  * @author Claudio Kopper
  */
 
+// Switch to enable hole ice simulation.
+#define HOLE_ICE
+
 #ifdef SAVE_ALL_PHOTONS
 #ifdef STOP_PHOTONS_ON_DETECTION
 #error The SAVE_ALL_PHOTONS and STOP_PHOTONS_ON_DETECTION options cannot be used at the same time.
@@ -311,6 +314,41 @@ inline void saveHit(const floating4_t photonPosAndTime,
   }
 }
 
+#ifdef HOLE_ICE
+// Checks if the given photon is within the hole ice cylinder.
+//
+//              ..
+//        .          *.             (X,Y) im Kreis:
+//      .         r *    .          r^2 < (x-X)^2 + (y-Y)^2
+//     .           *      .
+//    .           *        .
+//    .         (x,y)      .
+//     .                  .
+//      .                .
+//         .          .
+//              ..
+//    .                     .
+// @param photonPosAndTime [floating4_t] the photon to check.
+// @return [bool] whether the photon is within the hole ice cylinder.
+//
+inline bool isPhotonWithinCylinder(floating4_t photonPosAndTime) {
+  floating4_t cylinderPosAndRadius = { 0, 165.0, 0, 18.0 };
+
+  floating_t squared_distance_from_cylinder_center =
+      (sqr(cylinderPosAndRadius.x - photonPosAndTime.x) +
+       sqr(cylinderPosAndRadius.y - photonPosAndTime.y));
+  
+  printf("x %f,     y %f  \n", photonPosAndTime.x, photonPosAndTime.y);
+
+  if (squared_distance_from_cylinder_center < sqr(cylinderPosAndRadius.w)) {
+    printf("in cylinder: %f \n", squared_distance_from_cylinder_center);
+    return true;
+  } else {
+    return false;
+  }
+}
+#endif
+
 __kernel void propKernel(
     __global uint *hitIndex, // deviceBuffer_CurrentNumOutputPhotons
     const uint maxHitIndex,  // maxNumOutputPhotons_
@@ -472,6 +510,12 @@ __kernel void propKernel(
           min(max(findLayerForGivenZPos(effective_z), 0), MEDIUM_LAYERS - 1);
 #endif
 
+#ifdef HOLE_ICE
+      if (isPhotonWithinCylinder(photonPosAndTime)) {
+        abs_lens_left = 0;
+      }
+#endif
+
       const floating_t photon_dz = photonDirAndWlen.z;
 
       // add a correction factor to the number of absorption lengths
@@ -584,9 +628,9 @@ __kernel void propKernel(
 #ifdef DEBUG_STORE_GENERATED_PHOTONS
     bool collided;
     if (RNG_CALL_UNIFORM_OC > 0.9) // prescale: 10%
-#else // DEBUG_STORE_GENERATED_PHOTONS
+#else                              // DEBUG_STORE_GENERATED_PHOTONS
     bool
-#endif // DEBUG_STORE_GENERATED_PHOTONS
+#endif                             // DEBUG_STORE_GENERATED_PHOTONS
       collided =
 #endif // STOP_PHOTONS_ON_DETECTION
           checkForCollision(photonPosAndTime, photonDirAndWlen, inv_groupvel,
@@ -595,7 +639,7 @@ __kernel void propKernel(
                             photonStartPosAndTime, photonStartDirAndWlen, &step,
 #ifdef STOP_PHOTONS_ON_DETECTION
                             &distancePropagated,
-#else // STOP_PHOTONS_ON_DETECTION
+#else  // STOP_PHOTONS_ON_DETECTION
                       distancePropagated,
 #endif // STOP_PHOTONS_ON_DETECTION
                             hitIndex, maxHitIndex, outputPhotons,
