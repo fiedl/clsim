@@ -47,22 +47,27 @@
 #include <string>
 
 namespace I3CLSimModuleHelper {
+  
+    struct OpenCLInitOptions {
+        const I3CLSimOpenCLDevice &device;
+        I3RandomServicePtr rng;
+        I3CLSimSimpleGeometryFromI3GeometryPtr geometry;
+        I3CLSimMediumPropertiesConstPtr medium;
+        I3CLSimFunctionConstPtr wavelengthGenerationBias;
+        const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators;
+        bool enableDoubleBuffering;
+        bool doublePrecision;
+        bool stopDetectedPhotons;
+        bool saveAllPhotons;
+        double saveAllPhotonsPrescale;
+        double fixedNumberOfAbsorptionLengths;
+        double pancakeFactor;
+        uint32_t photonHistoryEntries;
+        uint32_t limitWorkgroupSize;
+    };
+  
     I3CLSimStepToPhotonConverterOpenCLPtr
-    initializeOpenCL(const I3CLSimOpenCLDevice &device,
-                     I3RandomServicePtr rng,
-                     I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
-                     I3CLSimMediumPropertiesConstPtr medium,
-                     I3CLSimFunctionConstPtr wavelengthGenerationBias,
-                     const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
-                     bool enableDoubleBuffering,
-                     bool doublePrecision,
-                     bool stopDetectedPhotons,
-                     bool saveAllPhotons,
-                     double saveAllPhotonsPrescale,
-                     double fixedNumberOfAbsorptionLengths,
-                     double pancakeFactor,
-                     uint32_t photonHistoryEntries,
-                     uint32_t limitWorkgroupSize);
+    initializeOpenCL(OpenCLInitOptions options);
     
     I3CLSimLightSourceToStepConverterGeant4Ptr
     initializeGeant4(I3RandomServicePtr rng,

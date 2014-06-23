@@ -43,13 +43,17 @@ void register_I3ModuleHelper()
     // this can be used for testing purposes
     bp::def("makeCherenkovWavelengthGenerator", &I3CLSimModuleHelper::makeCherenkovWavelengthGenerator);
     bp::def("makeWavelengthGenerator", &I3CLSimModuleHelper::makeWavelengthGenerator);
-    bp::def("initializeOpenCL", &I3CLSimModuleHelper::initializeOpenCL,
-        (bp::arg("openCLDevice"), "randomService", "geometry", "mediumProperties",
-	"wavelengthGenerationBias", "wavelengthGenerators",
-	bp::arg("enableDoubleBuffering")=false, bp::arg("doublePrecision")=false,
-	bp::arg("stopDetectedPhotons")=true, bp::arg("saveAllPhotons")=false,
-	bp::arg("saveAllPhotonsPrescale")=0.01, bp::arg("fixedNumberOfAbsorptionLengths")=NAN,
-	bp::arg("pancakeFactor")=1., bp::arg("photonHistoryEntries")=0,
-	bp::arg("limitWorkgroupSize")=0));
+    bp::def("initializeOpenCL", &I3CLSimModuleHelper::initializeOpenCL, "openCLInitOptions");
+    
+    // TODO:
+    // * Declare the I3CLSimModuleHelper::OpenCLInitOptions for python.
+    // * Set the defaults as they were before: 
+    //        (bp::arg("openCLDevice"), "randomService", "geometry", "mediumProperties",
+    //	      "wavelengthGenerationBias", "wavelengthGenerators",
+    //	      bp::arg("enableDoubleBuffering")=false, bp::arg("doublePrecision")=false,
+    //	      bp::arg("stopDetectedPhotons")=true, bp::arg("saveAllPhotons")=false,
+    //	      bp::arg("saveAllPhotonsPrescale")=0.01, bp::arg("fixedNumberOfAbsorptionLengths")=NAN,
+    //	      bp::arg("pancakeFactor")=1., bp::arg("photonHistoryEntries")=0,
+    //	      bp::arg("limitWorkgroupSize")=0));
     
 }

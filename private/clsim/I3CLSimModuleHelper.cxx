@@ -299,67 +299,76 @@ namespace I3CLSimModuleHelper {
     
     }
 
-    
-    I3CLSimStepToPhotonConverterOpenCLPtr initializeOpenCL(const I3CLSimOpenCLDevice &device,
-                                                           I3RandomServicePtr rng,
-                                                           I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
-                                                           I3CLSimMediumPropertiesConstPtr medium,
-                                                           I3CLSimFunctionConstPtr wavelengthGenerationBias,
-                                                           const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
-                                                           bool enableDoubleBuffering,
-                                                           bool doublePrecision,
-                                                           bool stopDetectedPhotons,
-                                                           bool saveAllPhotons,
-                                                           double saveAllPhotonsPrescale,
-                                                           double fixedNumberOfAbsorptionLengths,
-                                                           double pancakeFactor,
-                                                           uint32_t photonHistoryEntries,
-                                                           uint32_t limitWorkgroupSize)
+
+    // @param OpenCLInitOptions options
+    //
+    //     struct OpenCLInitOptions {
+    //         const I3CLSimOpenCLDevice &device,
+    //         I3RandomServicePtr rng,
+    //         I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
+    //         I3CLSimMediumPropertiesConstPtr medium,
+    //         I3CLSimFunctionConstPtr wavelengthGenerationBias,
+    //         const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
+    //         bool enableDoubleBuffering,
+    //         bool doublePrecision,
+    //         bool stopDetectedPhotons,
+    //         bool saveAllPhotons,
+    //         double saveAllPhotonsPrescale,
+    //         double fixedNumberOfAbsorptionLengths,
+    //         double pancakeFactor,
+    //         uint32_t photonHistoryEntries,
+    //         uint32_t limitWorkgroupSize
+    //     }
+    //
+    //     The boost python bindings apparently do not support so many arguments
+    //     passed directly into the method. Therefore, this options struct is used.
+    //
+    I3CLSimStepToPhotonConverterOpenCLPtr initializeOpenCL(OpenCLInitOptions options)
     {
-        I3CLSimStepToPhotonConverterOpenCLPtr conv(new I3CLSimStepToPhotonConverterOpenCL(rng, device.GetUseNativeMath()));
+        I3CLSimStepToPhotonConverterOpenCLPtr conv(new I3CLSimStepToPhotonConverterOpenCL(options.rng, options.device.GetUseNativeMath()));
 
-        conv->SetDevice(device);
+        conv->SetDevice(options.device);
 
-        conv->SetWlenGenerators(wavelengthGenerators);
-        conv->SetWlenBias(wavelengthGenerationBias);
+        conv->SetWlenGenerators(options.wavelengthGenerators);
+        conv->SetWlenBias(options.wavelengthGenerationBias);
 
-        conv->SetMediumProperties(medium);
-        conv->SetGeometry(geometry);
+        conv->SetMediumProperties(options.medium);
+        conv->SetGeometry(options.geometry);
 
-        conv->SetEnableDoubleBuffering(enableDoubleBuffering);
-        conv->SetDoublePrecision(doublePrecision);
-        conv->SetStopDetectedPhotons(stopDetectedPhotons);
-        conv->SetSaveAllPhotons(saveAllPhotons);
-        conv->SetSaveAllPhotonsPrescale(saveAllPhotonsPrescale);
+        conv->SetEnableDoubleBuffering(options.enableDoubleBuffering);
+        conv->SetDoublePrecision(options.doublePrecision);
+        conv->SetStopDetectedPhotons(options.stopDetectedPhotons);
+        conv->SetSaveAllPhotons(options.saveAllPhotons);
+        conv->SetSaveAllPhotonsPrescale(options.saveAllPhotonsPrescale);
 
-        conv->SetFixedNumberOfAbsorptionLengths(fixedNumberOfAbsorptionLengths);
-        conv->SetDOMPancakeFactor(pancakeFactor);
+        conv->SetFixedNumberOfAbsorptionLengths(options.fixedNumberOfAbsorptionLengths);
+        conv->SetDOMPancakeFactor(options.pancakeFactor);
 
-        conv->SetPhotonHistoryEntries(photonHistoryEntries);
+        conv->SetPhotonHistoryEntries(options.photonHistoryEntries);
 
         conv->Compile();
         //log_trace("%s", conv.GetFullSource().c_str());
         
         std::size_t maxWorkgroupSize = conv->GetMaxWorkgroupSize();
-        if (limitWorkgroupSize!=0) {
-            maxWorkgroupSize = std::min(static_cast<std::size_t>(limitWorkgroupSize), maxWorkgroupSize);
+        if (options.limitWorkgroupSize!=0) {
+            maxWorkgroupSize = std::min(static_cast<std::size_t>(options.limitWorkgroupSize), maxWorkgroupSize);
         }
         
         conv->SetWorkgroupSize(maxWorkgroupSize);
         const std::size_t workgroupSize = conv->GetWorkgroupSize();
         
         // use approximately the given number of work items, convert to a multiple of the workgroup size
-        std::size_t maxNumWorkitems = (static_cast<std::size_t>(device.GetApproximateNumberOfWorkItems())/workgroupSize)*workgroupSize;
+        std::size_t maxNumWorkitems = (static_cast<std::size_t>(options.device.GetApproximateNumberOfWorkItems())/workgroupSize)*workgroupSize;
         if (maxNumWorkitems==0) maxNumWorkitems=workgroupSize;
         
         conv->SetMaxNumWorkitems(maxNumWorkitems);
 
         log_info("maximum workgroup size is %zu", maxWorkgroupSize);
         log_info("configured workgroup size is %zu", workgroupSize);
-        if (maxNumWorkitems != device.GetApproximateNumberOfWorkItems()) {
-            log_warn("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, device.GetApproximateNumberOfWorkItems());
+        if (maxNumWorkitems != options.device.GetApproximateNumberOfWorkItems()) {
+            log_warn("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, options.device.GetApproximateNumberOfWorkItems());
         } else {
-            log_info("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, device.GetApproximateNumberOfWorkItems());
+            log_info("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, options.device.GetApproximateNumberOfWorkItems());
         }
 
         conv->Initialize();
