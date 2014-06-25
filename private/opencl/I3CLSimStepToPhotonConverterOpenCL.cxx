@@ -85,6 +85,8 @@ doublePrecision_(false),
 stopDetectedPhotons_(false),
 saveAllPhotons_(false),
 saveAllPhotonsPrescale_(0.001), // only save .1% of all photons when in "AllPhotons" mode
+simulateHoleIce_(false),
+singlePhotonOptimizations_(false),
 fixedNumberOfAbsorptionLengths_(NAN),
 pancakeFactor_(1.),
 photonHistoryEntries_(0),
@@ -1487,6 +1489,30 @@ double I3CLSimStepToPhotonConverterOpenCL::GetSaveAllPhotonsPrescale() const
     return saveAllPhotonsPrescale_;
 }
 
+
+void I3CLSimStepToPhotonConverterOpenCL::SetSimulateHoleIce(bool value)
+{
+    if (initialized_)
+        throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
+    simulateHoleIce_ = value;
+}
+
+bool I3CLSimStepToPhotonConverterOpenCL::GetSimulateHoleIce() const
+{
+    return simulateHoleIce_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetSinglePhotonOptimizations(bool value)
+{
+    if (initialized_)
+        throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
+    singlePhotonOptimizations_ = value;
+}
+
+bool I3CLSimStepToPhotonConverterOpenCL::GetSinglePhotonOptimizations() const
+{
+    return singlePhotonOptimizations_;
+}
 
 
 void I3CLSimStepToPhotonConverterOpenCL::SetPhotonHistoryEntries(uint32_t value)

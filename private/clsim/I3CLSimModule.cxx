@@ -268,6 +268,16 @@ geometryIsConfigured_(false)
                  "Only this fraction of photons is actually generated.",
                  saveAllPhotonsPrescale_);
 
+    simulateHoleIce_=false;
+    AddParameter("SimulateHoleIce",
+                 "Enables hole ice simulation, i.e. using different absorption and refraction lengths for hole ice cylinders.",
+                 simulateHoleIce_);
+   
+    singlePhotonOptimizations_=false;
+    AddParameter("SinglePhotonOptimizations",
+                 "When enabled, changing some memory allocation and randomization behavior in order to make simulations with a single photon possible.",
+                 singlePhotonOptimizations_);                 
+
     fixedNumberOfAbsorptionLengths_=NAN;
     AddParameter("FixedNumberOfAbsorptionLengths",
                  "Sets the number of absorption lengths each photon should be propagated. If set to NaN (the default),\n"
@@ -415,6 +425,9 @@ void I3CLSimModule::Configure()
     GetParameter("StopDetectedPhotons", stopDetectedPhotons_);
     GetParameter("SaveAllPhotons", saveAllPhotons_);
     GetParameter("SaveAllPhotonsPrescale", saveAllPhotonsPrescale_);
+
+    GetParameter("SimulateHoleIce", simulateHoleIce_);
+    GetParameter("SinglePhotonOptimizations", singlePhotonOptimizations_);
 
     GetParameter("FixedNumberOfAbsorptionLengths", fixedNumberOfAbsorptionLengths_);
 
@@ -725,6 +738,8 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     stopDetectedPhotons_,
                                                     saveAllPhotons_,
                                                     saveAllPhotonsPrescale_,
+                                                    simulateHoleIce_,
+                                                    singlePhotonOptimizations_,
                                                     fixedNumberOfAbsorptionLengths_,
                                                     pancakeFactor_,
                                                     photonHistoryEntries_,

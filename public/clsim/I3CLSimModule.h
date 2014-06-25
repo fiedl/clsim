@@ -246,6 +246,13 @@ private:
     /// Parmeter: Sets the prescale factor of photons being generated in "saveAllPhotons" mode.
     ///   Only this fraction of photons is actually generated.
     double saveAllPhotonsPrescale_;
+    
+    /// Parameter: Simulate hole ice, i.e. cylinders with different absorption and refraction lengths.
+    bool simulateHoleIce_;
+    
+    /// Parameter: Change some memory and randomization behavior in order to enable the propagation
+    ///   of a single photon.
+    bool singlePhotonOptimizations_;    
 
     /// Parameter: Sets the number of absorption lengths each photon
     ///   should be propagated. If set to NaN (the default),

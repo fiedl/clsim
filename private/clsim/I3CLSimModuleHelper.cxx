@@ -303,21 +303,23 @@ namespace I3CLSimModuleHelper {
     // @param OpenCLInitOptions options
     //
     //     struct OpenCLInitOptions {
-    //         const I3CLSimOpenCLDevice &device,
-    //         I3RandomServicePtr rng,
-    //         I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
-    //         I3CLSimMediumPropertiesConstPtr medium,
-    //         I3CLSimFunctionConstPtr wavelengthGenerationBias,
-    //         const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
-    //         bool enableDoubleBuffering,
-    //         bool doublePrecision,
-    //         bool stopDetectedPhotons,
-    //         bool saveAllPhotons,
-    //         double saveAllPhotonsPrescale,
-    //         double fixedNumberOfAbsorptionLengths,
-    //         double pancakeFactor,
-    //         uint32_t photonHistoryEntries,
-    //         uint32_t limitWorkgroupSize
+    //         const I3CLSimOpenCLDevice &device;
+    //         I3RandomServicePtr rng;
+    //         I3CLSimSimpleGeometryFromI3GeometryPtr geometry;
+    //         I3CLSimMediumPropertiesConstPtr medium;
+    //         I3CLSimFunctionConstPtr wavelengthGenerationBias;
+    //         const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators;
+    //         bool enableDoubleBuffering;
+    //         bool doublePrecision;
+    //         bool stopDetectedPhotons;
+    //         bool saveAllPhotons;
+    //         double saveAllPhotonsPrescale;
+    //         bool simulateHoleIce;
+    //         bool singlePhotonOptimizations;
+    //         double fixedNumberOfAbsorptionLengths;
+    //         double pancakeFactor;
+    //         uint32_t photonHistoryEntries;
+    //         uint32_t limitWorkgroupSize;
     //     }
     //
     //     The boost python bindings apparently do not support so many arguments
@@ -340,6 +342,9 @@ namespace I3CLSimModuleHelper {
         conv->SetStopDetectedPhotons(options.stopDetectedPhotons);
         conv->SetSaveAllPhotons(options.saveAllPhotons);
         conv->SetSaveAllPhotonsPrescale(options.saveAllPhotonsPrescale);
+        
+        conv->SetSimulateHoleIce(options.simulateHoleIce);
+        conv->SetSinglePhotonOptimizations(options.singlePhotonOptimizations);
 
         conv->SetFixedNumberOfAbsorptionLengths(options.fixedNumberOfAbsorptionLengths);
         conv->SetDOMPancakeFactor(options.pancakeFactor);

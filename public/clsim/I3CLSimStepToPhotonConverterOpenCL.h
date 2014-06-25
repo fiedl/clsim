@@ -202,6 +202,37 @@ public:
     double GetSaveAllPhotonsPrescale() const;
 
     /**
+     * Sets whether to simulate hole ice, i.e. to
+     * have cylinders with different absorption
+     * and refraction lengths.
+     * 
+     * Will throw if already initialized.
+     */
+    void SetSimulateHoleIce(bool value);
+    
+    /**
+     * Returns whether to simulate hole ice.
+     */
+    bool GetSimulateHoleIce() const;
+    
+    /**
+     * Sets whether to optimize the simulation
+     * for a run with only a single photon. This
+     * changes memory allocation behavior and
+     * deactivates the poission randomization.
+     * 
+     * Will throw if already initialized.
+     */
+    void SetSinglePhotonOptimizations(bool value);
+    
+    /*
+     * Returns whether to optimize the simulation
+     * for a run with only a single photon.
+     */
+    bool GetSinglePhotonOptimizations() const;
+
+
+    /**
      * Sets the maximum number of entries in the photon
      * history table. Each point in the table
      * will store the position of the photon
@@ -446,6 +477,8 @@ private:
     bool stopDetectedPhotons_;
     bool saveAllPhotons_;
     double saveAllPhotonsPrescale_;
+    bool simulateHoleIce_;
+    bool singlePhotonOptimizations_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;
     
