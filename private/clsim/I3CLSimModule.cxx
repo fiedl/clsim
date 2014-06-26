@@ -1410,8 +1410,10 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
     
     if (MCTreeName_ != "")
         MCTree = frame->Get<I3MCTreeConstPtr>(MCTreeName_);
-    if (flasherPulseSeriesName_ != "")
+    if (flasherPulseSeriesName_ != "") {
         flasherPulses = frame->Get<I3CLSimFlasherPulseSeriesConstPtr>(flasherPulseSeriesName_);
+        log_debug("Got flasherPulses: %zu", flasherPulses->size());
+    }
 
     if ((!MCTree) && (!flasherPulses)) {
         // ignore frames without any MCTree and/or Flashers
@@ -1436,8 +1438,12 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
     std::deque<I3CLSimLightSource> lightSources;
     std::deque<double> timeOffsets;
     if (MCTree) ConvertMCTreeToLightSources(*MCTree, lightSources, timeOffsets);
-    if (flasherPulses) ConvertFlasherPulsesToLightSources(*flasherPulses, lightSources, timeOffsets);
+    if (flasherPulses) {
+      ConvertFlasherPulsesToLightSources(*flasherPulses, lightSources, timeOffsets);
+      log_debug("Got lightSources from flasherPulses: %zu", lightSources.size());
+    }
     
+
     // support both vectors of OMKeys and vectors of ModuleKeys
     
     if (omKeyMask) {
@@ -1458,6 +1464,8 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
     {
         const I3CLSimLightSource &lightSource = lightSources[i];
         const double timeOffset = timeOffsets[i];
+        
+        log_debug("lightSource %zu type: %s", i, typeid(lightSource.GetType()).name());
 
         if (lightSource.GetType() == I3CLSimLightSource::Particle)
         {
