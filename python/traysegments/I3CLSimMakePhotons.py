@@ -237,9 +237,6 @@ def I3CLSimMakePhotons(tray, name,
             clSimFlasherPulseSeriesName = FlasherPulseSeriesName
             clSimOMKeyMaskName = ""
             
-            icetray.logging.log_debug("Using FlasherPulseSeriesName as input source: " 
-                + FlasherPulseSeriesName)
-                        
         else:
             SimulateFlashers=False
             clSimFlasherPulseSeriesName = ""
@@ -345,7 +342,6 @@ def I3CLSimMakePhotons(tray, name,
         UseOnlyDeviceNumber=UseOnlyDeviceNumber
 	)
 
-    icetray.logging.log_debug("Calling Module I3CLSimModule: " + name + "_clsim")
     tray.AddModule("I3CLSimModule", name + "_clsim",
                    MCTreeName=clSimMCTreeName,
                    PhotonSeriesMapName=PhotonSeriesName,

@@ -247,9 +247,13 @@ void I3CLSimStepToPhotonConverterOpenCL::Initialize()
         
         maxNumOutputPhotons_ = static_cast<uint32_t>(std::min(maxNumWorkitems_*sizeIncreaseFactor, static_cast<std::size_t>(std::numeric_limits<uint32_t>::max())));
     }
-
-    maxNumOutputPhotons_ /= 10000;
-    log_debug("maxNumOutputPhotons_: %zu", maxNumOutputPhotons_);
+    
+    if (singlePhotonOptimizations_) {
+        // Reduce the memory that is allocated for photons. For this optimization, we don't
+        // need many photons. Before applying this hack, the simulation crashed.
+        maxNumOutputPhotons_ /= 10000;
+        log_debug("maxNumOutputPhotons_: %u", maxNumOutputPhotons_);
+    }
     
     // set up rng
     log_debug("Setting up RNG for %zu workitems.", maxNumWorkitems_);
@@ -436,6 +440,11 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
             preamble = preamble + "#define SAVE_ALL_PHOTONS_PRESCALE " + ToFloatString(saveAllPhotonsPrescale_) + "\n";
         }
         
+    }
+    
+    // Pass throught the hole-ice switch to the kernel. 
+    if (simulateHoleIce_) {
+        preamble += "#define HOLE_ICE\n";
     }
     
     

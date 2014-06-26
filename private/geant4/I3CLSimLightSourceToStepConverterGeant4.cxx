@@ -548,8 +548,6 @@ void I3CLSimLightSourceToStepConverterGeant4::Geant4Thread_impl(boost::this_thre
             continue;
         }
         
-        log_debug("Handling lightSource of type: %s", typeid(lightSource->GetType()).name());
-
         if (lightSource->GetType() == I3CLSimLightSource::Unknown)
         {
             log_warn("Ignoring a light source with type \"Unknown\".");
@@ -576,8 +574,6 @@ void I3CLSimLightSourceToStepConverterGeant4::Geant4Thread_impl(boost::this_thre
             
             if (parameterization.IsValidForLightSource(*lightSource))
             {
-                log_debug("Appending lightSource to ParameterizationQueue.");
-              
                 sendToParameterizationQueue->push_back(boost::make_tuple(lightSource, lightSourceIdentifier, parameterization));
                 parameterizationIsAvailable=true;
                 break;
@@ -658,8 +654,6 @@ void I3CLSimLightSourceToStepConverterGeant4::Geant4Thread_impl(boost::this_thre
             if (!parameterization.converter->IsInitialized()) log_fatal("Internal error: parameterization converter is not initialized.");
             if (parameterization.converter->BarrierActive()) log_fatal("Logic error: parameterization converter has active barrier.");
             
-            log_debug("Adding lightSource to parameterization converter.");
-                    
             parameterization.converter->EnqueueLightSource(*lightSource, lightSourceIdentifier);
             parameterization.converter->EnqueueBarrier();
             
@@ -823,7 +817,6 @@ void I3CLSimLightSourceToStepConverterGeant4::EnqueueLightSource(const I3CLSimLi
     
     I3CLSimLightSourceConstPtr lightSourceCopy(new I3CLSimLightSource(lightSource));
     
-    log_debug("Adding lightSourceCopy to queueToGeant4_.");
     queueToGeant4_->Put(std::make_pair(identifier, lightSourceCopy));
     
     LogGeant4Messages();

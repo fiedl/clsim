@@ -24,9 +24,6 @@
  * @author Claudio Kopper
  */
 
-// Switch to enable hole ice simulation.
-#define HOLE_ICE
-
 #ifdef SAVE_ALL_PHOTONS
 #ifdef STOP_PHOTONS_ON_DETECTION
 #error The SAVE_ALL_PHOTONS and STOP_PHOTONS_ON_DETECTION options cannot be used at the same time.
@@ -39,6 +36,20 @@
 #undef USE_NATIVE_MATH
 #endif
 #endif
+
+
+// ## Hole-Ice-Simulation Switch
+//
+// One can switch the hole-ice simulation on/off by setting the IceTray parameter 
+// `SimulateHoleIce`. The `I3CLSimStepToPhotonConverterOpenCL` then sets the 
+// pre-processor definition #HOLE_ICE if `SimulateHoleIce` is set to true.
+//
+#ifdef HOLE_ICE
+inline bool hole_ice() { return true; }
+#else
+inline bool hole_ice() { return false; }
+#endif
+
 
 #ifdef USE_NATIVE_MATH
 inline floating_t my_divide(floating_t a, floating_t b) {
@@ -513,6 +524,8 @@ __kernel void propKernel(
 #ifdef HOLE_ICE
       if (isPhotonWithinCylinder(photonPosAndTime)) {
         abs_lens_left = 0;
+        
+        printf("HOLE ICE!\n");
       }
 #endif
 
