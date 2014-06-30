@@ -329,7 +329,7 @@ inline void saveHit(const floating4_t photonPosAndTime,
 // Checks if the given photon is within the hole ice cylinder.
 //
 //              ..
-//        .          *.             (X,Y) im Kreis:
+//        .          *.             (X,Y) within the cylinder:
 //      .         r *    .          r^2 < (x-X)^2 + (y-Y)^2
 //     .           *      .
 //    .           *        .
@@ -349,10 +349,10 @@ inline bool isPhotonWithinCylinder(floating4_t photonPosAndTime) {
       (sqr(cylinderPosAndRadius.x - photonPosAndTime.x) +
        sqr(cylinderPosAndRadius.y - photonPosAndTime.y));
   
-  printf("x %f,     y %f  \n", photonPosAndTime.x, photonPosAndTime.y);
+  //printf("x %f,     y %f  \n", photonPosAndTime.x, photonPosAndTime.y);
 
   if (squared_distance_from_cylinder_center < sqr(cylinderPosAndRadius.w)) {
-    printf("in cylinder: %f \n", squared_distance_from_cylinder_center);
+    //printf("in cylinder: %f \n", squared_distance_from_cylinder_center);
     return true;
   } else {
     return false;
@@ -523,10 +523,66 @@ __kernel void propKernel(
 
 #ifdef HOLE_ICE
       if (isPhotonWithinCylinder(photonPosAndTime)) {
-        abs_lens_left = 0;
         
-        printf("HOLE ICE!\n");
-      }
+        // 1. Get random length to propagate until scattering.
+        // 2. Update the abs_lens_left
+        // 3. Set the sca_step_left to trigger scattering outside this block.
+        // 4. Circumvent the layer jump mechanism.
+        
+        
+        //  HOLE ICE   - next scatter in 0.302520 scattering lengths
+        //  HOLE ICE   - next scatter in 0.727872 scattering lengths
+        //  HOLE ICE   - next scatter in 0.809809 scattering lengths
+        //  HOLE ICE   - next scatter in 1.127218 scattering lengths
+        //  HOLE ICE   - next scatter in 1.152747 scattering lengths
+        //  HOLE ICE   - next scatter in 1.109195 scattering lengths
+        //  HOLE ICE   - next scatter in 0.774116 scattering lengths
+        //  HOLE ICE   - next scatter in 0.421784 scattering lengths
+        //  HOLE ICE   - next scatter in 0.609248 scattering lengths
+        //  HOLE ICE   - next scatter in 1.451722 scattering lengths
+        //  HOLE ICE   - next scatter in 0.175565 scattering lengths
+        floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
+        printf("HOLE ICE   - next scatter in %f scattering lengths\n", sca_step_left);
+        
+        // Just a test: Assume the scattering length in the hole ice to be 1/10 
+        // of the scattering length in layer 10.
+        floating_t hole_ice_scattering_length = getScatteringLength(10, photonDirAndWlen.w) / 10;
+        
+        distancePropagated = hole_ice_scattering_length * sca_step_left;
+        
+        floating_t hole_ice_absorption_length = getAbsorptionLength(10, photonDirAndWlen.w) / 2;
+        
+        // Subtract the propagated distance from the distance to absorption.
+        abs_lens_left -= my_divide(distancePropagated, hole_ice_absorption_length);
+        
+        printf("HOLE ICE   - absorption in %f abs lengths\n", abs_lens_left);
+        printf("HOLE ICE   - abs_length = %f * scat_length\n", my_divide(hole_ice_absorption_length, hole_ice_scattering_length));
+                
+        // * scaled absorption length
+        // * scattering probability (or length)
+        // * scattering angle (duplication!?)    -> done outside
+        // * propagation                         -> done outside
+        
+        // Propagate photon within the hole ice with special
+        // ice properties. 
+        //
+        // ## Variables
+        //
+        // After leaving the hole ice, these variables are needed to 
+        // continue with the regular algorithm:
+        //
+        // abs_lens_left
+        // distancePropagated
+        //
+        // ## What is to be handled here? 
+        // 
+        // Only scattering. The absorption is handled outside.
+        // Only one scatterings step. After one step, the photon
+        // needs to be written down etc.
+        
+    
+      } else { // Outside of the hole ice cylinder.
+
 #endif
 
       const floating_t photon_dz = photonDirAndWlen.z;
@@ -631,6 +687,11 @@ __kernel void propKernel(
       // hoist the correction factor back out of the absorption length
       abs_lens_left = my_divide(abs_lens_left, abs_len_correction_factor);
     }
+    
+#ifdef HOLE_ICE
+    } // This closes the block that checks whether one is inside the hole ice cylinder.
+#endif
+    
 
 #ifndef SAVE_ALL_PHOTONS
 // no photon collission detection in case all photons should be saved
