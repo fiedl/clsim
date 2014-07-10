@@ -442,9 +442,48 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         
     }
     
-    // Pass throught the hole-ice switch to the kernel. 
+    // Pass throught the hole-ice switch and properties to the kernel. 
     if (simulateHoleIce_) {
         preamble += "#define HOLE_ICE\n";
+        
+        // To define the hole ice positions in the kernel,
+        // produce some kernel code like this:
+        //
+        //     __constant const unsigned int numberOfCylinders = 2;
+        //     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
+        //       {0, 1.2, 3.4, 18.0},
+        //       {0, -1.2, -3.4, 18.0}
+        //     };
+        //
+        preamble += "__constant const unsigned int numberOfCylinders = " 
+            + std::to_string(holeIceCylinderPositions_.size())
+            + ";\n";
+        
+        preamble += "__constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {";
+
+        for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
+        {
+            std::string cylinder_position_and_radius_str = "{"
+                + std::to_string(holeIceCylinderPositions_.at(i).GetX())
+                + ", "
+                + std::to_string(holeIceCylinderPositions_.at(i).GetY())
+                + ", "
+                + std::to_string(holeIceCylinderPositions_.at(i).GetZ())
+                + ", "
+                + std::to_string(holeIceCylinderRadii_.at(i))
+                + "}";
+            log_info("Hole ice cylinder at {x,y,z,radius}: %s \n",
+                cylinder_position_and_radius_str.c_str());
+
+            preamble += cylinder_position_and_radius_str;
+            if (i < holeIceCylinderPositions_.size() - 1)
+                preamble += ", ";
+        }
+        
+        preamble += "};\n";
+        
+        std::cout << preamble << std::endl;
+        
     }
     
     
@@ -1580,7 +1619,25 @@ double I3CLSimStepToPhotonConverterOpenCL::GetDOMPancakeFactor() const
     return pancakeFactor_;
 }
 
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderPositions(I3Vector<I3Position> holeIceCylinderPositions)
+{
+    holeIceCylinderPositions_ = holeIceCylinderPositions;
+}
 
+I3Vector<I3Position> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderPositions()
+{
+    return holeIceCylinderPositions_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderRadii(I3Vector<float> holeIceCylinderRadii)
+{
+    holeIceCylinderRadii_ = holeIceCylinderRadii;
+}
+
+I3Vector<float> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderRadii()
+{
+    return holeIceCylinderRadii_;
+}
 
 void I3CLSimStepToPhotonConverterOpenCL::SetWlenGenerators(const std::vector<I3CLSimRandomValueConstPtr> &wlenGenerators)
 {

@@ -24,6 +24,10 @@
  * @author Claudio Kopper
  */
 
+__constant const unsigned int foo_numberOfCylinders = 2;
+__constant floating4_t foo_cylinderPositionsAndRadii[numberOfCylinders] = {{0.000000, 165.000000, 0.000000, 18.000000}, {0.000000, -165.000000, 0.000000, 18.000000}};
+
+
 #ifdef SAVE_ALL_PHOTONS
 #ifdef STOP_PHOTONS_ON_DETECTION
 #error The SAVE_ALL_PHOTONS and STOP_PHOTONS_ON_DETECTION options cannot be used at the same time.

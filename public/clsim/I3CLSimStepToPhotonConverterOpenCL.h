@@ -287,6 +287,16 @@ public:
      * Returns the "pancake" factor for DOMs.
      */
     double GetDOMPancakeFactor() const;
+    
+    /**
+     * Setters and getters for the hole ice cylinder positions and
+     * radii that are set in the geometry frame and passed to the
+     * propagation kernel.
+     */
+    void SetHoleIceCylinderPositions(I3Vector<I3Position> holeIceCylinderPositions);
+    void SetHoleIceCylinderRadii(I3Vector<float> holeIceCylinderRadii);
+    I3Vector<I3Position> GetHoleIceCylinderPositions();
+    I3Vector<float>      GetHoleIceCylinderRadii();
 
     /**
      * Sets the wavelength generators. 
@@ -322,7 +332,7 @@ public:
      * Will throw if used after the call to Initialize().
      */
     virtual void SetGeometry(I3CLSimSimpleGeometryConstPtr geometry);
-
+    
     /**
      * Compiles the kernel. Can only be used
      * after medium properties, geometry and device have
@@ -483,6 +493,10 @@ private:
     double pancakeFactor_;
     
     uint32_t photonHistoryEntries_;
+    
+    // hole ice cylinder positions and radii
+    I3Vector<I3Position> holeIceCylinderPositions_;
+    I3Vector<float>      holeIceCylinderRadii_;
     
     // some kernel sources loaded on construction
     std::string prependSource_;

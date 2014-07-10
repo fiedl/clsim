@@ -280,6 +280,11 @@ private:
     /// Parmeter: Limits the OpenCL workgroup size (the number of bunches to be processed in parallel).
     ///   If set to zero (the default) the largest possible workgroup size will be chosen.
     uint32_t limitWorkgroupSize_;
+    
+    
+    /// Hole ice information read from geometry frame.
+    I3Vector<I3Position> holeIceCylinderPositions_;
+    I3Vector<float>      holeIceCylinderRadii_;
 
 
 private:
