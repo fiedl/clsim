@@ -216,20 +216,20 @@ public:
     bool GetSimulateHoleIce() const;
     
     /**
-     * Sets whether to optimize the simulation
-     * for a run with only a single photon. This
-     * changes memory allocation behavior and
-     * deactivates the poission randomization.
+     * Multiply the photon memory allocation
+     * by this factor. This is usefull for single
+     * photon runs. For single photons, a good
+     * value might be 1/10000. 
      * 
      * Will throw if already initialized.
      */
-    void SetSinglePhotonOptimizations(bool value);
+    void SetSinglePhotonOptimizations(double value);
     
     /*
-     * Returns whether to optimize the simulation
-     * for a run with only a single photon.
+     * Returns memory allocation factor for single 
+     * photon runs.
      */
-    bool GetSinglePhotonOptimizations() const;
+    double GetSinglePhotonOptimizations() const;
 
 
     /**
@@ -488,7 +488,7 @@ private:
     bool saveAllPhotons_;
     double saveAllPhotonsPrescale_;
     bool simulateHoleIce_;
-    bool singlePhotonOptimizations_;
+    double singlePhotonOptimizations_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;
     

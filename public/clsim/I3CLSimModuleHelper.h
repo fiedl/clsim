@@ -61,7 +61,7 @@ namespace I3CLSimModuleHelper {
         bool saveAllPhotons;
         double saveAllPhotonsPrescale;
         bool simulateHoleIce;
-        bool singlePhotonOptimizations;
+        double singlePhotonOptimizations;
         double fixedNumberOfAbsorptionLengths;
         double pancakeFactor;
         uint32_t photonHistoryEntries;

@@ -86,7 +86,7 @@ stopDetectedPhotons_(false),
 saveAllPhotons_(false),
 saveAllPhotonsPrescale_(0.001), // only save .1% of all photons when in "AllPhotons" mode
 simulateHoleIce_(false),
-singlePhotonOptimizations_(false),
+singlePhotonOptimizations_(1),
 fixedNumberOfAbsorptionLengths_(NAN),
 pancakeFactor_(1.),
 photonHistoryEntries_(0),
@@ -248,10 +248,10 @@ void I3CLSimStepToPhotonConverterOpenCL::Initialize()
         maxNumOutputPhotons_ = static_cast<uint32_t>(std::min(maxNumWorkitems_*sizeIncreaseFactor, static_cast<std::size_t>(std::numeric_limits<uint32_t>::max())));
     }
     
-    if (singlePhotonOptimizations_) {
+    if (singlePhotonOptimizations_ != 1) {
         // Reduce the memory that is allocated for photons. For this optimization, we don't
         // need many photons. Before applying this hack, the simulation crashed.
-        maxNumOutputPhotons_ /= 10000;
+        maxNumOutputPhotons_ *= singlePhotonOptimizations_;
         log_debug("maxNumOutputPhotons_: %u", maxNumOutputPhotons_);
     }
     
@@ -1551,14 +1551,14 @@ bool I3CLSimStepToPhotonConverterOpenCL::GetSimulateHoleIce() const
     return simulateHoleIce_;
 }
 
-void I3CLSimStepToPhotonConverterOpenCL::SetSinglePhotonOptimizations(bool value)
+void I3CLSimStepToPhotonConverterOpenCL::SetSinglePhotonOptimizations(double value)
 {
     if (initialized_)
         throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
     singlePhotonOptimizations_ = value;
 }
 
-bool I3CLSimStepToPhotonConverterOpenCL::GetSinglePhotonOptimizations() const
+double I3CLSimStepToPhotonConverterOpenCL::GetSinglePhotonOptimizations() const
 {
     return singlePhotonOptimizations_;
 }

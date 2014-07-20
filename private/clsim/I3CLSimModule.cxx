@@ -273,9 +273,9 @@ geometryIsConfigured_(false)
                  "Enables hole ice simulation, i.e. using different absorption and refraction lengths for hole ice cylinders.",
                  simulateHoleIce_);
    
-    singlePhotonOptimizations_=false;
+    singlePhotonOptimizations_=1;
     AddParameter("SinglePhotonOptimizations",
-                 "When enabled, changing some memory allocation and randomization behavior in order to make simulations with a single photon possible.",
+                 "Multiply photon memory allocation by this factor. This helps when the kernel crashes with code (-4).",
                  singlePhotonOptimizations_);                 
 
     fixedNumberOfAbsorptionLengths_=NAN;

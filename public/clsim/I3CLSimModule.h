@@ -250,9 +250,8 @@ private:
     /// Parameter: Simulate hole ice, i.e. cylinders with different absorption and refraction lengths.
     bool simulateHoleIce_;
     
-    /// Parameter: Change some memory and randomization behavior in order to enable the propagation
-    ///   of a single photon.
-    bool singlePhotonOptimizations_;    
+    /// Parameter: Multiply photon memory allocation by this factor.
+    double singlePhotonOptimizations_;    
 
     /// Parameter: Sets the number of absorption lengths each photon
     ///   should be propagated. If set to NaN (the default),
