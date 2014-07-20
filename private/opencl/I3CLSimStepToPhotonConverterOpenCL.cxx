@@ -442,51 +442,6 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         
     }
     
-    // Pass throught the hole-ice switch and properties to the kernel. 
-    if (simulateHoleIce_) {
-        preamble += "#define HOLE_ICE\n";
-        
-        // To define the hole ice positions in the kernel,
-        // produce some kernel code like this:
-        //
-        //     __constant const unsigned int numberOfCylinders = 2;
-        //     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
-        //       {0, 1.2, 3.4, 18.0},
-        //       {0, -1.2, -3.4, 18.0}
-        //     };
-        //
-        preamble += "__constant const unsigned int numberOfCylinders = " 
-            + std::to_string(holeIceCylinderPositions_.size())
-            + ";\n";
-        
-        preamble += "__constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {";
-
-        for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
-        {
-            std::string cylinder_position_and_radius_str = "{"
-                + std::to_string(holeIceCylinderPositions_.at(i).GetX())
-                + ", "
-                + std::to_string(holeIceCylinderPositions_.at(i).GetY())
-                + ", "
-                + std::to_string(holeIceCylinderPositions_.at(i).GetZ())
-                + ", "
-                + std::to_string(holeIceCylinderRadii_.at(i))
-                + "}";
-            log_info("Hole ice cylinder at {x,y,z,radius}: %s \n",
-                cylinder_position_and_radius_str.c_str());
-
-            preamble += cylinder_position_and_radius_str;
-            if (i < holeIceCylinderPositions_.size() - 1)
-                preamble += ", ";
-        }
-        
-        preamble += "};\n";
-        
-        std::cout << preamble << std::endl;
-        
-    }
-    
-    
     // should the photon history be saved?
     if (photonHistoryEntries_>0) {
         preamble = preamble + "#define SAVE_PHOTON_HISTORY\n";
@@ -541,6 +496,49 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         preamble = preamble + "#define ZERO 0.f\n";
         preamble = preamble + "#define ONE 1.f\n";
         preamble = preamble + "\n";
+    }
+    
+    
+    // Pass throught the hole-ice switch and properties to the kernel. 
+    if (simulateHoleIce_) {
+        preamble += "#define HOLE_ICE\n";
+        
+        // To define the hole ice positions in the kernel,
+        // produce some kernel code like this:
+        //
+        //     __constant const unsigned int numberOfCylinders = 2;
+        //     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
+        //       {0, 1.2, 3.4, 18.0},
+        //       {0, -1.2, -3.4, 18.0}
+        //     };
+        //
+        preamble += "__constant const unsigned int numberOfCylinders = " 
+            + std::to_string(holeIceCylinderPositions_.size())
+            + ";\n";
+        
+        preamble += "__constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {";
+
+        for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
+        {
+            std::string cylinder_position_and_radius_str = "{"
+                + std::to_string(holeIceCylinderPositions_.at(i).GetX())
+                + ", "
+                + std::to_string(holeIceCylinderPositions_.at(i).GetY())
+                + ", "
+                + std::to_string(holeIceCylinderPositions_.at(i).GetZ())
+                + ", "
+                + std::to_string(holeIceCylinderRadii_.at(i))
+                + "}";
+            log_info("Hole ice cylinder at {x,y,z,radius}: %s \n",
+                cylinder_position_and_radius_str.c_str());
+
+            preamble += cylinder_position_and_radius_str;
+            if (i < holeIceCylinderPositions_.size() - 1)
+                preamble += ", ";
+        }
+        
+        preamble += "};\n";
+        
     }
     
     return preamble;

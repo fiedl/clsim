@@ -24,9 +24,6 @@
  * @author Claudio Kopper
  */
 
-__constant const unsigned int foo_numberOfCylinders = 2;
-__constant floating4_t foo_cylinderPositionsAndRadii[numberOfCylinders] = {{0.000000, 165.000000, 0.000000, 18.000000}, {0.000000, -165.000000, 0.000000, 18.000000}};
-
 
 #ifdef SAVE_ALL_PHOTONS
 #ifdef STOP_PHOTONS_ON_DETECTION
@@ -342,25 +339,38 @@ inline void saveHit(const floating4_t photonPosAndTime,
 //      .                .
 //         .          .
 //              ..
-//    .                     .
+//
+// The converter inserts the position and radius information
+// in the following manner:
+// 
+//     __constant const unsigned int numberOfCylinders = 2;
+//     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
+//       {0, 1.2, 3.4, 18.0},
+//       {0, -1.2, -3.4, 18.0}
+//     };
+//
+inline floating_t suqaredDistanceFromCylinderCenter(
+    floating4_t cylinderPositionAndRadius, floating4_t photonPositionAndTime)
+{
+    return (sqr(cylinderPositionAndRadius.x - photonPositionAndTime.x) +
+            sqr(cylinderPositionAndRadius.y - photonPositionAndTime.y));
+}
+//
 // @param photonPosAndTime [floating4_t] the photon to check.
 // @return [bool] whether the photon is within the hole ice cylinder.
 //
 inline bool isPhotonWithinCylinder(floating4_t photonPosAndTime) {
-  floating4_t cylinderPosAndRadius = { 0, 165.0, 0, 18.0 };
-
-  floating_t squared_distance_from_cylinder_center =
-      (sqr(cylinderPosAndRadius.x - photonPosAndTime.x) +
-       sqr(cylinderPosAndRadius.y - photonPosAndTime.y));
-  
-  //printf("x %f,     y %f  \n", photonPosAndTime.x, photonPosAndTime.y);
-
-  if (squared_distance_from_cylinder_center < sqr(cylinderPosAndRadius.w)) {
-    //printf("in cylinder: %f \n", squared_distance_from_cylinder_center);
-    return true;
-  } else {
+    for (int i = 0; i < numberOfCylinders; i++) 
+    {
+        if (suqaredDistanceFromCylinderCenter(
+            cylinderPositionsAndRadii[i], photonPosAndTime) 
+            < sqr(cylinderPositionsAndRadii[i].w))
+        {
+            printf("HOLE ICE hit cylinder %i\n", i);
+            return true;
+        }
+    }
     return false;
-  }
 }
 #endif
 
