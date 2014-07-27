@@ -366,7 +366,7 @@ inline bool isPhotonWithinCylinder(floating4_t photonPosAndTime) {
             cylinderPositionsAndRadii[i], photonPosAndTime) 
             < sqr(cylinderPositionsAndRadii[i].w))
         {
-            printf("HOLE ICE hit cylinder %i\n", i);
+            //printf("HOLE ICE hit cylinder %i\n", i);
             return true;
         }
     }
@@ -556,21 +556,21 @@ __kernel void propKernel(
         //  HOLE ICE   - next scatter in 1.451722 scattering lengths
         //  HOLE ICE   - next scatter in 0.175565 scattering lengths
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
-        printf("HOLE ICE   - next scatter in %f scattering lengths\n", sca_step_left);
+        //printf("HOLE ICE   - next scatter in %f scattering lengths\n", sca_step_left);
         
         // Just a test: Assume the scattering length in the hole ice to be 1/10 
         // of the scattering length in layer 10.
-        floating_t hole_ice_scattering_length = getScatteringLength(10, photonDirAndWlen.w) / 10;
+        floating_t hole_ice_scattering_length = 0.3;  // getScatteringLength(10, photonDirAndWlen.w) / 2;
         
         distancePropagated = hole_ice_scattering_length * sca_step_left;
         
-        floating_t hole_ice_absorption_length = getAbsorptionLength(10, photonDirAndWlen.w) / 2;
+        floating_t hole_ice_absorption_length = getAbsorptionLength(1, photonDirAndWlen.w) / 1;
         
         // Subtract the propagated distance from the distance to absorption.
         abs_lens_left -= my_divide(distancePropagated, hole_ice_absorption_length);
         
-        printf("HOLE ICE   - absorption in %f abs lengths\n", abs_lens_left);
-        printf("HOLE ICE   - abs_length = %f * scat_length\n", my_divide(hole_ice_absorption_length, hole_ice_scattering_length));
+        //printf("HOLE ICE   - absorption in %f abs lengths\n", abs_lens_left);
+        //printf("HOLE ICE   - abs_length = %f * scat_length\n", my_divide(hole_ice_absorption_length, hole_ice_scattering_length));
                 
         // * scaled absorption length
         // * scattering probability (or length)
