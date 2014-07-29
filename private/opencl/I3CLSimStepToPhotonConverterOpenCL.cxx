@@ -599,7 +599,13 @@ loadKernel(const std::string& name, bool header)
     const std::string I3_SRC(getenv("I3_SRC"));
     const std::string kernelBaseDir = I3_SRC+"/clsim/resources/kernels/";
     const std::string ext = header ? ".h.cl" : ".c.cl";
-    return I3CLSimHelper::LoadProgramSource(kernelBaseDir+name+ext);
+    std::string kernelCode = I3CLSimHelper::LoadProgramSource(kernelBaseDir+name+ext);
+    
+    // For #include directives in the kernel code, provide an absolute clsim path.
+    // Example: #include "__CLSIM_DIR/resources/lib/my_lib.c"
+    boost::replace_all(kernelCode, "__CLSIM_DIR__", (I3_SRC + "/clsim")); 
+    
+    return kernelCode;
 }
 
 std::string I3CLSimStepToPhotonConverterOpenCL::GetCollisionDetectionSource(bool header)

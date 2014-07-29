@@ -327,51 +327,8 @@ inline void saveHit(const floating4_t photonPosAndTime,
 }
 
 #ifdef HOLE_ICE
-// Checks if the given photon is within the hole ice cylinder.
-//
-//              ..
-//        .          *.             (X,Y) within the cylinder:
-//      .         r *    .          r^2 < (x-X)^2 + (y-Y)^2
-//     .           *      .
-//    .           *        .
-//    .         (x,y)      .
-//     .                  .
-//      .                .
-//         .          .
-//              ..
-//
-// The converter inserts the position and radius information
-// in the following manner:
-// 
-//     __constant const unsigned int numberOfCylinders = 2;
-//     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
-//       {0, 1.2, 3.4, 18.0},
-//       {0, -1.2, -3.4, 18.0}
-//     };
-//
-inline floating_t suqaredDistanceFromCylinderCenter(
-    floating4_t cylinderPositionAndRadius, floating4_t photonPositionAndTime)
-{
-    return (sqr(cylinderPositionAndRadius.x - photonPositionAndTime.x) +
-            sqr(cylinderPositionAndRadius.y - photonPositionAndTime.y));
-}
-//
-// @param photonPosAndTime [floating4_t] the photon to check.
-// @return [bool] whether the photon is within the hole ice cylinder.
-//
-inline bool isPhotonWithinCylinder(floating4_t photonPosAndTime) {
-    for (int i = 0; i < numberOfCylinders; i++) 
-    {
-        if (suqaredDistanceFromCylinderCenter(
-            cylinderPositionsAndRadii[i], photonPosAndTime) 
-            < sqr(cylinderPositionsAndRadii[i].w))
-        {
-            //printf("HOLE ICE hit cylinder %i\n", i);
-            return true;
-        }
-    }
-    return false;
-}
+// __CLSIM_DIR__ is replaced in I3CLSimStepToPhotonConverterOpenCL::loadKernel.
+#include "__CLSIM_DIR__/resources/kernels/lib/intersection/intersection.c"
 #endif
 
 __kernel void propKernel(
@@ -535,70 +492,6 @@ __kernel void propKernel(
           min(max(findLayerForGivenZPos(effective_z), 0), MEDIUM_LAYERS - 1);
 #endif
 
-#ifdef HOLE_ICE
-      if (isPhotonWithinCylinder(photonPosAndTime)) {
-        
-        // 1. Get random length to propagate until scattering.
-        // 2. Update the abs_lens_left
-        // 3. Set the sca_step_left to trigger scattering outside this block.
-        // 4. Circumvent the layer jump mechanism.
-        
-        
-        //  HOLE ICE   - next scatter in 0.302520 scattering lengths
-        //  HOLE ICE   - next scatter in 0.727872 scattering lengths
-        //  HOLE ICE   - next scatter in 0.809809 scattering lengths
-        //  HOLE ICE   - next scatter in 1.127218 scattering lengths
-        //  HOLE ICE   - next scatter in 1.152747 scattering lengths
-        //  HOLE ICE   - next scatter in 1.109195 scattering lengths
-        //  HOLE ICE   - next scatter in 0.774116 scattering lengths
-        //  HOLE ICE   - next scatter in 0.421784 scattering lengths
-        //  HOLE ICE   - next scatter in 0.609248 scattering lengths
-        //  HOLE ICE   - next scatter in 1.451722 scattering lengths
-        //  HOLE ICE   - next scatter in 0.175565 scattering lengths
-        floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
-        //printf("HOLE ICE   - next scatter in %f scattering lengths\n", sca_step_left);
-        
-        // Just a test: Assume the scattering length in the hole ice to be 1/10 
-        // of the scattering length in layer 10.
-        floating_t hole_ice_scattering_length = 0.3;  // getScatteringLength(10, photonDirAndWlen.w) / 2;
-        
-        distancePropagated = hole_ice_scattering_length * sca_step_left;
-        
-        floating_t hole_ice_absorption_length = getAbsorptionLength(1, photonDirAndWlen.w) / 1;
-        
-        // Subtract the propagated distance from the distance to absorption.
-        abs_lens_left -= my_divide(distancePropagated, hole_ice_absorption_length);
-        
-        //printf("HOLE ICE   - absorption in %f abs lengths\n", abs_lens_left);
-        //printf("HOLE ICE   - abs_length = %f * scat_length\n", my_divide(hole_ice_absorption_length, hole_ice_scattering_length));
-                
-        // * scaled absorption length
-        // * scattering probability (or length)
-        // * scattering angle (duplication!?)    -> done outside
-        // * propagation                         -> done outside
-        
-        // Propagate photon within the hole ice with special
-        // ice properties. 
-        //
-        // ## Variables
-        //
-        // After leaving the hole ice, these variables are needed to 
-        // continue with the regular algorithm:
-        //
-        // abs_lens_left
-        // distancePropagated
-        //
-        // ## What is to be handled here? 
-        // 
-        // Only scattering. The absorption is handled outside.
-        // Only one scatterings step. After one step, the photon
-        // needs to be written down etc.
-        
-    
-      } else { // Outside of the hole ice cylinder.
-
-#endif
-
       const floating_t photon_dz = photonDirAndWlen.z;
 
       // add a correction factor to the number of absorption lengths
@@ -703,7 +596,25 @@ __kernel void propKernel(
     }
     
 #ifdef HOLE_ICE
-    } // This closes the block that checks whether one is inside the hole ice cylinder.
+    for (int i = 0; i < numberOfCylinders; i++)
+    {
+        // Calculate intersection points of photon trajectory and hole-ice cylinder.
+        // See lib/intersection/intersection.c.
+        IntersectionProblemParameters_t p = {
+            photonPosAndTime.x,
+            photonPosAndTime.y,
+            photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
+            photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
+            cylinderPositionsAndRadii[i].x,
+            cylinderPositionsAndRadii[i].y,
+            cylinderPositionsAndRadii[i].w // radius
+        };
+        
+        printf("HOLE ICE - NUMBER OF INTERSECTIONS WITH CYLINDER %i: %i\n", 
+            i, number_of_intersections(p));
+        printf(" -> s1 = %f\n", intersection_s1(p));
+        printf(" -> s2 = %f\n", intersection_s2(p));
+    }
 #endif
     
 
