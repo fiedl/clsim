@@ -35,8 +35,10 @@ double intersection_discriminant(IntersectionProblemParameters_t p)
 
 double intersection_s(IntersectionProblemParameters_t p, int sign)
 {
-    return (-intersection_beta(p) + 
+    double scale_parameter = (-intersection_beta(p) + 
         sign * my_sqrt(intersection_discriminant(p))) / 2 / intersection_alpha(p);
+    if (scale_parameter < 0) scale_parameter = my_nan();
+    return scale_parameter;
 }
 
 double intersection_s1(IntersectionProblemParameters_t p)
@@ -74,31 +76,22 @@ int number_of_intersections(IntersectionProblemParameters_t p)
     double d = intersection_discriminant(p);
     if (d < 0) return 0;
     else if (d == 0) return 1;
-    else if (d > 0) return 2;
+    else if (d > 0) {
+        // Both intersection points behind the trajectory starting point A:
+        if (my_is_nan(intersection_s2(p))) return 0; 
+        // One intersection point behind the trajectory starting point A:
+        if (my_is_nan(intersection_s1(p))) return 1;
+    }
+    // Both intersection points on the positive trajectory:
+    return 2;
 }
 
+double squared_distance_from_center(double X, double Y, double MX, double MY)
+{
+    return (sqr(MX - X) + sqr(MY - Y));
+}
 
-// int main()
-// {
-//     
-//     // 1e3 Photonen, 1e3 Sprungpunkte, 1e2 Richtungen.
-//     // Insgesamt dauert das 0,4 Sekunden. Prima.
-//     for (int i = 0; i < 1e8; i++)
-//     {
-//     
-//         IntersectionProblemParameters_t parameters = {
-//             0.0, 0.5, // A
-//             5.0, 0.5, // B
-//             1.0, 1.0, // M
-//             0.5
-//         };
-//         
-//         // TODO: s-Parameterbereich auf [0;1] eingrenzen.
-//         
-//         // printf("Anzahl der Schnittpunkte: %i\n", number_of_intersections(parameters));
-//         // printf("Schnittpunkt 1: (%e,%e)\n", X1(parameters), Y1(parameters));
-//         // printf("Schnittpunkt 2: (%e,%e)\n", X2(parameters), Y2(parameters));
-//         
-//     }
-//     return 0;
-// }
+bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
+{
+    return (squared_distance_from_center(p.ax, p.ay, p.mx, p.my) < sqr(p.r));
+}

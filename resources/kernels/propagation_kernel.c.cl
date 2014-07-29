@@ -84,6 +84,8 @@ inline floating_t my_fabs(floating_t a) { return (a < ZERO) ? (-a) : (a); }
 inline floating_t my_fabs(floating_t a) { return fabs(a); }
 #endif
 inline floating_t sqr(floating_t a) { return a * a; }
+inline floating_t my_nan() { return NAN; }
+inline bool my_is_nan(floating_t a) { return isnan(a); }
 
 inline int findLayerForGivenZPos(floating_t posZ) {
   return convert_int((posZ - (floating_t)MEDIUM_LAYER_BOTTOM_POS) /
@@ -614,6 +616,7 @@ __kernel void propKernel(
             i, number_of_intersections(p));
         printf(" -> s1 = %f\n", intersection_s1(p));
         printf(" -> s2 = %f\n", intersection_s2(p));
+        if (intersecting_trajectory_starts_inside(p)) printf(" -> starts inside.\n");
     }
 #endif
     
