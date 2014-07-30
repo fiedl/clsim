@@ -47,6 +47,11 @@
 //
 #ifdef HOLE_ICE
 inline bool hole_ice() { return true; }
+
+// HOLE ICE PROPERTIES
+__constant const floating_t hole_ice_scattering_length_factor = 1.0e-7;
+__constant const floating_t hole_ice_absorption_length_factor = 1.0;
+
 #else
 inline bool hole_ice() { return false; }
 #endif
@@ -595,9 +600,10 @@ __kernel void propKernel(
 
       // hoist the correction factor back out of the absorption length
       abs_lens_left = my_divide(abs_lens_left, abs_len_correction_factor);
-    }
+    
     
 #ifdef HOLE_ICE
+      // TODO: Move before overburden calculation.
     for (int i = 0; i < numberOfCylinders; i++)
     {
         // Calculate intersection points of photon trajectory and hole-ice cylinder.
@@ -611,16 +617,49 @@ __kernel void propKernel(
             cylinderPositionsAndRadii[i].y,
             cylinderPositionsAndRadii[i].w // radius
         };
-        
-        printf("HOLE ICE - NUMBER OF INTERSECTIONS WITH CYLINDER %i: %i\n", 
-            i, number_of_intersections(p));
-        printf(" -> s1 = %f\n", intersection_s1(p));
-        printf(" -> s2 = %f\n", intersection_s2(p));
-        if (intersecting_trajectory_starts_inside(p)) printf(" -> starts inside.\n");
+        floating_t trajectory_ratio_inside_of_the_cylinder = intersection_ratio_inside(p);
+        if ( ! trajectory_ratio_inside_of_the_cylinder == 0.0 )
+        {
+            
+            printf("HOLE ICE -> trajectory inside: %f\n",
+                trajectory_ratio_inside_of_the_cylinder);
+                
+            // The propagated distance and the absorpotion lengths left have
+            // to be corrected for the modified ice-properties within the hole ice
+            // along the part of the trajectory that is within the hole-ice cylinder.
+                
+            printf(" -> distancePropagated before: %f\n", distancePropagated);
+            printf(" -> abs_lens_left before: %f\n", abs_lens_left);
+            
+            // Correct for the modified scattering length.
+            floating_t distanceInsideTheCylinder = distancePropagated *
+                trajectory_ratio_inside_of_the_cylinder;
+            distancePropagated -= distanceInsideTheCylinder *
+                (1.0 - hole_ice_scattering_length_factor);
+            sca_step_left -= distanceInsideTheCylinder *
+                (1.0 - hole_ice_scattering_length_factor) /
+                (currentScaLen * hole_ice_scattering_length_factor);
+            if (sca_step_left < 0) sca_step_left = 0.0;
+            abs_lens_left += distanceInsideTheCylinder *
+                (1.0 - hole_ice_scattering_length_factor) / 
+                (currentAbsLen * hole_ice_absorption_length_factor);
+
+            printf("   -> distancePropagated AFTER: %f\n", distancePropagated);
+            
+            // Correct for the modified absorption length.
+            abs_lens_left -= distanceInsideTheCylinder *
+                (1.0 - hole_ice_absorption_length_factor) /
+                (currentAbsLen * hole_ice_absorption_length_factor);
+            if (abs_lens_left < 0) abs_lens_left = 0.0;
+
+            printf("   -> abs_lens_left AFTER: %f\n", abs_lens_left);
+
+        }
     }
 #endif
     
-
+    } // TODO: Fix indention problems.
+    
 #ifndef SAVE_ALL_PHOTONS
 // no photon collission detection in case all photons should be saved
 

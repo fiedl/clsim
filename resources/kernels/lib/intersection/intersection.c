@@ -37,7 +37,7 @@ double intersection_s(IntersectionProblemParameters_t p, int sign)
 {
     double scale_parameter = (-intersection_beta(p) + 
         sign * my_sqrt(intersection_discriminant(p))) / 2 / intersection_alpha(p);
-    if (scale_parameter < 0) scale_parameter = my_nan();
+    if (( scale_parameter < 0.0 ) || ( scale_parameter > 1.0 )) scale_parameter = my_nan();
     return scale_parameter;
 }
 
@@ -94,4 +94,27 @@ double squared_distance_from_center(double X, double Y, double MX, double MY)
 bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
 {
     return (squared_distance_from_center(p.ax, p.ay, p.mx, p.my) < sqr(p.r));
+}
+
+inline bool intersecting_trajectory_starts_outside(IntersectionProblemParameters_t p)
+{
+    return ( ! intersecting_trajectory_starts_inside(p));
+}
+
+double intersection_ratio_inside(IntersectionProblemParameters_t p)
+{
+    bool starts_inside = intersecting_trajectory_starts_inside(p);
+    int num_of_intersections = number_of_intersections(p);
+    
+    if (( ! starts_inside ) && ( num_of_intersections == 0 ))
+        return 0.0;
+    if (( ! starts_inside ) && ( num_of_intersections == 1 ))
+        return 1.0 - intersection_s1(p);
+    if (( ! starts_inside ) && ( num_of_intersections == 2 ))
+        return intersection_s2(p) - intersection_s1(p);
+    if (( starts_inside ) && ( num_of_intersections == 0 ))
+        return 1.0;
+    if (( starts_inside ) && ( num_of_intersections == 1 ))
+        return intersection_s2(p);
+    return my_nan();
 }
