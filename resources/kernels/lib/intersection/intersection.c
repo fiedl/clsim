@@ -74,6 +74,18 @@ double intersection_y2(IntersectionProblemParameters_t p)
 int number_of_intersections(IntersectionProblemParameters_t p)
 {
     double d = intersection_discriminant(p);
+
+    // if (my_is_nan(d))
+    // {
+    //     printf("DISCRIMINANT ERROR: d = %f\n", d);
+    //     printf(" -> alpha = %f\n", intersection_alpha(p));
+    //     printf(" -> beta  = %f\n", intersection_beta(p));
+    //     printf(" -> gamma = %f\n", intersection_gamma(p));
+    //     printf(" -> start at: (%f, %f)\n", p.ax, p.ay);
+    //     printf(" -> end at:   (%f, %f)\n", p.bx, p.by);
+    //     printf(" -> circle:   (%f, %f), %f\n", p.mx, p.my, p.r);
+    // }
+
     if (d < 0) return 0;
     else if (d == 0) return 1;
     else if (d > 0) {
@@ -81,9 +93,10 @@ int number_of_intersections(IntersectionProblemParameters_t p)
         if (my_is_nan(intersection_s2(p))) return 0; 
         // One intersection point behind the trajectory starting point A:
         if (my_is_nan(intersection_s1(p))) return 1;
+        // Both intersection points on the positive trajectory:
+        return 2;
     }
-    // Both intersection points on the positive trajectory:
-    return 2;
+    printf("ERROR: THIS POINT SHOULD NOT BE REACHED. in number_of_intersections().\n");
 }
 
 double squared_distance_from_center(double X, double Y, double MX, double MY)
@@ -106,6 +119,10 @@ double intersection_ratio_inside(IntersectionProblemParameters_t p)
     bool starts_inside = intersecting_trajectory_starts_inside(p);
     int num_of_intersections = number_of_intersections(p);
     
+    // printf("HOLE ICE - INTERSECTION\n");
+    // printf(" -> num of intersections = %i\n", num_of_intersections);
+    // if (starts_inside) printf(" -> starts inside.\n");
+    
     if (( ! starts_inside ) && ( num_of_intersections == 0 ))
         return 0.0;
     if (( ! starts_inside ) && ( num_of_intersections == 1 ))
@@ -116,5 +133,7 @@ double intersection_ratio_inside(IntersectionProblemParameters_t p)
         return 1.0;
     if (( starts_inside ) && ( num_of_intersections == 1 ))
         return intersection_s2(p);
+
+    printf("ERROR. This point should not be reached! in intersection_ratio_inside().\n");
     return my_nan();
 }
