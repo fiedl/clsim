@@ -513,7 +513,7 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         //     };
         //
         preamble += "__constant const unsigned int numberOfCylinders = " 
-            + std::to_string(holeIceCylinderPositions_.size())
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
             + ";\n";
         
         preamble += "__constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {";
@@ -521,13 +521,13 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
         {
             std::string cylinder_position_and_radius_str = "{"
-                + std::to_string(holeIceCylinderPositions_.at(i).GetX())
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetX())
                 + ", "
-                + std::to_string(holeIceCylinderPositions_.at(i).GetY())
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetY())
                 + ", "
-                + std::to_string(holeIceCylinderPositions_.at(i).GetZ())
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetZ())
                 + ", "
-                + std::to_string(holeIceCylinderRadii_.at(i))
+                + boost::lexical_cast<std::string>(holeIceCylinderRadii_.at(i))
                 + "}";
             log_info("Hole ice cylinder at {x,y,z,radius}: %s \n",
                 cylinder_position_and_radius_str.c_str());
