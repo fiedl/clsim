@@ -250,6 +250,12 @@ private:
     /// Parameter: Simulate hole ice, i.e. cylinders with different absorption and refraction lengths.
     bool simulateHoleIce_;
     
+    /// Parameter: Multiply the local scattering length within hole ice by this factor.
+    double holeIceScatteringLengthFactor_;
+    
+    /// Parameter: Multiply the local absorption length within hole ice by this factor.
+    double holeIceAbsorptionLengthFactor_;
+        
     /// Parameter: Multiply photon memory allocation by this factor.
     double singlePhotonOptimizations_;    
 

@@ -86,6 +86,8 @@ stopDetectedPhotons_(false),
 saveAllPhotons_(false),
 saveAllPhotonsPrescale_(0.001), // only save .1% of all photons when in "AllPhotons" mode
 simulateHoleIce_(false),
+holeIceScatteringLengthFactor_(0.6),
+holeIceAbsorptionLengthFactor_(0.6),
 singlePhotonOptimizations_(1),
 fixedNumberOfAbsorptionLengths_(NAN),
 pancakeFactor_(1.),
@@ -539,6 +541,13 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         
         preamble += "};\n";
         
+        preamble += "__constant floating_t holeIceScatteringLengthFactor = "
+            + boost::lexical_cast<std::string>(holeIceScatteringLengthFactor_)
+            + ";\n";
+        preamble += "__constant floating_t holeIceAbsorptionLengthFactor = "
+            + boost::lexical_cast<std::string>(holeIceAbsorptionLengthFactor_)
+            + ";\n";
+
     }
     
     return preamble;
@@ -1555,6 +1564,30 @@ void I3CLSimStepToPhotonConverterOpenCL::SetSimulateHoleIce(bool value)
 bool I3CLSimStepToPhotonConverterOpenCL::GetSimulateHoleIce() const
 {
     return simulateHoleIce_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceScatteringLengthFactor(double value)
+{
+    if (initialized_)
+        throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
+    holeIceScatteringLengthFactor_ = value;
+}
+
+double I3CLSimStepToPhotonConverterOpenCL::GetHoleIceScatteringLengthFactor() const
+{
+    return holeIceScatteringLengthFactor_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceAbsorptionLengthFactor(double value)
+{
+    if (initialized_)
+        throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
+    holeIceAbsorptionLengthFactor_ = value;
+}
+
+double I3CLSimStepToPhotonConverterOpenCL::GetHoleIceAbsorptionLengthFactor() const
+{
+    return holeIceAbsorptionLengthFactor_;
 }
 
 void I3CLSimStepToPhotonConverterOpenCL::SetSinglePhotonOptimizations(double value)

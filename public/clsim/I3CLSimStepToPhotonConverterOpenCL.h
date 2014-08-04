@@ -216,6 +216,30 @@ public:
     bool GetSimulateHoleIce() const;
     
     /**
+     * Sets the factor the local scattering length
+     * is multiplied with within the hole ice.
+     */
+    void SetHoleIceScatteringLengthFactor(double value);
+    
+    /**
+     * Returns the factor the local scattering length
+     * is multiplied with within the hole ice.
+     */
+    double GetHoleIceScatteringLengthFactor() const;
+
+    /**
+     * Sets the factor the local absorption length
+     * is multiplied with within the hole ice.
+     */
+    void SetHoleIceAbsorptionLengthFactor(double value);
+    
+    /**
+     * Returns the factor the local absorption length
+     * is multiplied with within the hole ice.
+     */
+    double GetHoleIceAbsorptionLengthFactor() const;
+    
+    /**
      * Multiply the photon memory allocation
      * by this factor. This is usefull for single
      * photon runs. For single photons, a good
@@ -488,6 +512,8 @@ private:
     bool saveAllPhotons_;
     double saveAllPhotonsPrescale_;
     bool simulateHoleIce_;
+    double holeIceScatteringLengthFactor_;
+    double holeIceAbsorptionLengthFactor_;
     double singlePhotonOptimizations_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;

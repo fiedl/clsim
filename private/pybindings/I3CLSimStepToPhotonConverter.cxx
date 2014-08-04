@@ -176,6 +176,13 @@ void register_I3CLSimStepToPhotonConverter()
 
         .def("SetSimulateHoleIce", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSimulateHoleIce)
         .def("GetSimulateHoleIce", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSimulateHoleIce)
+                
+        .def("SetHoleIceScatteringLengthFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetHoleIceScatteringLengthFactor)
+        .def("GetHoleIceScatteringLengthFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetHoleIceScatteringLengthFactor)
+
+        .def("SetHoleIceAbsorptionLengthFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetHoleIceAbsorptionLengthFactor)
+        .def("GetHoleIceAbsorptionLengthFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetHoleIceAbsorptionLengthFactor)
+                
         
         .def("SetSinglePhotonOptimizations", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSinglePhotonOptimizations)
         .def("GetSinglePhotonOptimizations", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSinglePhotonOptimizations)
@@ -198,6 +205,8 @@ void register_I3CLSimStepToPhotonConverter()
         .add_property("saveAllPhotons", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSaveAllPhotons, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSaveAllPhotons)
         .add_property("saveAllPhotonsPrescale", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSaveAllPhotonsPrescale, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSaveAllPhotonsPrescale)
         .add_property("simulateHoleIce", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSimulateHoleIce, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSimulateHoleIce)
+        .add_property("holeIceScatteringLengthFactor",             &I3CLSimStepToPhotonConverterOpenCLWrapper::GetHoleIceScatteringLengthFactor, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetHoleIceScatteringLengthFactor)
+        .add_property("holeIceAbsorptionLengthFactor",             &I3CLSimStepToPhotonConverterOpenCLWrapper::GetHoleIceAbsorptionLengthFactor, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetHoleIceAbsorptionLengthFactor)
         .add_property("singlePhotonOptimizations", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSinglePhotonOptimizations, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSinglePhotonOptimizations)
         .add_property("photonHistoryEntries", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetPhotonHistoryEntries, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetPhotonHistoryEntries)
         .add_property("fixedNumberOfAbsorptionLengths", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetFixedNumberOfAbsorptionLengths, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetFixedNumberOfAbsorptionLengths)

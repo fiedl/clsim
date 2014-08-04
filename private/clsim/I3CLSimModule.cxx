@@ -272,6 +272,16 @@ geometryIsConfigured_(false)
     AddParameter("SimulateHoleIce",
                  "Enables hole ice simulation, i.e. using different absorption and refraction lengths for hole ice cylinders.",
                  simulateHoleIce_);
+                 
+    holeIceScatteringLengthFactor_=0.6;
+    AddParameter("HoleIceScatteringLengthFactor",
+                 "Multiplies the local scattering length by this factor within the hole ice.",
+                 holeIceScatteringLengthFactor_);
+
+    holeIceAbsorptionLengthFactor_=0.6;
+    AddParameter("HoleIceAbsorptionLengthFactor",
+                 "Multiplies the local absorption length by this factor within the hole ice.",
+                 holeIceAbsorptionLengthFactor_);
    
     singlePhotonOptimizations_=1;
     AddParameter("SinglePhotonOptimizations",
@@ -427,6 +437,8 @@ void I3CLSimModule::Configure()
     GetParameter("SaveAllPhotonsPrescale", saveAllPhotonsPrescale_);
 
     GetParameter("SimulateHoleIce", simulateHoleIce_);
+    GetParameter("HoleIceScatteringLengthFactor", holeIceScatteringLengthFactor_);
+    GetParameter("HoleIceAbsorptionLengthFactor", holeIceAbsorptionLengthFactor_);
     GetParameter("SinglePhotonOptimizations", singlePhotonOptimizations_);
 
     GetParameter("FixedNumberOfAbsorptionLengths", fixedNumberOfAbsorptionLengths_);
@@ -747,6 +759,8 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     saveAllPhotons_,
                                                     saveAllPhotonsPrescale_,
                                                     simulateHoleIce_,
+                                                    holeIceScatteringLengthFactor_,
+                                                    holeIceAbsorptionLengthFactor_,
                                                     singlePhotonOptimizations_,
                                                     fixedNumberOfAbsorptionLengths_,
                                                     pancakeFactor_,
