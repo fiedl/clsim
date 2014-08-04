@@ -49,8 +49,8 @@
 inline bool hole_ice() { return true; }
 
 // HOLE ICE PROPERTIES
-__constant const floating_t hole_ice_scattering_length_factor = 0.3;
-__constant const floating_t hole_ice_absorption_length_factor = 1.0;
+__constant const floating_t hole_ice_scattering_length_factor = 0.6;
+__constant const floating_t hole_ice_absorption_length_factor = 0.6;
 
 #else
 inline bool hole_ice() { return false; }
@@ -607,14 +607,17 @@ __kernel void propKernel(
       // For some reason, there are photons with photonPosAndTime coordinates nan.
       // I will have to ignore them.
       // TODO: Why?
-      if ( ! my_is_nan(photonPosAndTime.x) )
+      if ( ! ( my_is_nan(photonPosAndTime.x) || my_is_nan(distancePropagated)  ) )
       {
-      
+          
       // TODO: Move before overburden calculation.
     for (int i = 0; i < numberOfCylinders; i++)
     {
-        // TODO: IF IN RANGE
         
+        // Is the cylinder in range?
+        if ( sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <= sqr(distancePropagated + cylinderPositionsAndRadii[i].w /* radius */) )
+        {
+            
         // Calculate intersection points of photon trajectory and hole-ice cylinder.
         // See lib/intersection/intersection.c.
         IntersectionProblemParameters_t p = {
@@ -627,7 +630,8 @@ __kernel void propKernel(
             cylinderPositionsAndRadii[i].w // radius
         };
         floating_t trajectory_ratio_inside_of_the_cylinder = intersection_ratio_inside(p);
-        if ( ! trajectory_ratio_inside_of_the_cylinder == 0.0 )
+
+        if (( ! trajectory_ratio_inside_of_the_cylinder == ZERO ) & ( ! my_is_nan(trajectory_ratio_inside_of_the_cylinder)))
         {
             
             //printf("HOLE ICE -> trajectory inside: %f\n",
@@ -643,27 +647,36 @@ __kernel void propKernel(
             floating_t distanceInsideTheCylinder = distancePropagated *
                 trajectory_ratio_inside_of_the_cylinder;
             distancePropagated -= distanceInsideTheCylinder *
-                (1.0 / hole_ice_scattering_length_factor - 1);
-            if (distancePropagated < 0) distancePropagated = 0.0;
+                (ONE / hole_ice_scattering_length_factor - ONE);
+            if (distancePropagated < ZERO) distancePropagated = ZERO;
             sca_step_left -= distanceInsideTheCylinder *
-                (1.0 / hole_ice_scattering_length_factor - 1) /
+                (ONE / hole_ice_scattering_length_factor - ONE) /
                 (currentScaLen * hole_ice_scattering_length_factor);
-            if (sca_step_left < 0) sca_step_left = 0.0;
+            if (sca_step_left < ZERO) sca_step_left = ZERO;
             abs_lens_left += distanceInsideTheCylinder *
-                (1.0 / hole_ice_scattering_length_factor - 1) / 
+                (ONE / hole_ice_scattering_length_factor - ONE) / 
                 (currentAbsLen * hole_ice_absorption_length_factor);
-            
+
             //printf(" -> distancePropagated AFTER: %f\n", distancePropagated);
             
             // Correct for the modified absorption length.
             abs_lens_left -= distanceInsideTheCylinder *
-                (1.0 / hole_ice_absorption_length_factor - 1) /
+                (ONE / hole_ice_absorption_length_factor - ONE) /
                 (currentAbsLen * hole_ice_absorption_length_factor);
-            if (abs_lens_left < 0) abs_lens_left = 0.0;
-
+            if (abs_lens_left < ZERO) abs_lens_left = ZERO;
+            
+            if (my_is_nan(abs_lens_left)) {
+                printf("WARNING: THIS SHOULD NOT BE REACHED. abs_lens_left == nan!\n");
+                printf("distance inside = %f\n", distanceInsideTheCylinder);
+                printf("absorption factor = %f\n", hole_ice_absorption_length_factor);
+                printf("currentAbsLen = %f\n", currentAbsLen);
+                printf("hole_ice_scattering_length_factor = %f\n", hole_ice_scattering_length_factor);
+                printf("distancePropagated = %f\n", distancePropagated);
+                printf("trajectory_ratio_inside_of_the_cylinder = %f\n", trajectory_ratio_inside_of_the_cylinder);
+            }
         }
     }
-    
+    }
     }
 #endif
     
