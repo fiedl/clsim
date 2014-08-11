@@ -663,7 +663,8 @@ __kernel void propKernel(
                 (ONE / holeIceAbsorptionLengthFactor - ONE) /
                 (currentAbsLen * holeIceAbsorptionLengthFactor);
             if (abs_lens_left < ZERO) abs_lens_left = ZERO;
-            
+
+#ifdef PRINTF_ENABLED
             if (my_is_nan(abs_lens_left)) {
                 printf("WARNING: THIS SHOULD NOT BE REACHED. abs_lens_left == nan!\n");
                 printf("distance inside = %f\n", distanceInsideTheCylinder);
@@ -673,6 +674,8 @@ __kernel void propKernel(
                 printf("distancePropagated = %f\n", distancePropagated);
                 printf("trajectory_ratio_inside_of_the_cylinder = %f\n", trajectory_ratio_inside_of_the_cylinder);
             }
+#endif
+
         }
     }
     }

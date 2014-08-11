@@ -518,7 +518,9 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
             + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
             + ";\n";
         
-        preamble += "__constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {";
+        preamble += "__constant floating4_t cylinderPositionsAndRadii["
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + "] = {";
 
         for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
         {
