@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: spherical_coordinates.c.cl 134531 2015-06-29 14:23:20Z musner $
  *
  * @file spherical_coordinates.c.cl
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 134531 $
+ * @date $Date: 2015-06-29 16:23:20 +0200 (Mo, 29 Jun 2015) $
  * @author Jakob van Santen
  */
 
@@ -63,7 +63,7 @@ getCoordinates(const floating4_t absPos, floating4_t dirAndWlen,
     // cos(polar angle)
     coords.s2 = (coords.s0 > 0) ? my_divide(l, coords.s0) : 0;
     // delay time
-    coords.s3 = pos.w - coords.s0*min_invGroupVel;
+    coords.s3 = pos.w - coords.s0*min_invPhaseVel;
 #ifdef TABULATE_IMPACT_ANGLE
     // s4 is the cosine of the opening angle between a vector connecting
     // the DOM's center to the photon impact point and a vector connecting

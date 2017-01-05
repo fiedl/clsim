@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: TrkUISessionToQueue.cxx 112393 2013-10-30 15:37:24Z claudio.kopper $
  *
  * @file TrkUISessionToQueue.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 112393 $
+ * @date $Date: 2013-10-30 16:37:24 +0100 (Mi, 30 Okt 2013) $
  * @author Claudio Kopper
  */
 

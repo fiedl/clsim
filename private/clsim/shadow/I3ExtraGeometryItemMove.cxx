@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3ExtraGeometryItemMove.cxx 119025 2014-04-18 17:38:57Z cweaver $
  *
  * @file I3ExtraGeometryItemMove.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 119025 $
+ * @date $Date: 2014-04-18 19:38:57 +0200 (Fr, 18 Apr 2014) $
  * @author Claudio Kopper
  */
 

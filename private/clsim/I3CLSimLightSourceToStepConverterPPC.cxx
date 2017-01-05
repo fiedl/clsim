@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimLightSourceToStepConverterPPC.cxx 140305 2015-12-10 10:54:09Z jvansanten $
  *
  * @file I3CLSimLightSourceToStepConverterPPC.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 140305 $
+ * @date $Date: 2015-12-10 11:54:09 +0100 (Do, 10 Dez 2015) $
  * @author Claudio Kopper
  */
 
@@ -279,9 +279,9 @@ void I3CLSimLightSourceToStepConverterPPC::EnqueueLightSource(const I3CLSimLight
 
     const double E = particle.GetEnergy()/I3Units::GeV;
     const double logE = std::max(0., std::log(E)); // protect against extremely low energies
+    const double Lrad = useCascadeExtension_ ? 0.358*(I3Units::g/I3Units::cm3)/density : 0.;
 
     if (isElectron) {
-        const double Lrad = useCascadeExtension_ ? 0.358*(I3Units::g/I3Units::cm3)/density : 0.;
         const double pa=2.03+0.604*logE;
         double pb=Lrad/0.633;
         
@@ -333,7 +333,6 @@ void I3CLSimLightSourceToStepConverterPPC::EnqueueLightSource(const I3CLSimLight
         
         log_trace("Generate %u steps for E=%fGeV. (electron)", static_cast<unsigned int>(numSteps+1), E);
     } else if (isHadron) {
-        const double Lrad = useCascadeExtension_ ? 0.95*(I3Units::g/I3Units::cm3)/density : 0.;
         double pa=1.49+0.359*logE;
         double pb=Lrad/0.772;
         

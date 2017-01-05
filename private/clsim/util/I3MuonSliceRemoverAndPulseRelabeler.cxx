@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3MuonSliceRemoverAndPulseRelabeler.cxx 126573 2014-12-04 22:01:03Z david.schultz $
  *
  * @file I3MuonSliceRemoverAndPulseRelabeler.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 126573 $
+ * @date $Date: 2014-12-04 23:01:03 +0100 (Do, 04 Dez 2014) $
  * @author Claudio Kopper
  */
 
@@ -40,10 +40,11 @@
 #include "dataclasses/physics/I3ParticleID.h"
 #include "dataclasses/physics/I3MCTree.h"
 #include "dataclasses/physics/I3MCTreeUtils.h"
+#include "dataclasses/I3TreeUtils.h"
 #include "dataclasses/I3Constants.h"
 
 #include "simclasses/I3MCPE.h"
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 
 /**
  * @brief Removes muon slices in I3MCTree objects

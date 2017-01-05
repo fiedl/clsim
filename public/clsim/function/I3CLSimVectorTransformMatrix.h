@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimVectorTransformMatrix.h 119198 2014-04-23 22:53:20Z claudio.kopper $
  *
  * @file I3CLSimVectorTransformMatrix.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 119198 $
+ * @date $Date: 2014-04-24 00:53:20 +0200 (Do, 24 Apr 2014) $
  * @author Claudio Kopper
  */
 
@@ -68,12 +68,12 @@ private:
     I3Matrix matrix_;
     bool renormalize_;
 
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void serialize(Archive & ar, unsigned version);
 };
 
 
-I3_CLASS_VERSION(I3CLSimVectorTransformMatrix, i3clsimvectortransformmatrix_version_);
+BOOST_CLASS_VERSION(I3CLSimVectorTransformMatrix, i3clsimvectortransformmatrix_version_);
 
 I3_POINTER_TYPEDEFS(I3CLSimVectorTransformMatrix);
 

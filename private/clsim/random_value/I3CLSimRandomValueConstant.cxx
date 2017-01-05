@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimRandomValueConstant.cxx 130806 2015-03-31 03:12:34Z nega $
  *
  * @file I3CLSimRandomValueConstant.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 130806 $
+ * @date $Date: 2015-03-31 05:12:34 +0200 (Di, 31 Mär 2015) $
  * @author Claudio Kopper
  */
 

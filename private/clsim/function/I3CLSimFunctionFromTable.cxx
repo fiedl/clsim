@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimFunctionFromTable.cxx 128624 2015-02-04 04:01:55Z claudio.kopper $
  *
  * @file I3CLSimFunctionFromTable.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 128624 $
+ * @date $Date: 2015-02-04 05:01:55 +0100 (Mi, 04 Feb 2015) $
  * @author Claudio Kopper
  */
 
@@ -243,7 +243,7 @@ std::string I3CLSimFunctionFromTable::GetOpenCLFunction(const std::string &funct
     std::string interpHelperBody =
     "{\n"
     "    float fbin;\n"
-    "    *fraction = modf((wavelength - " + ToFloatString(startWlen_) + ")/" + ToFloatString(wlenStep_) + ", &fbin);\n"
+    "    *fraction = modf((wavelength-" + ToFloatString(startWlen_) + ")/" + ToFloatString(wlenStep_) + ", &fbin);\n"
     "    \n"
     "    int ibin=(int)fbin;\n"
     "    \n"

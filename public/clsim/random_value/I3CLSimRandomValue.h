@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimRandomValue.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3CLSimRandomValue.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -96,7 +96,7 @@ public:
     virtual bool CompareTo(const I3CLSimRandomValue &other) const = 0;
     
 private:
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void serialize(Archive & ar, unsigned version);
 };
 
@@ -106,7 +106,7 @@ inline bool operator==(const I3CLSimRandomValue& a, const I3CLSimRandomValue& b)
 }
 
 
-I3_CLASS_VERSION(I3CLSimRandomValue, i3clsimrandomvalue_version_);
+BOOST_CLASS_VERSION(I3CLSimRandomValue, i3clsimrandomvalue_version_);
 
 I3_POINTER_TYPEDEFS(I3CLSimRandomValue);
 

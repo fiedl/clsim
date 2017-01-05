@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3PhotonToMCPEConverter.cxx 141050 2016-01-20 00:22:21Z benedikt.riedel $
  *
  * @file I3PhotonToMCPEConverter.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 141050 $
+ * @date $Date: 2016-01-20 01:22:21 +0100 (Mi, 20 Jan 2016) $
  * @author Claudio Kopper
  */
 
@@ -36,7 +36,7 @@
 
 #include <boost/foreach.hpp>
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 
 #include "phys-services/I3SummaryService.h"
 
@@ -510,7 +510,7 @@ void I3PhotonToMCPEConverter::DAQ(I3FramePtr frame)
             // find the particle
             const I3Particle *particle = NULL;
             
-            if ((photon.GetParticleMajorID() != 0) && (photon.GetParticleMinorID() != 0))
+            if ((photon.GetParticleMajorID() != 0) || (photon.GetParticleMinorID() != 0))
             {
                 // index (0,0) is used for flasher photons, set no hit particle for those
                 particle = I3MCTreeUtils::GetParticlePtr(MCTree, photon.GetParticleID());

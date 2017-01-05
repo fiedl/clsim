@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimStepToTableConverter.h 128840 2015-02-09 09:49:13Z jvansanten $
  *
  * @file I3CLSimStepToTableConverter.h
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 128840 $
+ * @date $Date: 2015-02-09 10:49:13 +0100 (Mo, 09 Feb 2015) $
  * @author Jakob van Santen
  */
 
@@ -49,7 +49,6 @@ public:
 	    clsim::tabulator::AxesConstPtr axes, size_t entriesPerStream,
 	    I3CLSimMediumPropertiesConstPtr medium,
 	    I3CLSimSpectrumTableConstPtr spectrumTable,
-	    double referenceArea,
 	    I3CLSimFunctionConstPtr wavelengthAcceptance,
 	    I3CLSimFunctionConstPtr angularAcceptance,
 	    I3RandomServicePtr rng);

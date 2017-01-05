@@ -1,6 +1,6 @@
-.. $Id$
-.. $Author$
-.. $Date$
+.. $Id: RELEASE_NOTES 140277 2015-12-09 16:24:08Z claudio.kopper $
+.. $Author: claudio.kopper $
+.. $Date: 2015-12-09 17:24:08 +0100 (Mi, 09 Dez 2015) $
 
 Release Notes
 =============
@@ -19,7 +19,6 @@ trunk
   should reduce fluctuations in the memory requirements of clsim jobs.
   This cannot currently be used with flasher simulations. If unset, the
   previous behavior is used.
-* Moved I3Photon and I3CompressedPhoton to simclasses
 
 December 22, 2014 Alex Olivas  (olivas@icecube.umd.edu) 
 --------------------------------------------------------------------

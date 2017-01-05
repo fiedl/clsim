@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimModule.h 131448 2015-04-14 16:12:57Z claudio.kopper $
  *
  * @file I3CLSimModule.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 131448 $
+ * @date $Date: 2015-04-14 18:12:57 +0200 (Di, 14 Apr 2015) $
  * @author Claudio Kopper
  */
 
@@ -54,7 +54,7 @@
 
 #include "clsim/I3CLSimLightSourceParameterization.h"
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 
 #include "clsim/I3CLSimPhotonHistory.h"
 #include "clsim/I3CLSimEventStatistics.h"

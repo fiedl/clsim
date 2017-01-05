@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimMediumProperties.cxx 119199 2014-04-23 22:53:37Z claudio.kopper $
  *
  * @file I3CLSimMediumProperties.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 119199 $
+ * @date $Date: 2014-04-24 00:53:37 +0200 (Do, 24 Apr 2014) $
  * @author Claudio Kopper
  */
 

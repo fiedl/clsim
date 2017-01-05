@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimVectorTransformConstant.cxx 128624 2015-02-04 04:01:55Z claudio.kopper $
  *
  * @file I3CLSimVectorTransformConstant.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 128624 $
+ * @date $Date: 2015-02-04 05:01:55 +0100 (Mi, 04 Feb 2015) $
  * @author Claudio Kopper
  */
 

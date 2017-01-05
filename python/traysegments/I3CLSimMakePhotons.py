@@ -64,18 +64,14 @@ def I3CLSimMakePhotons(tray, name,
                        UseGeant4=False,
                        CrossoverEnergyEM=None,
                        CrossoverEnergyHadron=None,
-                       UseCascadeExtension=True,
                        StopDetectedPhotons=True,
                        PhotonHistoryEntries=0,
                        DoNotParallelize=False,
                        DOMOversizeFactor=5.,
                        UnshadowedFraction=0.9,
                        UseHoleIceParameterization=True,
-                       DOMRadius=0.16510*icetray.I3Units.m, # 13" diameter
                        OverrideApproximateNumberOfWorkItems=None,
-                       ExtraArgumentsToI3CLSimModule=dict(
-                           IgnoreSubdetectors=['IceTop'],
-                           ),
+                       ExtraArgumentsToI3CLSimModule=dict(),
                        If=lambda f: True
                        ):
     """Do standard clsim processing up to the I3Photon level.
@@ -217,10 +213,6 @@ def I3CLSimMakePhotons(tray, name,
         If CrossoverEnergyHadron is set to 0 (GeV) while CrossoverEnergyHadron is
         set so hybrid mode is working, hadronic cascades will use parameterizations
         for the whole energy range.
-    :param UseCascadeExtension:
-    	If set, the cascade light emission parameterizations will include 
-    	longitudinal extension. Otherwise, parameterized cascades will be 
-    	treated as point-like. 
     :param DoNotParallelize:
         Try only using a single work item in parallel when running the
         OpenCL simulation. This might be useful if you want to run jobs
@@ -232,8 +224,6 @@ def I3CLSimMakePhotons(tray, name,
         Fraction of photocathode available to receive light (e.g. unshadowed by the cable)
     :param UseHoleIceParameterization:
         Use an angular acceptance correction for hole ice scattering.
-    :param DOMRadius:
-        Allow the DOMRadius to be set externally, for things like mDOMs.
     :param OverrideApproximateNumberOfWorkItems:
         Allows to override the auto-detection for the maximum number of parallel work items.
         You should only change this if you know what you are doing.
@@ -246,7 +236,7 @@ def I3CLSimMakePhotons(tray, name,
     # make sure the geometry is updated to the new granular format (in case it is supported)
     if hasattr(dataclasses, "I3ModuleGeo"):
         tray.AddModule("I3GeometryDecomposer", name + "_decomposeGeometry",
-                       If=lambda frame: If(frame) and ("I3OMGeoMap" not in frame) and ("I3ModuleGeoMap" not in frame))
+                       If=lambda frame: If(frame) and ("I3OMGeoMap" not in frame))
 
     if UseGeant4:
         if not clsim.I3CLSimLightSourceToStepConverterGeant4.can_use_geant4:
@@ -265,7 +255,8 @@ def I3CLSimMakePhotons(tray, name,
         print("If this is what you want, you can safely ignore this warning.")
         print("********************")
 
-    # a constant
+    # some constants
+    DOMRadius = 0.16510*icetray.I3Units.m # 13" diameter
     Jitter = 2.*icetray.I3Units.ns
 
     if MMCTrackListName is None or MMCTrackListName=="":
@@ -363,7 +354,6 @@ def I3CLSimMakePhotons(tray, name,
 
     # muon&cascade parameterizations
     ppcConverter = clsim.I3CLSimLightSourceToStepConverterPPC(photonsPerStep=200)
-    ppcConverter.SetUseCascadeExtension(UseCascadeExtension)
     if not UseGeant4:
         particleParameterizations = GetDefaultParameterizationList(ppcConverter, muonOnly=False)
     else:
@@ -406,6 +396,8 @@ def I3CLSimMakePhotons(tray, name,
                    SpectrumTable=spectrumTable,
                    FlasherPulseSeriesName=clSimFlasherPulseSeriesName,
                    OMKeyMaskName=clSimOMKeyMaskName,
+                   # ignore IceTop
+                   IgnoreSubdetectors = ["IceTop"],
                    #IgnoreNonIceCubeOMNumbers=False,
                    GenerateCherenkovPhotonsWithoutDispersion=False,
                    WavelengthGenerationBias=wavelengthGenerationBias,

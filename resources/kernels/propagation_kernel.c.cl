@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: propagation_kernel.c.cl 132206 2015-05-06 20:36:25Z claudio.kopper $
  *
  * @file propagation_kernel.c.cl
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 132206 $
+ * @date $Date: 2015-05-06 22:36:25 +0200 (Mi, 06 Mai 2015) $
  * @author Claudio Kopper
  */
 
@@ -582,11 +582,7 @@ __kernel void propKernel(
 #define effective_z (photonPosAndTime.z-getTiltZShift_IS_CONSTANT)
 #else
             // apply ice tilt
-#ifdef DOUBLE_PRECISION
-            const floating_t effective_z = photonPosAndTime.z - (double)getTiltZShift( (float4)(photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z, photonPosAndTime.w) );
-#else
             const floating_t effective_z = photonPosAndTime.z - getTiltZShift(photonPosAndTime);
-#endif
             int currentPhotonLayer = min(max(findLayerForGivenZPos(effective_z), 0), MEDIUM_LAYERS-1);
 #endif
 
@@ -596,11 +592,7 @@ __kernel void propKernel(
             // before the photon is absorbed. This factor will be taken out after this
             // propagation step. Usually the factor is 1 and thus has no effect, but it
             // is used in a direction-dependent way for our model of ice anisotropy.
-#ifdef DOUBLE_PRECISION
-            const floating_t abs_len_correction_factor = (double)getDirectionalAbsLenCorrFactor( (float4)( photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z, photonDirAndWlen.w ) );
-#else
             const floating_t abs_len_correction_factor = getDirectionalAbsLenCorrFactor(photonDirAndWlen);
-#endif
 
             abs_lens_left *= abs_len_correction_factor;
 
@@ -770,6 +762,7 @@ __kernel void propKernel(
         photonPosAndTime.w += inv_groupvel*distancePropagated;
         photonTotalPathLength += distancePropagated;
 
+
         // absorb or scatter the photon
         if (abs_lens_left < EPSILON) 
         {
@@ -828,15 +821,7 @@ __kernel void propKernel(
 #endif
 
             // optional direction transformation (for ice anisotropy)
-#ifdef DOUBLE_PRECISION
-            {
-              float4 photonDirAndWlen_float = (float4)(photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z, photonDirAndWlen.w);
-              transformDirectionPreScatter(&photonDirAndWlen_float); // this expects single precision
-              photonDirAndWlen = (double4)(photonDirAndWlen_float.x, photonDirAndWlen_float.y, photonDirAndWlen_float.z, photonDirAndWlen_float.w);
-            }
-#else
             transformDirectionPreScatter(&photonDirAndWlen);
-#endif
 
             // choose a scattering angle
             const floating_t cosScatAngle = makeScatteringCosAngle(RNG_ARGS_TO_CALL);
@@ -846,15 +831,7 @@ __kernel void propKernel(
             scatterDirectionByAngle(cosScatAngle, sinScatAngle, &photonDirAndWlen, RNG_CALL_UNIFORM_CO);
 
             // optional direction transformation (for ice anisotropy)
-#ifdef DOUBLE_PRECISION
-            {
-              float4 photonDirAndWlen_float = (float4)(photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z, photonDirAndWlen.w);
-              transformDirectionPostScatter(&photonDirAndWlen); // this expects single precision
-              photonDirAndWlen = (double4)(photonDirAndWlen_float.x, photonDirAndWlen_float.y, photonDirAndWlen_float.z, photonDirAndWlen_float.w);
-            }
-#else
             transformDirectionPostScatter(&photonDirAndWlen);
-#endif
 
 #ifdef PRINTF_ENABLED
             //dbg_printf("    . cos(scat_angle)=%f sin(scat_angle)=%f\n",

@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3PhotonToMCHitConverterForMDOMs.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3PhotonToMCHitConverterForMDOMs.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -129,7 +129,6 @@ class I3PhotonToMCHitConverterForMDOMs : public I3ConditionalModule
          */
         double glassThickness_;
 
-        double oversizeFactor_;
         /**
          * Parameter: The absorption length of the optical gel between the DOM sphere and the PMT.
          */

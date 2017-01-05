@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimStep.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3CLSimStep.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -145,14 +145,14 @@ public:
     cl_ushort dummy2;
 
 private:
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void load(Archive & ar, unsigned version);
     template <class Archive> void save(Archive & ar, unsigned version) const;
-    I3_SERIALIZATION_SPLIT_MEMBER();
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
 } __attribute__ ((packed)) ;
 
-template<> void I3CLSimStep::save(icecube::archive::portable_binary_oarchive &ar, unsigned version) const;
-template<> void I3CLSimStep::load(icecube::archive::portable_binary_iarchive &ar, unsigned version);
+template<> void I3CLSimStep::save(boost::archive::portable_binary_oarchive &ar, unsigned version) const;
+template<> void I3CLSimStep::load(boost::archive::portable_binary_iarchive &ar, unsigned version);
 
 inline bool operator==(const I3CLSimStep &a, const I3CLSimStep &b)
 {
@@ -160,14 +160,14 @@ inline bool operator==(const I3CLSimStep &a, const I3CLSimStep &b)
     return (std::memcmp(&a, &b, sizeof(I3CLSimStep)-sizeof(cl_int))==0);
 }
 
-I3_CLASS_VERSION(I3CLSimStep, i3clsimstep_version_);
+BOOST_CLASS_VERSION(I3CLSimStep, i3clsimstep_version_);
 
 typedef I3Vector<I3CLSimStep> I3CLSimStepSeries;
 
 I3_POINTER_TYPEDEFS(I3CLSimStep);
 I3_POINTER_TYPEDEFS(I3CLSimStepSeries);
 
-template<> template<> void I3Vector<I3CLSimStep>::serialize(icecube::archive::portable_binary_iarchive &ar, unsigned version);
-template<> template<> void I3Vector<I3CLSimStep>::serialize(icecube::archive::portable_binary_oarchive &ar, unsigned version);
+template<> template<> void I3Vector<I3CLSimStep>::serialize(boost::archive::portable_binary_iarchive &ar, unsigned version);
+template<> template<> void I3Vector<I3CLSimStep>::serialize(boost::archive::portable_binary_oarchive &ar, unsigned version);
 
 #endif //I3CLSIMSTEP_H_INCLUDED

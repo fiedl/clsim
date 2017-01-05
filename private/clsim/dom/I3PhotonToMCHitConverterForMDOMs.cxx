@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3PhotonToMCHitConverterForMDOMs.cxx 141406 2016-02-01 21:46:00Z david.schultz $
  *
  * @file I3PhotonToMCHitConverterForMDOMs.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 141406 $
+ * @date $Date: 2016-02-01 22:46:00 +0100 (Mo, 01 Feb 2016) $
  * @author Claudio Kopper
  */
 
@@ -32,7 +32,7 @@
 // Things from this module:
 #include "clsim/dom/I3PhotonToMCHitConverterForMDOMs.h"
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 #include "simclasses/I3MCPE.h"
 #include "dataclasses/physics/I3MCTree.h"
 
@@ -95,11 +95,6 @@ I3PhotonToMCHitConverterForMDOMs::I3PhotonToMCHitConverterForMDOMs(const I3Conte
                  "Wavelength acceptance of a PMT as a I3CLSimFunction object.",
                  pmtWavelengthAcceptance_);
     
-    oversizeFactor_ = 1.;
-    AddParameter("DOMOversizeFactor",
-                 "Size scaling applied to DOM during photon propagation",
-                 oversizeFactor_);
-    
     AddParameter("PMTAngularAcceptance",
                  "Angular acceptance of a PMT as a I3CLSimFunction object.",
                  pmtAngularAcceptance_);
@@ -137,7 +132,6 @@ void I3PhotonToMCHitConverterForMDOMs::Configure()
     GetParameter("IgnoreSubdetectors", ignoreSubdetectors_);
 
     GetParameter("PMTWavelengthAcceptance", pmtWavelengthAcceptance_);
-    GetParameter("DOMOversizeFactor", oversizeFactor_);
     GetParameter("PMTAngularAcceptance", pmtAngularAcceptance_);
 
     GetParameter("GlassAbsorptionLength", glassAbsorptionLength_);
@@ -174,7 +168,6 @@ namespace {
                           const I3ModuleGeo &moduleGeo,
                           const I3OMGeoMap &omGeoMap,
                           const std::vector<unsigned char> &pmtNumbersToCheck,
-                          double oversizeFactor,
                           double glassThickness,
                           double &pathLengthInOM,
                           double &pathLengthInGlass)
@@ -192,23 +185,6 @@ namespace {
         const double dy = photonDir.GetY();
         const double dz = photonDir.GetZ();
         
-        // undo pancaking
-        if (oversizeFactor != 1.) {
-            // find a vector perpendicular to the photon track, connecting
-            // it with the axis of the DOM
-            double parallel = dx*px + dy*py + dz*pz;
-            double nx = px - parallel*dx;
-            double ny = py - parallel*dy;
-            double nz = pz - parallel*dz;
-            // scale the distance of closest approach to the center by
-            // oversizeFactor_
-            double scale = (oversizeFactor - 1.)/oversizeFactor;
-            
-            px -= scale*nx;
-            py -= scale*ny;
-            pz -= scale*nz;
-            pr2 = px*px + py*py + pz*pz;
-        }
         {
             // sanity check: are photons on the OM's surface?
             const double distFromDOMCenter = std::sqrt(pr2);
@@ -476,7 +452,7 @@ void I3PhotonToMCHitConverterForMDOMs::DAQ(I3FramePtr frame)
     
     // build an index into the I3MCTree
     std::map<std::pair<uint64_t, int>, const I3Particle *> mcTreeIndex;
-    for (I3MCTree::const_iterator it = MCTree->begin();
+    for (I3MCTree::iterator it = MCTree->begin();
          it != MCTree->end(); ++it)
     {
         const I3Particle &particle = *it;
@@ -514,7 +490,6 @@ void I3PhotonToMCHitConverterForMDOMs::DAQ(I3FramePtr frame)
                                        moduleGeo,
                                        *omGeoMap,
                                        checkPMTNumbers,
-                                       oversizeFactor_,
                                        glassThickness_,
                                        pathLengthInsideOM,
                                        pathLengthInsideGlass);
@@ -564,7 +539,7 @@ void I3PhotonToMCHitConverterForMDOMs::DAQ(I3FramePtr frame)
             // angular acceptance factor from the geometry. So we have to get rid of that first.
             // This means that after the code knows that a PMT is hit, the geometrical acceptance
             // should be 1 if the acceptance factor from the geometry is cos(theta).
-            const double ang_fac = std::min(pmtAngularAcceptance_->GetValue(hit_cosangle)/std::fabs(hit_cosangle), 1.);
+            const double ang_fac = pmtAngularAcceptance_->GetValue(hit_cosangle)/std::fabs(hit_cosangle);
             
             // calculate the measurement probability
             double measurement_prob = photon.GetWeight();

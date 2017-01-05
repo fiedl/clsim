@@ -18,11 +18,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: python_gil_holder.h 136731 2015-08-21 21:52:17Z nega $
  *
  * @file python_gil_holder.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 136731 $
+ * @date $Date: 2015-08-21 23:52:17 +0200 (Fr, 21 Aug 2015) $
  * @author Claudio Kopper
  */
 

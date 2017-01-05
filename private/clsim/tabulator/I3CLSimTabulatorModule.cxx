@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimTabulatorModule.cxx 128840 2015-02-09 09:49:13Z jvansanten $
  *
  * @file I3CLSimStepToTableConverter.cxx
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 128840 $
+ * @date $Date: 2015-02-09 10:49:13 +0100 (Mo, 09 Feb 2015) $
  * @author Jakob van Santen
  */
 
@@ -67,7 +67,6 @@ private:
 	I3CLSimFunctionConstPtr angularAcceptance_;
 	I3CLSimSpectrumTableConstPtr spectrumTable_;
 	I3CLSimOpenCLDeviceSeries openCLDeviceList_;
-	double referenceArea_;
 	size_t photonsPerBunch_, entriesPerPhoton_;
 	
 	I3CLSimLightSourceToStepConverterPtr particleToStepsConverter_;
@@ -98,9 +97,8 @@ I3CLSimTabulatorModule::I3CLSimTabulatorModule(const I3Context &ctx)
 	AddParameter("MCTreeName", "", "I3MCTree");
 	AddParameter("FlasherPulseSeriesName", "", "");
 	AddParameter("RandomService", "", "I3RandomService");
-	AddParameter("Area", "Geometric area of the sensor", M_PI*std::pow(0.16510*I3Units::m, 2));
-	AddParameter("WavelengthAcceptance", "Wavelength acceptance (relative to geometric area)", wavelengthGenerationBias_);
-	AddParameter("AngularAcceptance", "Angular acceptance (relative to head-on geometric area)", angularAcceptance_);
+	AddParameter("WavelengthAcceptance", "", wavelengthGenerationBias_);
+	AddParameter("AngularAcceptance", "", angularAcceptance_);
 	AddParameter("MediumProperties", "", mediumProperties_);
 	AddParameter("ParameterizationList","", parameterizationList_);
 	AddParameter("SpectrumTable", "", spectrumTable_);
@@ -118,7 +116,6 @@ void I3CLSimTabulatorModule::Configure()
 	GetParameter("FlasherPulseSeriesName", flasherPulseSeriesName_);
 	GetParameter("RandomService", randomService_);
 	GetParameter("WavelengthAcceptance", wavelengthGenerationBias_);
-	GetParameter("Area", referenceArea_);
 	GetParameter("AngularAcceptance", angularAcceptance_);
 	GetParameter("MediumProperties", mediumProperties_);
 	GetParameter("ParameterizationList",parameterizationList_);
@@ -143,7 +140,7 @@ void I3CLSimTabulatorModule::Configure()
 	
 	tabulator_ = boost::make_shared<I3CLSimStepToTableConverter>(
 	    openCLDeviceList_[0], axes_, entriesPerPhoton_*photonsPerBunch_,
-	    mediumProperties_, spectrumTable_, referenceArea_,
+	    mediumProperties_, spectrumTable_,
 	    wavelengthGenerationBias_, angularAcceptance_, randomService_);
 	
 	particleToStepsConverter_ =

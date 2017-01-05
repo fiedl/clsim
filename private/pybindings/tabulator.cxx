@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: tabulator.cxx 128843 2015-02-09 13:18:52Z jvansanten $
  *
  * @file tabulator.cxx
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 128843 $
+ * @date $Date: 2015-02-09 14:18:52 +0100 (Mo, 09 Feb 2015) $
  * @author Jakob van Santen
  */
 

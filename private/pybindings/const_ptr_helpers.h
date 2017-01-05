@@ -6,10 +6,10 @@
  * copyright  (C) 2010
  * The Icecube Collaboration
  *
- * $Id$
+ * $Id: const_ptr_helpers.h 136731 2015-08-21 21:52:17Z nega $
  *
- * @version $Revision$
- * @date $LastChangedDate$
+ * @version $Revision: 136731 $
+ * @date $LastChangedDate: 2015-08-21 23:52:17 +0200 (Fr, 21 Aug 2015) $
  * @author Jakob van Santen <vansanten@wisc.edu> Last changed by: $LastChangedBy$
  */
 

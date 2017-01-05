@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3ExtraGeometryItemMove.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3ExtraGeometryItemMove.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -60,14 +60,14 @@ private:
     mutable I3Position boundingBoxLower_;
     mutable I3Position boundingBoxUpper_;
     
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void load(Archive & ar, unsigned version);
     template <class Archive> void save(Archive & ar, unsigned version) const;
 
-    I3_SERIALIZATION_SPLIT_MEMBER();
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
 };
 
-I3_CLASS_VERSION(I3ExtraGeometryItemMove, i3extrageometryitemmove_version_);
+BOOST_CLASS_VERSION(I3ExtraGeometryItemMove, i3extrageometryitemmove_version_);
 
 I3_POINTER_TYPEDEFS(I3ExtraGeometryItemMove);
 

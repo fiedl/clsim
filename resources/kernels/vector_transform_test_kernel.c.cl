@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: vector_transform_test_kernel.c.cl 132206 2015-05-06 20:36:25Z claudio.kopper $
  *
  * @file vector_transform_test_kernel.cl
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 132206 $
+ * @date $Date: 2015-05-06 22:36:25 +0200 (Mi, 06 Mai 2015) $
  * @author Claudio Kopper
  */
 

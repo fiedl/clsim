@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: sparse_collision_kernel.c.cl 117555 2014-03-05 20:58:08Z claudio.kopper $
  *
  * @file sparse_collision_kernel.c.cl
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 117555 $
+ * @date $Date: 2014-03-05 21:58:08 +0100 (Mi, 05 Mär 2014) $
  * @author Claudio Kopper
  */
 

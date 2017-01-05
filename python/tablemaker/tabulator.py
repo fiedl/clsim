@@ -30,7 +30,6 @@ from icecube.dataclasses import I3Position, I3Particle, I3MCTree, I3Direction, I
 from icecube.phys_services import I3Calculator, I3GSLRandomService
 from icecube.clsim import I3CLSimFunctionConstant
 from icecube.clsim import GetIceCubeDOMAcceptance, GetIceCubeDOMAngularSensitivity
-from icecube.clsim import Gen2Sensors
 from icecube.clsim import FlasherInfoVectToFlasherPulseSeriesConverter, I3CLSimFlasherPulse, I3CLSimFlasherPulseSeries
 import numpy, math
 from icecube.photospline import numpy_extensions # meshgrid_nd
@@ -132,9 +131,7 @@ def I3CLSimTabulatePhotons(tray, name,
                        CrossoverEnergyHadron=None,
                        UseCascadeExtension=False,
                        DoNotParallelize=False,
-                       Area=None,
-                       WavelengthAcceptance=None,
-                       AngularAcceptance=None,
+                       DOMOversizeFactor=1,
                        UseHoleIceParameterization=True,
                        OverrideApproximateNumberOfWorkItems=None,
                        ExtraArgumentsToI3CLSimModule=dict(),
@@ -192,6 +189,9 @@ def I3CLSimTabulatePhotons(tray, name,
         Only used if *ChopMuons* is active. Set it to the name
         of the I3MMCTrackList object that contains additional
         muon energy loss information.
+    :param PhotonSeriesName:
+        Configure this to enable writing an I3PhotonSeriesMap containing
+        all photons that reached the DOM surface.
     :param ParallelEvents:
         clsim will work on a couple of events in parallel in order
         not to starve the GPU. Setting this too high will result
@@ -211,14 +211,28 @@ def I3CLSimTabulatePhotons(tray, name,
         less interpolation between table entries (the PPC ice-specification
         is parametric w.r.t. wavelength, whereas the photonics specification
         is not).
-    :param Area:
-        Geometric area of the sensor. If None, use the area of an IceCube DOM
-    :param WavelengthAcceptance:
-        Quantum efficiency of the sensor, relative to the geometric area. If
-        None, use the IceCube DOM (standard QE)
-    :param AngularAcceptance:
-        Efficiency as a function of polar angle, relative to the geometric area.
-        If None, use the IceCube angular efficiency, assuming hole ice.
+    :param DisableTilt:
+        Do not simulate ice tilt, even if the ice model directory
+        provides tilt information. (Photonics-based models will never
+        have tilt.)
+    :param UnWeightedPhotons:
+        Enabling this setting will disable all optimizations. These
+        are currently a DOM oversize factor of 5 (with the appropriate
+        timing correction) and a biased initial photon spectrum that
+        includes the DOM spectral acceptance. Enabling this setting
+        essentially means that all photons that would be generated
+        in the real detector *will* actually be generated. This will siginificatly
+        slow down the simulation, but the optional ``PhotonSeries``
+        will contain an unweighted sample of photons that arrive
+        at your DOMs. This can be useful for DOM acceptance studies.
+    :param StopDetectedPhotons:
+        Configures behaviour for photons that hit a DOM. If this is true (the default)
+        photons will be stopped once they hit a DOM. If this is false, they continue to
+        propagate.
+    :param PhotonHistoryEntries:
+        The maximum number of scatterings points to be saved for every photon hitting a DOM.
+        Only the most recent positions are saved, older positions are overwritten if
+        the maximum size is reached.
     :param UseGeant4:
         Enabling this setting will disable all cascade and muon light yield
         parameterizations. All particles will sent to Geant4 for a full
@@ -255,6 +269,12 @@ def I3CLSimTabulatePhotons(tray, name,
         OpenCL simulation. This might be useful if you want to run jobs
         in parallel on a batch system. This will only affect CPUs and
         will be a no-op for GPUs.
+    :param DOMOversizeFactor:
+        Set the DOM oversize factor. To disable oversizing, set this to 1.
+    :param UnshadowedFraction:
+        Fraction of photocathode available to receive light (e.g. unshadowed by the cable)
+    :param UseHoleIceParameterization:
+        Use an angular acceptance correction for hole ice scattering.
     :param OverrideApproximateNumberOfWorkItems:
         Allows to override the auto-detection for the maximum number of parallel work items.
         You should only change this if you know what you are doing.
@@ -277,6 +297,10 @@ def I3CLSimTabulatePhotons(tray, name,
     # TODO: fix this
     if clsim.I3CLSimLightSourceToStepConverterGeant4.can_use_geant4:
         AutoSetGeant4Environment()
+
+    # some constants
+    DOMRadius = 0.16510*icetray.I3Units.m # 13" diameter
+    Jitter = 2.*icetray.I3Units.ns
 
     if MMCTrackListName is None or MMCTrackListName=="":
         # the input does not seem to have been processed by MMC
@@ -344,21 +368,12 @@ def I3CLSimTabulatePhotons(tray, name,
         else:
             clSimMCTreeName = clSimMCTreeName
 
-    # some constants
-    DOMRadius = 0.16510*icetray.I3Units.m # 13" diameter
-
-    if Area is None:
-        referenceArea = dataclasses.I3Constants.pi*DOMRadius**2
+    domAcceptance = clsim.GetIceCubeDOMAcceptance(domRadius=DOMOversizeFactor*DOMRadius)
+    if UseHoleIceParameterization:
+        angularAcceptance = clsim.GetIceCubeDOMAngularSensitivity(UseHoleIceParameterization)
     else:
-        referenceArea = Area
-    if WavelengthAcceptance is None:
-        domAcceptance = clsim.GetIceCubeDOMAcceptance(domRadius=DOMRadius)
-    else:
-        domAcceptance = WavelengthAcceptance
-    if AngularAcceptance is None:
-        angularAcceptance = clsim.GetIceCubeDOMAngularSensitivity(holeIce=True)
-    else:
-        angularAcceptance = AngularAcceptance
+        icetray.logging.log_warn("Applying *no* angular sensitivity at all. None.")
+        angularAcceptance = clsim.I3CLSimFunctionConstant(1.)
 
     # muon&cascade parameterizations
     ppcConverter = clsim.I3CLSimLightSourceToStepConverterPPC(photonsPerStep=200)
@@ -400,7 +415,6 @@ def I3CLSimTabulatePhotons(tray, name,
                    MediumProperties=MediumProperties,
                    SpectrumTable=spectrumTable,
                    FlasherPulseSeriesName=clSimFlasherPulseSeriesName,
-                   Area=referenceArea,
                    WavelengthAcceptance=domAcceptance,
                    AngularAcceptance=angularAcceptance,
                    ParameterizationList=particleParameterizations,
@@ -415,7 +429,7 @@ def I3CLSimTabulatePhotons(tray, name,
 def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Units.degree, Azimuth=0.*I3Units.degree, ZCoordinate=0.*I3Units.m,
     Energy=1.*I3Units.GeV, FlasherWidth=127, FlasherBrightness=127, Seed=12345, NEvents=100,
     IceModel='spice_mie', DisableTilt=False, Filename="", TabulateImpactAngle=False,
-    PhotonPrescale=1, Axes=None, Directions=None, Sensor='DOM'):
+    PhotonPrescale=1, Axes=None, Directions=None):
     
     """
     Tabulate the distribution of photoelectron yields on IceCube DOMs from various
@@ -492,12 +506,9 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
     if Directions is None:
         Directions = numpy.asarray([(Zenith, Azimuth)])
 
-    if PhotonSource in ('cascade', 'flasher', 'muon-segment'):
-        
-        if PhotonSource == 'muon-segment':
-            ptype = I3Particle.ParticleType.MuMinus
-        else:
-            ptype = I3Particle.ParticleType.EMinus
+    if PhotonSource == 'cascade' or PhotonSource == 'flasher':
+
+        ptype = I3Particle.ParticleType.EMinus
 
         def reference_source(zenith, azimuth, scale):
             source = I3Particle()
@@ -506,10 +517,7 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
             source.pos = I3Position(0., 0., ZCoordinate)
             source.dir = I3Direction(zenith, azimuth)
             source.time = 0.
-            if PhotonSource == 'muon-segment':
-                source.length = 3.
-            else:
-                source.length = 0.
+            source.length = 0.
             source.location_type = I3Particle.LocationType.InIce
         
             return source
@@ -517,10 +525,7 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
     elif PhotonSource == 'infinite-muon':
         
         from icecube import MuonGun
-        # pad depth to ensure that the track appears effectively infinite
-        surface = MuonGun.Cylinder(1800, 800)
-        # account for zenith-dependent distribution of track lengths
-        length_scale = surface.area(dataclasses.I3Direction(0, 0))/surface.area(dataclasses.I3Direction(Zenith, 0))
+        surface = MuonGun.Cylinder(1600, 800)
         
         ptype = I3Particle.ParticleType.MuMinus
         
@@ -558,15 +563,15 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
                     source = self.reference_source(zenith, azimuth, 1./len(Directions))
                     mctree.append_child(primary, source)
                 frame["I3MCTree"] = mctree
-                # use the emitting particle as a geometrical reference
-                frame["ReferenceParticle"] = source
             else:
                 pulseseries = I3CLSimFlasherPulseSeries()
                 for zenith, azimuth in Directions:
                     pulse = makeFlasherPulse(0, 0, ZCoordinate, zenith, azimuth, FlasherWidth, FlasherBrightness, 1./len(Directions))
                     pulseseries.append(pulse)
                 frame["I3FlasherPulseSeriesMap"] = pulseseries
-                frame["ReferenceParticle"] = self.reference_source(Zenith, Azimuth, 1.)
+
+            # use the primary particle as a geometrical reference
+            frame["ReferenceParticle"] = self.reference_source(Zenith, Azimuth, 1.)
             
             self.PushFrame(frame)
             
@@ -590,8 +595,6 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
     header['energy'] = Energy
     header['type'] = int(ptype)
     header['efficiency'] = Efficiency.RECEIVER | Efficiency.WAVELENGTH
-    if PhotonSource == 'infinite-muon':
-        header['n_events'] = length_scale*NEvents/float(PhotonPrescale)
     
     if Axes is None:
         if PhotonSource != "infinite-muon":
@@ -618,36 +621,6 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
     if PhotonSource == "flasher":
         header['flasherwidth'] = FlasherWidth
         header['flasherbrightness'] = FlasherBrightness
-    
-    # some constants
-    DOMRadius = 0.16510*icetray.I3Units.m # 13" diameter
-    referenceArea = dataclasses.I3Constants.pi*DOMRadius**2
-    
-    # NB: GetIceCubeDOMAcceptance() calculates the quantum efficiency by
-    #     dividing the geometric area (a circle of radius domRadius) by the
-    #     tabulated effective area. Scaling that radius by *sqrt(prescale)*
-    #     _reduces_ the effective quantum efficiency by a factor *prescale*. 
-    #     Since we draw photons directly from the QE-weighted Cherenkov
-    #     spectrum, this causes *prescale* fewer photons to be progagated per
-    #     light source. We compensate by dividing the number of events by
-    #     *prescale* in the header above.
-    #     to be propagated per light source.
-    domAcceptance = clsim.GetIceCubeDOMAcceptance(domRadius=math.sqrt(PhotonPrescale)*DOMRadius)
-    
-    if Sensor.lower() == 'dom':
-        angularAcceptance = clsim.GetIceCubeDOMAngularSensitivity(holeIce=True)
-    elif Sensor.lower() == 'degg':
-        referenceArea = dataclasses.I3Constants.pi*(300.*I3Units.mm/2)**2
-        angularAcceptance = Gen2Sensors.GetDEggAngularSensitivity(pmt='both')
-        domAcceptance = Gen2Sensors.GetDEggAcceptance(active_fraction=1./PhotonPrescale)
-    elif Sensor.lower() == 'wom':
-       # outer diameter of the pressure vessel is 11.4 cm, walls are 9 mm thick
-       referenceArea = (11-2*0.9)*90*icetray.I3Units.cm2
-       angularAcceptance = Gen2Sensors.GetWOMAngularSensitivity()
-       domAcceptance = Gen2Sensors.GetWOMAcceptance(active_fraction=1./PhotonPrescale)
-       
-    else:
-        raise ValueError("Don't know how to simulate %ds yet" % (sensor))
 
     tray.AddSegment(I3CLSimTabulatePhotons, name+"makeCLSimPhotons",
         MCTreeName = mctree,                        # if source is a cascade this will point to the I3MCTree
@@ -658,9 +631,8 @@ def TabulatePhotonsFromSource(tray, name, PhotonSource="cascade", Zenith=0.*I3Un
         # UnWeightedPhotons=True,
         UseGPUs=False,                              # table-making is not a workload particularly suited to GPUs
         UseCPUs=True,                               # it should work fine on CPUs, though
-        Area=referenceArea,
-        WavelengthAcceptance=domAcceptance,
-        AngularAcceptance=angularAcceptance,
+        DOMOversizeFactor=math.sqrt(PhotonPrescale),
+        UseHoleIceParameterization=True,
         DoNotParallelize=True,                      # no multithreading
         UseGeant4=False,
         OverrideApproximateNumberOfWorkItems=1,     # if you *would* use multi-threading, this would be the maximum number of jobs to run in parallel (OpenCL is free to split them)

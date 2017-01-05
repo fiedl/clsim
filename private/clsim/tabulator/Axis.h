@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: Axis.h 128948 2015-02-11 19:05:52Z jvansanten $
  *
  * @file Axis.h
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 128948 $
+ * @date $Date: 2015-02-11 20:05:52 +0100 (Mi, 11 Feb 2015) $
  * @author Jakob van Santen
  */
 
@@ -39,11 +39,8 @@ public:
 	Axis(double min, double max, unsigned n_bins);
 	virtual ~Axis();
 	
-	/// lowest bin edge
 	double GetMin() const { return min_; };
-	/// highest bin edge
-	double GetMax() const { return max_; };
-	/// the number of bins *without under/overflow*
+	double GetMax() const { return max_; };	
 	unsigned GetNBins() const { return n_bins_; };
 	
 	std::string GetIndexCode(const std::string &varName) const;

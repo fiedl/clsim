@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimPhotonHistory.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3CLSimPhotonHistory.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -68,7 +68,7 @@ private:
     std::vector<float> distanceInAbsorptionLengths_;
     
 private:
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void serialize(Archive & ar, unsigned version);
 };
 
@@ -87,7 +87,7 @@ inline bool operator==(const I3CLSimPhotonHistory &a, const I3CLSimPhotonHistory
     return true;
 }
 
-I3_CLASS_VERSION(I3CLSimPhotonHistory, i3clsimphotonhistory_version_);
+BOOST_CLASS_VERSION(I3CLSimPhotonHistory, i3clsimphotonhistory_version_);
 
 typedef I3Vector<I3CLSimPhotonHistory> I3CLSimPhotonHistorySeries;
 

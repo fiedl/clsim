@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3ShadowedPhotonRemoverModule.cxx 119201 2014-04-23 22:54:15Z claudio.kopper $
  *
  * @file I3ShadowedPhotonRemoverModule.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 119201 $
+ * @date $Date: 2014-04-24 00:54:15 +0200 (Do, 24 Apr 2014) $
  * @author Claudio Kopper
  */
 
@@ -33,7 +33,7 @@
 
 #include <boost/foreach.hpp>
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 
 //#include "dataclasses/geometry/I3Geometry.h"
 

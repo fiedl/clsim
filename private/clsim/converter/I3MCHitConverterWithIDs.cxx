@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3MCHitConverterWithIDs.cxx 128612 2015-02-03 22:46:02Z nega $
  *
  * @file I3MCHitConverterWithIDs.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 128612 $
+ * @date $Date: 2015-02-03 23:46:02 +0100 (Di, 03 Feb 2015) $
  * @author Claudio Kopper
  */
 

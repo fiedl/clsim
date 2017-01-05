@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimFunctionScatLenPartic.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3CLSimFunctionScatLenPartic.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -90,12 +90,12 @@ private:
     double volumeConcentrationSmallParticles_;
     double volumeConcentrationLargeParticles_;
     
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void serialize(Archive & ar, unsigned version);
 };
 
 
-I3_CLASS_VERSION(I3CLSimFunctionScatLenPartic, i3clsimfunctionscatlenpartic_version_);
+BOOST_CLASS_VERSION(I3CLSimFunctionScatLenPartic, i3clsimfunctionscatlenpartic_version_);
 
 I3_POINTER_TYPEDEFS(I3CLSimFunctionScatLenPartic);
 

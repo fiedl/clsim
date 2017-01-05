@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: cylindrical_coordinates.c.cl 130250 2015-03-17 10:28:02Z jvansanten $
  *
  * @file cylindrical_coordinates.c.cl
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 130250 $
+ * @date $Date: 2015-03-17 11:28:02 +0100 (Di, 17 Mär 2015) $
  * @author Jakob van Santen
  */
 

@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: Axes.cxx 135841 2015-08-04 14:20:51Z musner $
  *
  * @file Axes.cxx
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 135841 $
+ * @date $Date: 2015-08-04 16:20:51 +0200 (Di, 04 Aug 2015) $
  * @author Jakob van Santen
  */
 
@@ -52,11 +52,10 @@ Axes::Axes(const std::vector<value_type> &axes) : axes_(axes), n_dim_(axes_.size
     shape_(n_dim_), strides_(n_dim_)
 {
 	int i = n_dim_-1;
-	// NB: every axis has an over- and an under-flow bin.
-	shape_[i] = axes_[i]->GetNBins()+2;
+	shape_[i] = axes_[i]->GetNBins();
 	strides_[i] = 1;
 	for (i--; i >= 0; i--) {
-		shape_[i] = axes_[i]->GetNBins()+2;
+		shape_[i] = axes_[i]->GetNBins();
 		strides_[i] = strides_[i+1]*shape_[i+1];
 	}
 	n_bins_ = strides_[0]*shape_[0];

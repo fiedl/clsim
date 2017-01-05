@@ -16,11 +16,11 @@
 .. CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ..
 ..
-.. $Id$
+.. $Id: index.rst 135628 2015-07-27 20:37:07Z david.schultz $
 ..
 .. @file index.rst
-.. @version $Revision$
-.. @date $Date$
+.. @version $Revision: 135628 $
+.. @date $Date: 2015-07-27 22:37:07 +0200 (Mo, 27 Jul 2015) $
 .. @author Claudio Kopper
 ..
 

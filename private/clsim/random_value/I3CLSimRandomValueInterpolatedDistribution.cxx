@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimRandomValueInterpolatedDistribution.cxx 137629 2015-09-16 17:06:50Z claudio.kopper $
  *
  * @file I3CLSimRandomValueInterpolatedDistribution.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 137629 $
+ * @date $Date: 2015-09-16 19:06:50 +0200 (Mi, 16 Sep 2015) $
  * @author Claudio Kopper
  */
 

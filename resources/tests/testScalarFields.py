@@ -15,10 +15,10 @@ magnitudePerpToDir = -0.08
 
 maximumRelativeDeviation = 1e-5
 
-# get OpenCL devices
-openCLDevices = [device for device in clsim.I3CLSimOpenCLDevice.GetAllDevices()]
+# get OpenCL CPU devices
+openCLDevices = [device for device in clsim.I3CLSimOpenCLDevice.GetAllDevices() if device.cpu]
 if len(openCLDevices)==0:
-    raise RuntimeError("No OpenCL devices available!")
+    raise RuntimeError("No CPU OpenCL devices available!")
 openCLDevice = openCLDevices[0]
 
 openCLDevice.useNativeMath=False

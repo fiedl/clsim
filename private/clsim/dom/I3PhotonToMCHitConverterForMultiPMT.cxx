@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3PhotonToMCHitConverterForMultiPMT.cxx 141406 2016-02-01 21:46:00Z david.schultz $
  *
  * @file I3PhotonToMCHitConverterForMultiPMT.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 141406 $
+ * @date $Date: 2016-02-01 22:46:00 +0100 (Mo, 01 Feb 2016) $
  * @author Claudio Kopper
  */
 
@@ -30,7 +30,7 @@
 // Things from this module:
 #include "clsim/dom/I3PhotonToMCHitConverterForMultiPMT.h"
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 #include "dataclasses/physics/I3MCHit.h"
 #include "dataclasses/physics/I3MCTree.h"
 

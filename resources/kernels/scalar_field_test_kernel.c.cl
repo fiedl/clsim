@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: scalar_field_test_kernel.c.cl 139192 2015-11-04 22:02:04Z claudio.kopper $
  *
  * @file scalar_field_test_kernel.cl
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 139192 $
+ * @date $Date: 2015-11-04 23:02:04 +0100 (Mi, 04 Nov 2015) $
  * @author Claudio Kopper
  */
 

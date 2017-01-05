@@ -16,18 +16,18 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3ShadowedPhotonRemover.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3ShadowedPhotonRemover.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
 #ifndef I3SHADOWEDPHOTONREMOVER_H_INCLUDED
 #define I3SHADOWEDPHOTONREMOVER_H_INCLUDED
 
-#include "simclasses/I3Photon.h"
+#include "clsim/I3Photon.h"
 
 #include <string>
 

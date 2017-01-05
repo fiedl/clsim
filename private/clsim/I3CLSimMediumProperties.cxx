@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimMediumProperties.cxx 136718 2015-08-21 20:23:49Z nega $
  *
  * @file I3CLSimMediumProperties.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 136718 $
+ * @date $Date: 2015-08-21 22:23:49 +0200 (Fr, 21 Aug 2015) $
  * @author Claudio Kopper
  */
 
@@ -37,7 +37,7 @@
 
 
 #include <boost/shared_ptr.hpp>
-#include <serialization/shared_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 #include <boost/foreach.hpp>
 
 const uint32_t I3CLSimMediumProperties::default_layersNum=1;

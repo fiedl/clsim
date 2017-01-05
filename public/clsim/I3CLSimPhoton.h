@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimPhoton.h 108199 2013-07-12 21:33:08Z nwhitehorn $
  *
  * @file I3CLSimPhoton.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 108199 $
+ * @date $Date: 2013-07-12 23:33:08 +0200 (Fr, 12 Jul 2013) $
  * @author Claudio Kopper
  */
 
@@ -203,14 +203,14 @@ public:
     cl_float distInAbsLens;
     
 private:
-    friend class icecube::serialization::access;
+    friend class boost::serialization::access;
     template <class Archive> void load(Archive & ar, unsigned version);
     template <class Archive> void save(Archive & ar, unsigned version) const;
-    I3_SERIALIZATION_SPLIT_MEMBER();
+    BOOST_SERIALIZATION_SPLIT_MEMBER();
 } __attribute__ ((packed)) ;
 
-template<> void I3CLSimPhoton::save(icecube::archive::portable_binary_oarchive &ar, unsigned version) const;
-template<> void I3CLSimPhoton::load(icecube::archive::portable_binary_iarchive &ar, unsigned version);
+template<> void I3CLSimPhoton::save(boost::archive::portable_binary_oarchive &ar, unsigned version) const;
+template<> void I3CLSimPhoton::load(boost::archive::portable_binary_iarchive &ar, unsigned version);
 
 
 inline bool operator==(const I3CLSimPhoton &a, const I3CLSimPhoton &b)
@@ -219,7 +219,7 @@ inline bool operator==(const I3CLSimPhoton &a, const I3CLSimPhoton &b)
     return (std::memcmp(&a, &b, sizeof(I3CLSimPhoton))==0);
 }
 
-I3_CLASS_VERSION(I3CLSimPhoton, i3clsimphoton_version_);
+BOOST_CLASS_VERSION(I3CLSimPhoton, i3clsimphoton_version_);
 
 typedef I3Vector<I3CLSimPhoton> I3CLSimPhotonSeries;
 typedef I3Map<OMKey, I3CLSimPhotonSeries> I3CLSimPhotonSeriesMap;
@@ -228,7 +228,7 @@ I3_POINTER_TYPEDEFS(I3CLSimPhoton);
 I3_POINTER_TYPEDEFS(I3CLSimPhotonSeries);
 I3_POINTER_TYPEDEFS(I3CLSimPhotonSeriesMap);
 
-template<> template<> void I3Vector<I3CLSimPhoton>::serialize(icecube::archive::portable_binary_iarchive &ar, unsigned version);
-template<> template<> void I3Vector<I3CLSimPhoton>::serialize(icecube::archive::portable_binary_oarchive &ar, unsigned version);
+template<> template<> void I3Vector<I3CLSimPhoton>::serialize(boost::archive::portable_binary_iarchive &ar, unsigned version);
+template<> template<> void I3Vector<I3CLSimPhoton>::serialize(boost::archive::portable_binary_oarchive &ar, unsigned version);
 
 #endif //I3CLSIMPHOTON_H_INCLUDED

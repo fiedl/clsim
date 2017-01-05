@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: TrkEventAction.hh 136753 2015-08-22 18:27:25Z kkrings $
  *
  * @file TrkEventAction.hh
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 136753 $
+ * @date $Date: 2015-08-22 20:27:25 +0200 (Sa, 22 Aug 2015) $
  * @author Claudio Kopper
  */
 

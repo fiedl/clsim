@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: TrkUserEventInformation.hh 136739 2015-08-21 22:28:32Z nega $
  *
  * @file TrkUserEventInformation.hh
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 136739 $
+ * @date $Date: 2015-08-22 00:28:32 +0200 (Sa, 22 Aug 2015) $
  * @author Claudio Kopper
  */
 

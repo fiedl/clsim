@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimTesterBase.cxx 139192 2015-11-04 22:02:04Z claudio.kopper $
  *
  * @file I3CLSimTesterBase.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 139192 $
+ * @date $Date: 2015-11-04 23:02:04 +0100 (Mi, 04 Nov 2015) $
  * @author Claudio Kopper
  */
 

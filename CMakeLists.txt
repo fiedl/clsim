@@ -16,11 +16,11 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 # 
 # 
-# $Id$
+# $Id: CMakeLists.txt 142978 2016-03-11 05:09:00Z nega $
 # 
 # @file CMakeLists.txt
-# @version $Revision$
-# @date $Date$
+# @version $Revision: 142978 $
+# @date $Date: 2016-03-11 06:09:00 +0100 (Fr, 11 Mär 2016) $
 # @author Claudio Kopper
 #
 
@@ -73,14 +73,13 @@ endif (BUILD_CLSIM_DATACLASSES_ONLY)
 SET(LIB_${PROJECT_NAME}_SOURCEFILES
   # private/clsim
   private/clsim/I3CLSimEventStatistics.cxx
-  # private/clsim/I3Photon.cxx
-  # private/clsim/I3CompressedPhoton.cxx
+  private/clsim/I3Photon.cxx
+  private/clsim/I3CompressedPhoton.cxx
   private/clsim/I3CLSimFlasherPulse.cxx
   private/clsim/util/I3MuonSlicer.cxx
   private/clsim/util/I3MuonSliceRemoverAndPulseRelabeler.cxx
   private/clsim/util/I3TauSanitizer.cxx
   private/clsim/dom/I3PhotonToMCPEConverter.cxx
-  private/clsim/dom/I3PhotonToMCHitConverterForMDOMs.cxx
   private/clsim/shadow/I3ShadowedPhotonRemover.cxx
   private/clsim/shadow/I3ShadowedPhotonRemoverModule.cxx
   private/clsim/shadow/I3ExtraGeometryItem.cxx
@@ -89,12 +88,12 @@ SET(LIB_${PROJECT_NAME}_SOURCEFILES
   private/clsim/shadow/I3ExtraGeometryItemCylinder.cxx
 
   # tableio converters
-  # private/clsim/converter/I3PhotonConverter.cxx
+  private/clsim/converter/I3PhotonConverter.cxx
   private/clsim/converter/I3MCHitConverterWithIDs.cxx
-  # private/clsim/converter/I3MCPEConverterWithIDs.cxx
+  private/clsim/converter/I3MCPEConverterWithIDs.cxx
 )
 
-SET(LIB_${PROJECT_NAME}_PROJECTS serialization icetray dataio dataclasses phys-services tableio simclasses)
+SET(LIB_${PROJECT_NAME}_PROJECTS icetray dataio dataclasses phys-services tableio simclasses)
 SET(LIB_${PROJECT_NAME}_TOOLS python boost gsl)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -msse3")
 
@@ -124,11 +123,11 @@ endif (GEANT4_FOUND AND OPENCL_FOUND AND NOT DISABLE_GEANT4_IN_CLSIM)
 
 # these files will be compiled in any case (with or without OpenCL/Geant4)
 SET(LIB_${PROJECT_NAME}_PYBINDINGS_SOURCEFILES
-  # private/pybindings/I3Photon.cxx
-  # private/pybindings/I3CompressedPhoton.cxx
+  private/pybindings/I3Photon.cxx
+  private/pybindings/I3CompressedPhoton.cxx
   private/pybindings/I3CLSimEventStatistics.cxx
   private/pybindings/I3CLSimFlasherPulse.cxx
-  # private/pybindings/I3Converters.cxx
+  private/pybindings/I3Converters.cxx
   private/pybindings/I3ShadowedPhotonRemover.cxx
   private/pybindings/I3ExtraGeometryItem.cxx
   private/pybindings/module.cxx
@@ -301,7 +300,7 @@ if(GMP_FOUND)
     )
   i3_executable(convert_safeprimes
     private/make_safeprimes/convert.cxx
-    USE_PROJECTS serialization icetray
+    USE_PROJECTS icetray
     USE_TOOLS python boost
     )
   colormsg(GREEN "+-- gmp support (make_safeprimes utility)")
@@ -312,7 +311,7 @@ endif(GMP_FOUND)
 i3_add_pybindings(clsim
   ${LIB_${PROJECT_NAME}_PYBINDINGS_SOURCEFILES}
   USE_TOOLS boost python
-  USE_PROJECTS serialization icetray dataclasses clsim
+  USE_PROJECTS icetray dataclasses clsim
 )
 
 ## restore OPENCL_FOUND

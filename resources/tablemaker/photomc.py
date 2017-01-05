@@ -45,7 +45,7 @@ parser.add_option("--zenith", dest="zenith", type="float", default=0.,
     help="Zenith angle of source, in IceCube convention and degrees [%default]")
 parser.add_option("--energy", dest="energy", type="float", default=1,
     help="Energy of light source, in GeV [%default]")
-parser.add_option("--light-source", choices=('cascade', 'flasher', 'infinite-muon', 'muon-segment'), default='cascade',
+parser.add_option("--light-source", choices=('cascade', 'flasher', 'infinite-muon'), default='cascade',
     help="Type of light source. If 'infinite-muon', Z will be ignored, and tracks sampled over all depths. [%default]")
 parser.add_option("--tabulate-impact-angle", default=False, action="store_true",
     help="Tabulate the impact angle on the DOM instead of weighting by the angular acceptance")
@@ -53,9 +53,6 @@ parser.add_option("--prescale", dest="prescale", type="float", default=100,
     help="Only propagate 1/PRESCALE of photons. This is useful for controlling \
     how many photons are simulated per source, e.g. for infinite muons where \
     multiple trajectories need to be sampled [%default]")
-parser.add_option("--sensor", default="dom", choices=("dom", "degg", "wom", "mdom"),
-    help="Type of sensor to simulate")
-parser.add_option("--ice-model", default="spice_mie", help="Ice model to simulate [%default]")
 parser.add_option("--step", dest="steplength", type="float", default=1,
     help="Sampling step length in meters [%default]")
 parser.add_option("--overwrite", dest="overwrite", action="store_true", default=False,
@@ -89,12 +86,9 @@ icetray.logging.set_level_for_unit('I3CLSimTabulatorModule', 'DEBUG')
 icetray.logging.set_level_for_unit('I3CLSimLightSourceToStepConverterGeant4', 'TRACE')
 icetray.logging.set_level_for_unit('I3CLSimLightSourceToStepConverterFlasher', 'TRACE')
 
-axes = None
-
 tray.AddSegment(TabulatePhotonsFromSource, 'generator', Seed=opts.seed, PhotonSource=opts.light_source,
     Zenith=opts.zenith, ZCoordinate=opts.z, Energy=opts.energy, NEvents=opts.nevents, Filename=outfile,
-    TabulateImpactAngle=opts.tabulate_impact_angle, PhotonPrescale=opts.prescale,
-    DisableTilt=True, IceModel=opts.ice_model, Axes=axes, Sensor=opts.sensor)
+    TabulateImpactAngle=opts.tabulate_impact_angle, PhotonPrescale=opts.prescale)
     
 tray.AddModule('TrashCan', 'MemoryHole')
 tray.Execute()

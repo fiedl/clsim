@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3MuonSlicer.cxx 130806 2015-03-31 03:12:34Z nega $
  *
  * @file I3MuonSlicer.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 130806 $
+ * @date $Date: 2015-03-31 05:12:34 +0200 (Di, 31 Mär 2015) $
  * @author Claudio Kopper
  */
 
@@ -39,6 +39,7 @@
 #include "dataclasses/physics/I3Particle.h"
 #include "dataclasses/physics/I3MCTree.h"
 #include "dataclasses/physics/I3MCTreeUtils.h"
+#include "dataclasses/I3TreeUtils.h"
 #include "dataclasses/I3Constants.h"
 
 #include "simclasses/I3MMCTrack.h"
@@ -544,6 +545,8 @@ void I3MuonSlicer::DAQ(I3FramePtr frame)
             log_warn("Input tree contains a particle with shape!=(Primary or Null or Dark) at its root. (shape=%s, type=%s)",
                       primary->GetShapeString().c_str(), primary->GetTypeString().c_str());
         
+        // have to use I3TreeUtils here, I3MCTreeUtils::AddPrimary expects a non-const I3Particle..
+        //I3MCTreeUtils::AddPrimary(outputMCTree, *primary);
         outputMCTree->insert(*primary);
 
         I3MCTree::const_iterator primary_in_input_tree(*inputMCTree,  *primary);

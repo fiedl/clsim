@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: Axis.cxx 130869 2015-04-01 21:37:59Z benedikt.riedel $
  *
  * @file Axis.cxx
- * @version $LastChangedRevision$
- * @date $Date$
+ * @version $LastChangedRevision: 130869 $
+ * @date $Date: 2015-04-01 23:37:59 +0200 (Mi, 01 Apr 2015) $
  * @author Jakob van Santen
  */
 
@@ -50,10 +50,10 @@ Axis::GetIndexCode(const std::string &var) const {
 	double offset = scale*InverseTransform(min_);
 
 	using I3CLSimHelper::ToFloatString;
-	ss << "(clamp(convert_int_sat_rtn("
+	ss << "clamp(convert_int_sat_rtz("
 	    <<ToFloatString(scale)<<"*"<<GetInverseTransformCode(var)
 	    <<" - "<<ToFloatString(offset)
-	    <<"), -1, "<<(n_bins_)<<")+1)";
+	    <<"), 0, "<<(n_bins_-1)<<")";
 	
 	return ss.str();
 }

@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimLightSourceToStepConverterPPC.h 140305 2015-12-10 10:54:09Z jvansanten $
  *
  * @file I3CLSimLightSourceToStepConverterPPC.h
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 140305 $
+ * @date $Date: 2015-12-10 11:54:09 +0100 (Do, 10 Dez 2015) $
  * @author Claudio Kopper
  */
 

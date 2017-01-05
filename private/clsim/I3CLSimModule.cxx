@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: I3CLSimModule.cxx 140057 2015-12-03 17:31:50Z david.schultz $
  *
  * @file I3CLSimModule.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 140057 $
+ * @date $Date: 2015-12-03 18:31:50 +0100 (Do, 03 Dez 2015) $
  * @author Claudio Kopper
  */
 

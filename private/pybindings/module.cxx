@@ -16,11 +16,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *
- * $Id$
+ * $Id: module.cxx 139041 2015-11-02 02:50:05Z juancarlos $
  *
  * @file module.cxx
- * @version $Revision$
- * @date $Date$
+ * @version $Revision: 139041 $
+ * @date $Date: 2015-11-02 03:50:05 +0100 (Mo, 02 Nov 2015) $
  * @author Claudio Kopper
  */
 
@@ -33,8 +33,8 @@ namespace bp = boost::python;
 #include <boost/preprocessor.hpp>
 
 #define REGISTER_THESE_THINGS                       \
-    /*(I3Photon)(I3CompressedPhoton)*/              \
-    (I3CLSimEventStatistics)/*(I3Converters)*/      \
+    (I3Photon)(I3CompressedPhoton)                  \
+    (I3CLSimEventStatistics)(I3Converters)          \
     (I3CLSimFlasherPulse)(I3ShadowedPhotonRemover)  \
     (I3ExtraGeometryItem)
 
