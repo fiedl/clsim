@@ -47,18 +47,18 @@
 
 
 namespace I3CLSimModuleHelper {
-    
+
     namespace {
         double CherenkovYieldDistribution(double wlen, I3CLSimMediumPropertiesConstPtr mediumProperties, double beta=1.)
         {
             I3CLSimFunctionConstPtr nPhaseDist =
             mediumProperties->GetPhaseRefractiveIndex(0); // this assumes the refractive index does not change between layers
-            
-            if (!nPhaseDist->HasNativeImplementation()) 
+
+            if (!nPhaseDist->HasNativeImplementation())
                 log_fatal("The refractive index distribution needs a native implementation to be usable!");
-            
+
             const double nPhase = nPhaseDist->GetValue(wlen);
-            
+
             return (2.*M_PI/(137.*(wlen*wlen)))*(1. - 1./ ( std::pow(beta*nPhase,2.) ) ); // dN/dxdwlen
         }
 
@@ -69,8 +69,8 @@ namespace I3CLSimModuleHelper {
         }
 
     };
-    
-    
+
+
     I3CLSimRandomValueConstPtr
     makeWavelengthGenerator(I3CLSimFunctionConstPtr unbiasedSpectrum,
                             I3CLSimFunctionConstPtr wavelengthGenerationBias,
@@ -82,17 +82,17 @@ namespace I3CLSimModuleHelper {
             boost::dynamic_pointer_cast<const I3CLSimFunctionDeltaPeak>(unbiasedSpectrum);
             if (deltaPeak) {
                 const double peakPosition = deltaPeak->GetPeakPosition();
-                
+
                 return I3CLSimRandomValueConstantConstPtr
                 (new I3CLSimRandomValueConstant(peakPosition));
             }
         }
 
         // if we get here, it's not a delta peak
-        
+
         double minWlen = unbiasedSpectrum->GetMinWlen();
         double maxWlen = unbiasedSpectrum->GetMaxWlen();
-        
+
         // check if the spectrum is from a tabulated distribution (instead of
         // a parameterized one)
         I3CLSimFunctionFromTableConstPtr unbiasedSpectrumFromTable;
@@ -105,7 +105,7 @@ namespace I3CLSimModuleHelper {
             if (mediumProperties->GetMinWavelength() > minWlen) minWlen=mediumProperties->GetMinWavelength();
             if (mediumProperties->GetMaxWavelength() < maxWlen) maxWlen=mediumProperties->GetMaxWavelength();
         }
-        
+
         const double wlenRange = maxWlen-minWlen;
         if (wlenRange <= 0.) log_fatal("Internal error, wavelength range <= 0!");
 
@@ -120,7 +120,7 @@ namespace I3CLSimModuleHelper {
         {
             std::size_t wlenPoints = unbiasedSpectrumFromTable->GetNumEntries();
             const double firstWlen = unbiasedSpectrumFromTable->GetFirstWavelength();
-            
+
             std::vector<double> spectrum(wlenPoints, NAN);
             std::vector<double> wavelengths(wlenPoints, NAN);
             for (std::size_t i=0;i<wlenPoints;++i)
@@ -128,11 +128,11 @@ namespace I3CLSimModuleHelper {
                 const double wavelength = unbiasedSpectrumFromTable->GetEntryWavelength(i);
                 const double entry = unbiasedSpectrumFromTable->GetEntryValue(i);
                 const double bias = wavelengthGenerationBias->GetValue(wavelength);
-                
+
                 spectrum[i] = bias * entry;
                 wavelengths[i] = wavelength;
             }
-            
+
             if (unbiasedSpectrumFromTable->GetInEqualSpacingMode()) {
                 const double wlenStep = unbiasedSpectrumFromTable->GetWavelengthStepping();
 
@@ -150,28 +150,28 @@ namespace I3CLSimModuleHelper {
         else
         {
             // use a pre-defined binning of 10ns (an arbitrary value..)
-            
+
             std::size_t wlenPoints = static_cast<std::size_t>(wlenRange/(10.*I3Units::nanometer))+2;
             const double firstWlen = minWlen;
             const double wlenStep = wlenRange/static_cast<double>(wlenPoints-1);
-            
+
             std::vector<double> spectrum(wlenPoints, NAN);
             for (std::size_t i=0;i<wlenPoints;++i)
             {
                 const double wavelength = firstWlen + static_cast<double>(i)*wlenStep;
                 const double entry = unbiasedSpectrum->GetValue(wavelength);
                 const double bias = wavelengthGenerationBias->GetValue(wavelength);
-                
+
                 spectrum[i] = bias * entry;
             }
-            
+
             return I3CLSimRandomValueInterpolatedDistributionConstPtr
             (new I3CLSimRandomValueInterpolatedDistribution(firstWlen,
                                                             wlenStep,
                                                             spectrum));
         }
     }
-    
+
     I3CLSimRandomValueConstPtr
     makeCherenkovWavelengthGenerator(I3CLSimFunctionConstPtr wavelengthGenerationBias,
                                      bool generateCherenkovPhotonsWithoutDispersion,
@@ -186,28 +186,28 @@ namespace I3CLSimModuleHelper {
             log_fatal("wavelength generation bias has to have a wavelength range larger or equal to the medium property range!");
         if (wavelengthGenerationBias->GetMaxWlen() < maxWlen)
             log_fatal("wavelength generation bias has to have a wavelength range larger or equal to the medium property range!");
-        
+
         bool noBias=false;
         //bool biasIsConstant=false;
-        
+
         {
             I3CLSimFunctionConstantConstPtr wavelengthGenerationBiasConstant =
             boost::dynamic_pointer_cast<const I3CLSimFunctionConstant>(wavelengthGenerationBias);
-            
+
             if (wavelengthGenerationBiasConstant)
             {
                 //biasIsConstant=true;
-                
+
                 if ( std::abs(wavelengthGenerationBiasConstant->GetValue((minWlen+maxWlen)/2.)-1.) < 1e-10 )
                     noBias=true;
             }
         }
-        
+
         I3CLSimFunctionFromTableConstPtr wavelengthGenerationBiasFromTable;
         wavelengthGenerationBiasFromTable =
         boost::dynamic_pointer_cast<const I3CLSimFunctionFromTable>(wavelengthGenerationBias);
-        
-        
+
+
 
         if ((!noBias) && (generateCherenkovPhotonsWithoutDispersion))
         {
@@ -218,21 +218,21 @@ namespace I3CLSimModuleHelper {
             log_warn(" approximation of the Cherenkov spectrum.");
             log_warn("**********");
         }
-        
+
         // Check if the bias values are from a tabulated distribution.
         // If yes, use the table binning, if not make up a binning.
         if (wavelengthGenerationBiasFromTable)
         {
             std::size_t wlenPoints = wavelengthGenerationBiasFromTable->GetNumEntries();
             const double firstWlen = wavelengthGenerationBiasFromTable->GetFirstWavelength();
-            
+
             std::vector<double> spectrum(wlenPoints, NAN);
             std::vector<double> wavelengths(wlenPoints, NAN);
             for (std::size_t i=0;i<wlenPoints;++i)
             {
                 const double wavelength = wavelengthGenerationBiasFromTable->GetEntryWavelength(i);
                 const double bias = wavelengthGenerationBiasFromTable->GetEntryValue(i);
-                
+
                 if (generateCherenkovPhotonsWithoutDispersion)
                 {
                     spectrum[i] =
@@ -243,10 +243,10 @@ namespace I3CLSimModuleHelper {
                     spectrum[i] =
                     bias * CherenkovYieldDistribution(wavelength, mediumProperties);
                 }
-                
+
                 wavelengths[i] = wavelength;
             }
-            
+
             if (wavelengthGenerationBiasFromTable->GetInEqualSpacingMode()) {
                 const double wlenStep = wavelengthGenerationBiasFromTable->GetWavelengthStepping();
 
@@ -271,13 +271,13 @@ namespace I3CLSimModuleHelper {
             std::size_t wlenPoints = static_cast<std::size_t>(wlenRange/(10.*I3Units::nanometer))+2;
             const double firstWlen = minWlen;
             const double wlenStep = wlenRange/static_cast<double>(wlenPoints-1);
-            
+
             std::vector<double> spectrum(wlenPoints, NAN);
             for (std::size_t i=0;i<wlenPoints;++i)
             {
                 const double wavelength = firstWlen + static_cast<double>(i)*wlenStep;
                 const double bias = wavelengthGenerationBias->GetValue(wavelength);
-                
+
                 if (generateCherenkovPhotonsWithoutDispersion)
                 {
                     spectrum[i] =
@@ -296,74 +296,83 @@ namespace I3CLSimModuleHelper {
                                                             spectrum));
         }
 
-    
+
     }
 
-    
-    I3CLSimStepToPhotonConverterOpenCLPtr initializeOpenCL(const I3CLSimOpenCLDevice &device,
-                                                           I3RandomServicePtr rng,
-                                                           I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
-                                                           I3CLSimMediumPropertiesConstPtr medium,
-                                                           I3CLSimFunctionConstPtr wavelengthGenerationBias,
-                                                           const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
-                                                           bool enableDoubleBuffering,
-                                                           bool doublePrecision,
-                                                           bool stopDetectedPhotons,
-                                                           bool saveAllPhotons,
-                                                           double saveAllPhotonsPrescale,
-                                                           double fixedNumberOfAbsorptionLengths,
-                                                           double pancakeFactor,
-                                                           uint32_t photonHistoryEntries,
-                                                           uint32_t limitWorkgroupSize)
+
+    // @param OpenCLInitOptions options
+    //
+    //     struct OpenCLInitOptions {
+    //         const I3CLSimOpenCLDevice &device,
+    //         I3RandomServicePtr rng,
+    //         I3CLSimSimpleGeometryFromI3GeometryPtr geometry,
+    //         I3CLSimMediumPropertiesConstPtr medium,
+    //         I3CLSimFunctionConstPtr wavelengthGenerationBias,
+    //         const std::vector<I3CLSimRandomValueConstPtr> &wavelengthGenerators,
+    //         bool enableDoubleBuffering,
+    //         bool doublePrecision,
+    //         bool stopDetectedPhotons,
+    //         bool saveAllPhotons,
+    //         double saveAllPhotonsPrescale,
+    //         double fixedNumberOfAbsorptionLengths,
+    //         double pancakeFactor,
+    //         uint32_t photonHistoryEntries,
+    //         uint32_t limitWorkgroupSize
+    //     }
+    //
+    //     The boost python bindings apparently do not support so many arguments
+    //     passed directly into the method. Therefore, this options struct is used.
+    //
+    I3CLSimStepToPhotonConverterOpenCLPtr initializeOpenCL(OpenCLInitOptions options)
     {
-        I3CLSimStepToPhotonConverterOpenCLPtr conv(new I3CLSimStepToPhotonConverterOpenCL(rng, device.GetUseNativeMath()));
+        I3CLSimStepToPhotonConverterOpenCLPtr conv(new I3CLSimStepToPhotonConverterOpenCL(options.rng, options.device.GetUseNativeMath()));
 
-        conv->SetDevice(device);
+        conv->SetDevice(options.device);
 
-        conv->SetWlenGenerators(wavelengthGenerators);
-        conv->SetWlenBias(wavelengthGenerationBias);
+        conv->SetWlenGenerators(options.wavelengthGenerators);
+        conv->SetWlenBias(options.wavelengthGenerationBias);
 
-        conv->SetMediumProperties(medium);
-        conv->SetGeometry(geometry);
+        conv->SetMediumProperties(options.medium);
+        conv->SetGeometry(options.geometry);
 
-        conv->SetEnableDoubleBuffering(enableDoubleBuffering);
-        conv->SetDoublePrecision(doublePrecision);
-        conv->SetStopDetectedPhotons(stopDetectedPhotons);
-        conv->SetSaveAllPhotons(saveAllPhotons);
-        conv->SetSaveAllPhotonsPrescale(saveAllPhotonsPrescale);
+        conv->SetEnableDoubleBuffering(options.enableDoubleBuffering);
+        conv->SetDoublePrecision(options.doublePrecision);
+        conv->SetStopDetectedPhotons(options.stopDetectedPhotons);
+        conv->SetSaveAllPhotons(options.saveAllPhotons);
+        conv->SetSaveAllPhotonsPrescale(options.saveAllPhotonsPrescale);
 
-        conv->SetFixedNumberOfAbsorptionLengths(fixedNumberOfAbsorptionLengths);
-        conv->SetDOMPancakeFactor(pancakeFactor);
+        conv->SetFixedNumberOfAbsorptionLengths(options.fixedNumberOfAbsorptionLengths);
+        conv->SetDOMPancakeFactor(options.pancakeFactor);
 
-        conv->SetPhotonHistoryEntries(photonHistoryEntries);
+        conv->SetPhotonHistoryEntries(options.photonHistoryEntries);
 
         conv->Compile();
         //log_trace("%s", conv.GetFullSource().c_str());
-        
+
         std::size_t maxWorkgroupSize = conv->GetMaxWorkgroupSize();
-        if (limitWorkgroupSize!=0) {
-            maxWorkgroupSize = std::min(static_cast<std::size_t>(limitWorkgroupSize), maxWorkgroupSize);
+        if (options.limitWorkgroupSize!=0) {
+            maxWorkgroupSize = std::min(static_cast<std::size_t>(options.limitWorkgroupSize), maxWorkgroupSize);
         }
-        
+
         conv->SetWorkgroupSize(maxWorkgroupSize);
         const std::size_t workgroupSize = conv->GetWorkgroupSize();
-        
+
         // use approximately the given number of work items, convert to a multiple of the workgroup size
-        std::size_t maxNumWorkitems = (static_cast<std::size_t>(device.GetApproximateNumberOfWorkItems())/workgroupSize)*workgroupSize;
+        std::size_t maxNumWorkitems = (static_cast<std::size_t>(options.device.GetApproximateNumberOfWorkItems())/workgroupSize)*workgroupSize;
         if (maxNumWorkitems==0) maxNumWorkitems=workgroupSize;
-        
+
         conv->SetMaxNumWorkitems(maxNumWorkitems);
 
         log_info("maximum workgroup size is %zu", maxWorkgroupSize);
         log_info("configured workgroup size is %zu", workgroupSize);
-        if (maxNumWorkitems != device.GetApproximateNumberOfWorkItems()) {
-            log_info("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, device.GetApproximateNumberOfWorkItems());
+        if (maxNumWorkitems != options.device.GetApproximateNumberOfWorkItems()) {
+            log_info("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, options.device.GetApproximateNumberOfWorkItems());
         } else {
-            log_debug("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, device.GetApproximateNumberOfWorkItems());
+            log_debug("maximum number of work items is %zu (user configured was %" PRIu32 ")", maxNumWorkitems, options.device.GetApproximateNumberOfWorkItems());
         }
 
         conv->Initialize();
-        
+
         return conv;
     }
 
@@ -387,17 +396,17 @@ namespace I3CLSimModuleHelper {
           maxNumPhotonsPerStep
          )
         );
-        
+
         conv->SetRandomService(rng);
         conv->SetWlenBias(wavelengthGenerationBias);
         conv->SetMediumProperties(medium);
         conv->SetMaxBunchSize(maxBunchSize);
         conv->SetBunchSizeGranularity(bunchSizeGranularity);
-        
+
         conv->SetLightSourceParameterizationSeries(parameterizationList);
-        
+
         conv->Initialize();
-        
+
         return conv;
     }
 

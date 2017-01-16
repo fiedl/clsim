@@ -737,22 +737,27 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                  openCLdevice.GetPlatformName().c_str(), openCLdevice.GetDeviceName().c_str());
 #endif
         
+        
+        
+        
         I3CLSimStepToPhotonConverterOpenCLPtr openCLStepsToPhotonsConverter =
-        I3CLSimModuleHelper::initializeOpenCL(openCLdevice,
-                                              randomService_,
-                                              geometry_,
-                                              mediumProperties_,
-                                              wavelengthGenerationBias_,
-                                              wavelengthGenerators_,
-                                              enableDoubleBuffering_,
-                                              doublePrecision_,
-                                              stopDetectedPhotons_,
-                                              saveAllPhotons_,
-                                              saveAllPhotonsPrescale_,
-                                              fixedNumberOfAbsorptionLengths_,
-                                              pancakeFactor_,
-                                              photonHistoryEntries_,
-                                              limitWorkgroupSize_);
+        I3CLSimModuleHelper::initializeOpenCL((I3CLSimModuleHelper::OpenCLInitOptions) {
+                                                    openCLdevice,
+                                                    randomService_,
+                                                    geometry_,
+                                                    mediumProperties_,
+                                                    wavelengthGenerationBias_,
+                                                    wavelengthGenerators_,
+                                                    enableDoubleBuffering_,
+                                                    doublePrecision_,
+                                                    stopDetectedPhotons_,
+                                                    saveAllPhotons_,
+                                                    saveAllPhotonsPrescale_,
+                                                    fixedNumberOfAbsorptionLengths_,
+                                                    pancakeFactor_,
+                                                    photonHistoryEntries_,
+                                                    limitWorkgroupSize_
+                                                } );
         if (!openCLStepsToPhotonsConverter)
             log_fatal("Could not initialize OpenCL!");
         
