@@ -47,7 +47,7 @@
 #include <string>
 
 namespace I3CLSimModuleHelper {
-  
+
     struct OpenCLInitOptions {
         const I3CLSimOpenCLDevice &device;
         I3RandomServicePtr rng;
@@ -65,10 +65,10 @@ namespace I3CLSimModuleHelper {
         uint32_t photonHistoryEntries;
         uint32_t limitWorkgroupSize;
     };
-  
+
     I3CLSimStepToPhotonConverterOpenCLPtr
     initializeOpenCL(OpenCLInitOptions options);
-    
+
     I3CLSimLightSourceToStepConverterGeant4Ptr
     initializeGeant4(I3RandomServicePtr rng,
                      I3CLSimMediumPropertiesConstPtr medium,

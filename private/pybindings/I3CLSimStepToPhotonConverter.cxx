@@ -82,7 +82,7 @@ struct I3CLSimStepToPhotonConverterOpenCLWrapper : I3CLSimStepToPhotonConverterO
 void register_I3CLSimStepToPhotonConverter()
 {
     {
-        bp::scope I3CLSimStepToPhotonConverter_scope = 
+        bp::scope I3CLSimStepToPhotonConverter_scope =
         bp::class_<I3CLSimStepToPhotonConverterWrapper, boost::shared_ptr<I3CLSimStepToPhotonConverterWrapper>, boost::noncopyable>
         ("I3CLSimStepToPhotonConverter", bp::no_init)
         .def("SetWlenGenerators", bp::pure_virtual(&I3CLSimStepToPhotonConverter::SetWlenGenerators))
@@ -96,10 +96,10 @@ void register_I3CLSimStepToPhotonConverter()
         .def("MorePhotonsAvailable", bp::pure_virtual(&I3CLSimStepToPhotonConverter::MorePhotonsAvailable))
         .def("GetConversionResult", bp::pure_virtual(&I3CLSimStepToPhotonConverter::GetConversionResult))
         ;
-        
-        
+
+
         bp::class_<I3CLSimStepToPhotonConverter::ConversionResult_t>
-        ("ConversionResult_t", 
+        ("ConversionResult_t",
          bp::init<uint32_t, I3CLSimPhotonSeriesPtr, I3CLSimPhotonHistorySeriesPtr>
          (
           (
@@ -114,22 +114,22 @@ void register_I3CLSimStepToPhotonConverter()
         .def_readwrite("photons", &I3CLSimStepToPhotonConverter::ConversionResult_t::photons)
         .def_readwrite("photonHistories", &I3CLSimStepToPhotonConverter::ConversionResult_t::photonHistories)
         ;
-        
+
     }
-    
+
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterWrapper>, boost::shared_ptr<const I3CLSimStepToPhotonConverter> >();
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterWrapper>, boost::shared_ptr<I3CLSimStepToPhotonConverter> >();
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterWrapper>, boost::shared_ptr<const I3CLSimStepToPhotonConverterWrapper> >();
-    
 
-    
+
+
     // I3CLSimStepToPhotonConverterOpenCL
     {
 
-        
+
         bp::class_<
-        I3CLSimStepToPhotonConverterOpenCLWrapper, 
-        boost::shared_ptr<I3CLSimStepToPhotonConverterOpenCLWrapper>, 
+        I3CLSimStepToPhotonConverterOpenCLWrapper,
+        boost::shared_ptr<I3CLSimStepToPhotonConverterOpenCLWrapper>,
         bases<I3CLSimStepToPhotonConverter>,
         boost::noncopyable
         >
@@ -146,10 +146,10 @@ void register_I3CLSimStepToPhotonConverter()
         )
         .def("Compile", &I3CLSimStepToPhotonConverterOpenCLWrapper::Compile)
         .def("GetFullSource", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetFullSource)
-                
+
         .def("GetGeometrySource", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetGeometrySource)
         .def("GetCollisionDetectionSource", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetCollisionDetectionSource)
-        
+
         .def("SetDevice", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetDevice)
         .def("GetMaxWorkgroupSize", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetMaxWorkgroupSize)
         .add_property("maxWorkgroupSize", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetMaxWorkgroupSize)
@@ -183,7 +183,7 @@ void register_I3CLSimStepToPhotonConverter()
         .def("SetDOMPancakeFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetDOMPancakeFactor)
         .def("GetDOMPancakeFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetDOMPancakeFactor)
 
-        
+
         .add_property("workgroupSize", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetWorkgroupSize, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetWorkgroupSize)
         .add_property("maxNumWorkitems", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetMaxNumWorkitems, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetMaxNumWorkitems)
         .add_property("enableDoubleBuffering", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetEnableDoubleBuffering, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetEnableDoubleBuffering)
@@ -196,9 +196,9 @@ void register_I3CLSimStepToPhotonConverter()
         .add_property("DOMPancakeFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetDOMPancakeFactor, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetDOMPancakeFactor)
         ;
     }
-    
+
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterOpenCLWrapper>, boost::shared_ptr<const I3CLSimStepToPhotonConverterOpenCLWrapper> >();
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterOpenCLWrapper>, boost::shared_ptr<I3CLSimStepToPhotonConverter> >();
     bp::implicitly_convertible<boost::shared_ptr<I3CLSimStepToPhotonConverterOpenCLWrapper>, boost::shared_ptr<const I3CLSimStepToPhotonConverter> >();
-    
+
 }

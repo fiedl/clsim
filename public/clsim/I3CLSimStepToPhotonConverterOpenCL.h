@@ -63,13 +63,13 @@ struct I3CLSimStepToPhotonConverterOpenCL : public I3CLSimStepToPhotonConverter
 {
 public:
     static const bool default_useNativeMath;
-    
+
     I3CLSimStepToPhotonConverterOpenCL(I3RandomServicePtr randomService,
                                        bool useNativeMath=default_useNativeMath);
     virtual ~I3CLSimStepToPhotonConverterOpenCL();
 
     /**
-     * Sets the workgroup size. A value of 0 
+     * Sets the workgroup size. A value of 0
      * uses the maximum possible workgroup size
      * for the kernel.
      *
@@ -88,19 +88,19 @@ public:
      * Gets the current workgroup size.
      */
     std::size_t GetWorkgroupSize() const;
-    
+
     /**
      * Gets the number of parallel work items.
      */
     std::size_t GetMaxNumWorkitems() const;
-    
+
     /**
      * Sets the OpenCL device.
      *
      * Will throw if already initialized.
      */
     void SetDevice(const I3CLSimOpenCLDevice &device);
-    
+
     /**
      * Returns the maximum workgroup size for the
      * current kernel.
@@ -148,7 +148,7 @@ public:
      * Will throw if already initialized.
      */
     void SetDoublePrecision(bool value);
-        
+
     /**
      * Returns true if double precision is enabled.
      */
@@ -164,7 +164,7 @@ public:
      * Will throw if already initialized.
      */
     void SetStopDetectedPhotons(bool value);
-    
+
     /**
      * Returns true if detected photons are stopped.
      */
@@ -178,7 +178,7 @@ public:
      * Will throw if already initialized.
      */
     void SetSaveAllPhotons(bool value);
-    
+
     /**
      * Returns true if all photons are saved,
      * regardless of detection.
@@ -194,7 +194,7 @@ public:
      * Will throw if already initialized.
      */
     void SetSaveAllPhotonsPrescale(double value);
-    
+
     /**
      * Returns true if all photons are saved,
      * regardless of detection.
@@ -212,7 +212,7 @@ public:
      * Will throw if already initialized.
      */
     void SetPhotonHistoryEntries(uint32_t value);
-    
+
     /**
      * Returns the maximum number of photon
      * history entries.
@@ -228,7 +228,7 @@ public:
      * Will throw if already initialized.
      */
     void SetFixedNumberOfAbsorptionLengths(double value);
-    
+
     /**
      * Returns number of absorption lengths each photon
      * should be propagated. If set to NaN (the default),
@@ -251,14 +251,14 @@ public:
      * Will throw if already initialized.
      */
     void SetDOMPancakeFactor(double value);
-    
+
     /**
      * Returns the "pancake" factor for DOMs.
      */
     double GetDOMPancakeFactor() const;
 
     /**
-     * Sets the wavelength generators. 
+     * Sets the wavelength generators.
      * The first generator (index 0) is assumed to return a Cherenkov
      * spectrum that may have a bias applied to it. This bias factor
      * needs to be set using SetWlenBias().
@@ -268,7 +268,7 @@ public:
      * Will throw if used after the call to Initialize().
      */
     virtual void SetWlenGenerators(const std::vector<I3CLSimRandomValueConstPtr> &wlenGenerators);
-    
+
     /**
      * Sets the wavelength weights. Set this to a constant value
      * of 1 if you do not need biased photon generation.
@@ -285,7 +285,7 @@ public:
      * Will throw if used after the call to Initialize().
      */
     virtual void SetMediumProperties(I3CLSimMediumPropertiesConstPtr mediumProperties);
-    
+
     /**
      * Sets the geometry.
      * Will throw if used after the call to Initialize().
@@ -296,20 +296,20 @@ public:
      * Compiles the kernel. Can only be used
      * after medium properties, geometry and device have
      * been set.
-     * 
+     *
      * Will throw if already initialized.
      */
     virtual void Compile();
 
     /**
-     * Gets the full generated OpenCL source code. 
+     * Gets the full generated OpenCL source code.
      *
      * Will throw if not yet compiled.
      */
     virtual std::string GetFullSource();
-    
+
     /**
-     * Provide individual bits of the OpenCL source code. 
+     * Provide individual bits of the OpenCL source code.
      */
     virtual std::string GetPreambleSource();
     std::string GetMediumPropertiesSource();
@@ -317,7 +317,7 @@ public:
     std::string GetWlenBiasSource();
     virtual std::string GetGeometrySource();
     virtual std::string GetCollisionDetectionSource(bool header=true);
-    
+
     /**
      * Initializes the simulation.
      * Will throw if already initialized.
@@ -329,13 +329,13 @@ public:
      * Never throws.
      */
     virtual bool IsInitialized() const;
-    
+
     /**
      * Adds a new I3CLSimStepSeries to the queue.
      * The resulting I3CLSimPhotonSeries can be retrieved from the
      * I3CLSimStepToPhotonConverter after some processing time.
      *
-     * Enqueuing a vector after calling EnqueueBarrier 
+     * Enqueuing a vector after calling EnqueueBarrier
      * will throw if not all photons have been retrieved.
      *
      * Will throw if not initialized.
@@ -348,13 +348,13 @@ public:
      *
      * Will throw if not initialized.
      */
-    virtual std::size_t QueueSize() const; 
+    virtual std::size_t QueueSize() const;
 
     /**
      * Returns true if more photons are available.
      * If the return value is false, the current simulation is finished
      * and a new step vector may be set.
-     * 
+     *
      * Will throw if not initialized.
      */
     virtual bool MorePhotonsAvailable() const;
@@ -367,24 +367,24 @@ public:
      * to EnqueueSteps().
      *
      * Might block if no photons are available.
-     * 
+     *
      * Will throw if not initialized.
      */
     virtual I3CLSimStepToPhotonConverter::ConversionResult_t GetConversionResult();
-    
+
     inline double GetTotalDeviceTime() {boost::unique_lock<boost::mutex> guard(statistics_mutex_); return static_cast<double>(statistics_total_device_duration_in_nanoseconds_);}
     inline double GetTotalHostTime() {boost::unique_lock<boost::mutex> guard(statistics_mutex_); return static_cast<double>(statistics_total_host_duration_in_nanoseconds_);}
     inline uint64_t GetNumKernelCalls() {boost::unique_lock<boost::mutex> guard(statistics_mutex_); return statistics_total_kernel_calls_;}
     inline uint64_t GetTotalNumPhotonsGenerated() {boost::unique_lock<boost::mutex> guard(statistics_mutex_); return statistics_total_num_photons_generated_;}
     inline uint64_t GetTotalNumPhotonsAtDOMs() {boost::unique_lock<boost::mutex> guard(statistics_mutex_); return statistics_total_num_photons_atDOMs_;}
-    
+
 private:
     typedef std::pair<uint32_t, I3CLSimStepSeriesConstPtr> ToOpenCLPair_t;
 
     // sets up OpenCL
     void SetupQueueAndKernel(const cl::Platform& platform, const cl::Device &device);
 
-    
+
     void OpenCLThread();
     void OpenCLThread_impl(boost::this_thread::disable_interruption &di);
     bool OpenCLThread_impl_uploadSteps(boost::this_thread::disable_interruption &di,
@@ -418,28 +418,28 @@ private:
     uint64_t statistics_total_num_photons_generated_;
     uint64_t statistics_total_num_photons_atDOMs_;
 
-    
+
     boost::shared_ptr<boost::thread> openCLThreadObj_;
     boost::condition_variable_any openCLStarted_cond_;
     boost::mutex openCLStarted_mutex_;
     bool openCLStarted_;
-    
+
     boost::shared_ptr<I3CLSimQueue<ToOpenCLPair_t> > queueToOpenCL_;
     boost::shared_ptr<I3CLSimQueue<I3CLSimStepToPhotonConverter::ConversionResult_t> > queueFromOpenCL_;
 
     I3RandomServicePtr randomService_;
-    
+
     bool initialized_;
     bool compiled_;
     std::vector<I3CLSimRandomValueConstPtr> wlenGenerators_;
     I3CLSimFunctionConstPtr wlenBias_;
     I3CLSimMediumPropertiesConstPtr mediumProperties_;
     I3CLSimSimpleGeometryConstPtr geometry_;
-    
+
     I3CLSimOpenCLDevicePtr device_;
     bool useNativeMath_;
     bool deviceIsSelected_;
-    
+
     bool disableDoubleBuffering_;
     bool doublePrecision_;
     bool stopDetectedPhotons_;
@@ -447,9 +447,9 @@ private:
     double saveAllPhotonsPrescale_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;
-    
+
     uint32_t photonHistoryEntries_;
-    
+
     // some kernel sources loaded on construction
     std::string prependSource_;
     std::string mwcrngKernelSource_;
@@ -458,46 +458,46 @@ private:
     std::string mediumPropertiesSource_;
     std::string geometrySource_;
     std::string propagationKernelSource_;
-    
+
     // this is extra geometry information, we upload it to global memory
     std::vector<unsigned short> geoLayerToOMNumIndexPerStringSetInfo_;
-    
+
     // this allows us to convert the string index back to the string ID (which may be negative and non-contiguous)
     std::vector<int> stringIndexToStringIDBuffer_;
 
     // this allows us to convert the DOM index back to the DOM ID (which may be non-contiguous)
     std::vector<std::vector<unsigned int> > domIndexToDomIDBuffer_perStringIndex_;
-    
+
     // OpenCL command queue and kernel
     std::vector<boost::shared_ptr<cl::CommandQueue> > queue_;
     std::vector<boost::shared_ptr<cl::Kernel> > kernel_;
     boost::shared_ptr<cl::Context> context_;
-    
+
     // maximum workgroup size for current kernel
     uint64_t maxWorkgroupSize_;
-    
+
     // configured workgroup size and maximum number of work items
     std::size_t workgroupSize_;
     std::size_t maxNumWorkitems_;
-    
+
     // rng state per workitem
     std::vector<uint64_t> MWC_RNG_x;
     std::vector<uint32_t> MWC_RNG_a;
     boost::shared_ptr<cl::Buffer> deviceBuffer_MWC_RNG_x;
     boost::shared_ptr<cl::Buffer> deviceBuffer_MWC_RNG_a;
-    
+
     // Memory buffers on the device
     std::vector<boost::shared_ptr<cl::Buffer> > deviceBuffer_InputSteps;
     std::vector<boost::shared_ptr<cl::Buffer> > deviceBuffer_OutputPhotons;
     std::vector<boost::shared_ptr<cl::Buffer> > deviceBuffer_CurrentNumOutputPhotons;
     std::vector<boost::shared_ptr<cl::Buffer> > deviceBuffer_PhotonHistory;
-    
+
     // this one is constant, so we only need one
     boost::shared_ptr<cl::Buffer> deviceBuffer_GeoLayerToOMNumIndexPerStringSet;
-    
+
     // Size of output photon storage (maximum amount of photons per step bunch)
     uint32_t maxNumOutputPhotons_;
-    
+
     SET_LOGGER("I3CLSimStepToPhotonConverterOpenCL");
 };
 

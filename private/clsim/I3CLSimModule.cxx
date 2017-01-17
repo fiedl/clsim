@@ -62,22 +62,22 @@ namespace {
         {
             m_thread_state = PyEval_SaveThread();
         }
-        
+
         inline ~ScopedGILRelease()
         {
             PyEval_RestoreThread(m_thread_state);
             m_thread_state = NULL;
         }
-        
+
     private:
         PyThreadState *m_thread_state;
-    };    
+    };
 }
 
 // The module
 I3_MODULE(I3CLSimModule);
 
-I3CLSimModule::I3CLSimModule(const I3Context& context) 
+I3CLSimModule::I3CLSimModule(const I3Context& context)
 : I3ConditionalModule(context),
 geometryIsConfigured_(false)
 {
@@ -121,12 +121,12 @@ geometryIsConfigured_(false)
     AddParameter("MaxNumParallelEvents",
                  "Maximum number of events that will be processed by the GPU in parallel.",
                  maxNumParallelEvents_);
-    
+
     totalEnergyToProcess_=0.;
     AddParameter("TotalEnergyToProcess",
                  "Maximum energy that will be processed by the GPU in parallel.",
                  totalEnergyToProcess_);
-    
+
     MCTreeName_="I3MCTree";
     AddParameter("MCTreeName",
                  "Name of the I3MCTree frame object. All particles except neutrinos will be read from this tree.",
@@ -235,7 +235,7 @@ geometryIsConfigured_(false)
                  "and a lower part at z<-30m.",
                  useHardcodedDeepCoreSubdetector_);
 
-    
+
     enableDoubleBuffering_=false;
     AddParameter("EnableDoubleBuffering",
                  "Disables or enables double-buffered GPU usage. Double buffering will use\n"
@@ -310,7 +310,7 @@ I3CLSimModule::~I3CLSimModule()
     log_trace("%s", __PRETTY_FUNCTION__);
 
     StopThread();
-    
+
 }
 
 void I3CLSimModule::StartThread()
@@ -321,19 +321,19 @@ void I3CLSimModule::StartThread()
         log_debug("Thread is already running. Not starting a new one.");
         return;
     }
-    
+
     log_trace("Thread not running. Starting a new one..");
 
     // clear statistics counters
     photonNumGeneratedPerParticle_.clear();
     photonWeightSumGeneratedPerParticle_.clear();
-    
+
     // re-set flags
     threadStarted_=false;
     threadFinishedOK_=false;
-    
+
     threadObj_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&I3CLSimModule::Thread_starter, this)));
-    
+
     // wait for startup
     {
         boost::unique_lock<boost::mutex> guard(threadStarted_mutex_);
@@ -342,8 +342,8 @@ void I3CLSimModule::StartThread()
             if (threadStarted_) break;
             threadStarted_cond_.wait(guard);
         }
-    }        
-    
+    }
+
     log_trace("Thread started..");
 
 }
@@ -351,7 +351,7 @@ void I3CLSimModule::StartThread()
 void I3CLSimModule::StopThread()
 {
     log_trace("%s", __PRETTY_FUNCTION__);
-    
+
     if (threadObj_)
     {
         if (threadObj_->joinable())
@@ -360,7 +360,7 @@ void I3CLSimModule::StopThread()
             threadObj_->interrupt();
             threadObj_->join(); // wait for it indefinitely
             log_trace("thread stopped.");
-        } 
+        }
         else
         {
             log_trace("Thread did already finish, deleting reference.");
@@ -376,15 +376,15 @@ void I3CLSimModule::Configure()
 
     GetParameter("WorkOnTheseStops", workOnTheseStops_);
     workOnTheseStops_set_ = std::set<I3Frame::Stream>(workOnTheseStops_.begin(), workOnTheseStops_.end());
-    
+
     GetParameter("RandomService", randomService_);
     if (!randomService_) {
         log_info("Getting the default random service from the context..");
         randomService_ = context_.Get<I3RandomServicePtr>();
-        if (!randomService_) 
+        if (!randomService_)
             log_fatal("You have to specify the \"RandomService\" parameter or add a I3RandomServiceFactor using tray.AddService()!");
     }
-    
+
     GetParameter("GenerateCherenkovPhotonsWithoutDispersion", generateCherenkovPhotonsWithoutDispersion_);
     GetParameter("WavelengthGenerationBias", wavelengthGenerationBias_);
 
@@ -414,7 +414,7 @@ void I3CLSimModule::Configure()
 
     GetParameter("StatisticsName", statisticsName_);
     collectStatistics_ = (statisticsName_!="");
-    
+
     GetParameter("IgnoreStrings", ignoreStrings_);
     GetParameter("IgnoreDomIDs", ignoreDomIDs_);
     GetParameter("IgnoreSubdetectors", ignoreSubdetectors_);
@@ -440,21 +440,21 @@ void I3CLSimModule::Configure()
     if (pancakeFactor_ != DOMOversizeFactor_) {
         log_warn("***** You set the \"DOMOversizeFactor\" to a different value than the \"DOMPancakeFactor\". Be sure you know what you are doing!");
     }
-    
+
     if ((saveAllPhotons_) && (stopDetectedPhotons_)) {
         log_fatal("The \"SaveAllPhotons\" option cannot be used when \"StopDetectedPhotons\" is active.");
     }
-    
+
     if ((flasherPulseSeriesName_=="") && (MCTreeName_==""))
         log_fatal("You need to set at least one of the \"MCTreeName\" and \"FlasherPulseSeriesName\" parameters.");
-    
+
     if (!wavelengthGenerationBias_) {
         wavelengthGenerationBias_ = I3CLSimFunctionConstantConstPtr(new I3CLSimFunctionConstant(1.));
     }
 
     if (!mediumProperties_) log_fatal("You have to specify the \"MediumProperties\" parameter!");
 
-    if ((totalEnergyToProcess_ > 0) && (!std::isnan(totalEnergyToProcess_)))    
+    if ((totalEnergyToProcess_ > 0) && (!std::isnan(totalEnergyToProcess_)))
     {
         log_warn("Total Energy to Process mode! MaxNumParallelEvents is set to 1! "
                  "CLSim is going to figure out the number of frames to process "
@@ -462,18 +462,18 @@ void I3CLSimModule::Configure()
         maxNumParallelEvents_=1;
         maxNumParallelEventsSecondFlush_=1;
     }
-    if ((maxNumParallelEvents_ <= 0) && (totalEnergyToProcess_ <= 0)) 
+    if ((maxNumParallelEvents_ <= 0) && (totalEnergyToProcess_ <= 0))
         log_fatal("Values <= 0 are invalid for both the \"MaxNumParallelEvents\" and \"TotalEnergyToProcess\" parameter!");
     // maxNumParallelEvents_ is the number of frames buffered by this module.
     // Since we use double-buffering, divide the number by 2.
     maxNumParallelEvents_ /= 2;
     if (maxNumParallelEvents_==0) maxNumParallelEvents_=1;
     maxNumParallelEventsSecondFlush_ = maxNumParallelEvents_;
-    
 
-    if (openCLDeviceList_.empty()) 
+
+    if (openCLDeviceList_.empty())
         log_fatal("You have to provide at least one OpenCL device using the \"OpenCLDeviceList\" parameter.");
-    
+
     // fill wavelengthGenerators_[0] (index 0 is the Cherenkov generator)
     wavelengthGenerators_.clear();
     wavelengthGenerators_.push_back(I3CLSimModuleHelper::makeCherenkovWavelengthGenerator
@@ -482,11 +482,11 @@ void I3CLSimModule::Configure()
                                      mediumProperties_
                                     )
                                    );
-    
+
     if ((spectrumTable_) && (spectrumTable_->size() > 1)) {
         // a spectrum table has been configured and it contains more than the
         // default Cherenkov spectrum at index #0.
-        
+
         for (std::size_t i=1;i<spectrumTable_->size();++i)
         {
             wavelengthGenerators_.push_back(I3CLSimModuleHelper::makeWavelengthGenerator
@@ -496,7 +496,7 @@ void I3CLSimModule::Configure()
                                              )
                                             );
         }
-        
+
         log_info("%zu additional (non-Cherenkov) wavelength generators (spectra) have been configured.",
                  spectrumTable_->size()-1);
     }
@@ -506,10 +506,10 @@ void I3CLSimModule::Configure()
     totalSimulatedEnergyForFlush_ = 0.;
     totalSimulatedEnergy_ = 0;
     totalNumParticlesForFlush_ = 0;
-    
+
     if (parameterizationList_.size() > 0) {
         log_info("Using the following parameterizations:");
-        
+
         BOOST_FOREACH(const I3CLSimLightSourceParameterization &parameterization, parameterizationList_)
         {
             I3Particle tmpParticle;
@@ -523,11 +523,11 @@ void I3CLSimModule::Configure()
                      tmpParticle.GetTypeString().c_str(),
                      parameterization.fromEnergy/I3Units::GeV,
                      parameterization.toEnergy/I3Units::GeV);
-            
+
         }
-        
+
     }
-    
+
 }
 
 
@@ -539,7 +539,7 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
 {
     // do some setup while the main thread waits..
     numBunchesSentToOpenCL_.assign(openCLStepsToPhotonsConverters_.size(), 0);
-    
+
     // notify the main thread that everything is set up
     {
         boost::unique_lock<boost::mutex> guard(threadStarted_mutex_);
@@ -548,16 +548,16 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
     threadStarted_cond_.notify_all();
 
     // the main thread is running again
-    
+
     uint32_t counter=0;
     std::size_t lastDeviceIndexToUse=0;
-    
+
     for (;;)
     {
         // retrieve steps from Geant4
         I3CLSimStepSeriesConstPtr steps;
         bool barrierWasJustReset=false;
-        
+
         {
             boost::this_thread::restore_interruption ri(di);
             try {
@@ -566,8 +566,8 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
                 return false;
             }
         }
-        
-        if (!steps) 
+
+        if (!steps)
         {
             log_debug("Got NULL I3CLSimStepSeriesConstPtr from Geant4.");
         }
@@ -580,7 +580,7 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
             log_debug("Got %zu steps from Geant4, sending them to OpenCL",
                      steps->size());
 
-            
+
             // collect statistics if requested
             if (collectStatistics_)
             {
@@ -590,10 +590,10 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
 
                     // skip dummy steps
                     if ((step.weight<=0.) || (step.numPhotons<=0)) continue;
-                    
+
                     // sanity check
                     if (particleID==0) log_fatal("particleID==0, this should not happen (this index is never used)");
-                    
+
                     (photonNumGeneratedPerParticle_.insert(std::make_pair(particleID, 0)).first->second)+=step.numPhotons;
                     (photonWeightSumGeneratedPerParticle_.insert(std::make_pair(particleID, 0.)).first->second)+=static_cast<double>(step.numPhotons)*step.weight;
                 }
@@ -605,7 +605,7 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
             {
                 fillLevels[i]=openCLStepsToPhotonsConverters_[i]->QueueSize();
             }
-            
+
             std::size_t minimumFillLevel = fillLevels[0];
             for (std::size_t i=1;i<openCLStepsToPhotonsConverters_.size();++i)
             {
@@ -614,14 +614,14 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
                     minimumFillLevel=fillLevels[i];
                 }
             }
-            
+
             std::size_t deviceIndexToUse=lastDeviceIndexToUse;
             do {
                 ++deviceIndexToUse;
                 if (deviceIndexToUse>=fillLevels.size()) deviceIndexToUse=0;
             } while (fillLevels[deviceIndexToUse] != minimumFillLevel);
             lastDeviceIndexToUse=deviceIndexToUse;
-            
+
             // send to OpenCL
             {
                 boost::this_thread::restore_interruption ri(di);
@@ -631,17 +631,17 @@ bool I3CLSimModule::Thread(boost::this_thread::disable_interruption &di)
                     return false;
                 }
             }
-            
+
             ++numBunchesSentToOpenCL_[deviceIndexToUse];
             ++counter; // this may overflow, but it is not used for anything important/unique
         }
-        
+
         if (barrierWasJustReset) {
             log_trace("Geant4 barrier has been reached. Exiting thread.");
             break;
         }
     }
-    
+
     return true;
 }
 
@@ -649,7 +649,7 @@ void I3CLSimModule::Thread_starter()
 {
     // do not interrupt this thread by default
     boost::this_thread::disable_interruption di;
-    
+
     try {
         threadFinishedOK_ = Thread(di);
         if (!threadFinishedOK_)
@@ -658,10 +658,10 @@ void I3CLSimModule::Thread_starter()
         }
     } catch(...) { // any exceptions?
         log_warn("thread died unexpectedly..");
-        
+
         throw;
     }
-    
+
     log_debug("thread exited.");
 }
 
@@ -669,22 +669,22 @@ void I3CLSimModule::Thread_starter()
 void I3CLSimModule::DigestGeometry(I3FramePtr frame)
 {
     log_trace("%s", __PRETTY_FUNCTION__);
-    
+
     if (geometryIsConfigured_)
         log_fatal("This module currently supports only a single geometry per input file.");
-    
+
     //log_debug("Retrieving geometry..");
     //I3GeometryConstPtr geometryObject = frame->Get<I3GeometryConstPtr>();
     //if (!geometryObject) log_fatal("Geometry frame does not have an I3Geometry object!");
-    
+
     log_debug("Converting geometry..");
-    
+
     std::set<int> ignoreStringsSet(ignoreStrings_.begin(), ignoreStrings_.end());
     std::set<unsigned int> ignoreDomIDsSet(ignoreDomIDs_.begin(), ignoreDomIDs_.end());
     std::set<std::string> ignoreSubdetectorsSet(ignoreSubdetectors_.begin(), ignoreSubdetectors_.end());
-    
-    if (ignoreNonIceCubeOMNumbers_) 
-    {    
+
+    if (ignoreNonIceCubeOMNumbers_)
+    {
         geometry_ = I3CLSimSimpleGeometryFromI3GeometryPtr
         (
          new I3CLSimSimpleGeometryFromI3Geometry(DOMRadius_,
@@ -719,14 +719,14 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                  useHardcodedDeepCoreSubdetector_)
         );
     }
-    
+
     log_info("Initializing CLSim..");
     // initialize OpenCL converters
     openCLStepsToPhotonsConverters_.clear();
-    
+
     uint64_t granularity=0;
     uint64_t maxBunchSize=0;
-    
+
     BOOST_FOREACH(const I3CLSimOpenCLDevice &openCLdevice, openCLDeviceList_)
     {
 #ifdef I3_LOG4CPLUS_LOGGING
@@ -736,10 +736,10 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
         log_info(" -> platform: %s device: %s",
                  openCLdevice.GetPlatformName().c_str(), openCLdevice.GetDeviceName().c_str());
 #endif
-        
-        
-        
-        
+
+
+
+
         I3CLSimStepToPhotonConverterOpenCLPtr openCLStepsToPhotonsConverter =
         I3CLSimModuleHelper::initializeOpenCL((I3CLSimModuleHelper::OpenCLInitOptions) {
                                                     openCLdevice,
@@ -760,21 +760,21 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                 } );
         if (!openCLStepsToPhotonsConverter)
             log_fatal("Could not initialize OpenCL!");
-        
+
         if (openCLStepsToPhotonsConverter->GetWorkgroupSize()==0)
             log_fatal("Internal error: converter.GetWorkgroupSize()==0.");
         if (openCLStepsToPhotonsConverter->GetMaxNumWorkitems()==0)
             log_fatal("Internal error: converter.GetMaxNumWorkitems()==0.");
-        
+
         openCLStepsToPhotonsConverters_.push_back(openCLStepsToPhotonsConverter);
-        
+
         if (granularity==0) {
             granularity = openCLStepsToPhotonsConverter->GetWorkgroupSize();
         } else {
             // least common multiple
             const uint64_t currentGranularity = openCLStepsToPhotonsConverter->GetWorkgroupSize();
             const uint64_t newGranularity = boost::math::lcm(currentGranularity, granularity);
-            
+
             if (newGranularity != granularity) {
 #ifdef I3_LOG4CPLUS_LOGGING
                 LOG_IMPL(INFO, "new OpenCL device work group size is not compatible (%" PRIu64 "), changing granularity from %" PRIu64 " to %" PRIu64,
@@ -784,7 +784,7 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                          currentGranularity, granularity, newGranularity);
 #endif
             }
-            
+
             granularity=newGranularity;
         }
 
@@ -808,13 +808,13 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
 
             if (newMaxBunchSizeWithGranularity==0)
                 log_fatal("maximum bunch sizes are incompatible with kernel work group sizes.");
-            
+
             maxBunchSize = newMaxBunchSizeWithGranularity;
         }
-        
+
     }
-    
-    
+
+
     log_info("Initializing Geant4..");
     // initialize Geant4 (will set bunch sizes according to the OpenCL settings)
     geant4ParticleToStepsConverter_ =
@@ -829,7 +829,7 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                           geant4MaxNumPhotonsPerStep_,
                                           false); // the multiprocessor version is not yet safe to use
 
-    
+
     log_info("Initialization complete.");
     geometryIsConfigured_=true;
 }
@@ -857,7 +857,7 @@ void I3CLSimModule::AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
         log_fatal("Internal error: cache sizes differ. (1)");
     if (photonsForFrameList_.size() != currentPhotonIdForFrame_.size())
         log_fatal("Internal error: cache sizes differ. (2)");
-    
+
     if (photonHistories) {
         if (photonHistories->size() != photons.size())
         {
@@ -865,12 +865,12 @@ void I3CLSimModule::AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
                       photonHistories->size(), photons.size());
         }
     }
-    
-    
+
+
     for (std::size_t i=0;i<photons.size();++i)
     {
         const I3CLSimPhoton &photon = photons[i];
-        
+
         // find identifier in particle cache
         std::map<uint32_t, particleCacheEntry>::const_iterator it = particleCache_.find(photon.identifier);
         if (it == particleCache_.end())
@@ -880,27 +880,27 @@ void I3CLSimModule::AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
 
         if (cacheEntry.frameListEntry >= photonsForFrameList_.size())
             log_fatal("Internal error: particle cache entry uses invalid frame cache position");
-        
+
         //I3FramePtr &frame = frameList_[cacheEntry.frameListEntry];
         I3PhotonSeriesMap &outputPhotonMap = *(photonsForFrameList_[cacheEntry.frameListEntry]);
 
         // get the current photon id
         int32_t &currentPhotonId = currentPhotonIdForFrame_[cacheEntry.frameListEntry];
-        
+
         // generate the OMKey
         const ModuleKey key = ModuleKeyFromOpenCLSimIDs(photon.stringID, photon.omID);
-        
+
         // get the OMKey mask
         const std::set<ModuleKey> &keyMask = maskedOMKeys_[cacheEntry.frameListEntry];
 
         if (keyMask.count(key) > 0) continue; // ignore masked DOMs
-        
+
         // this either inserts a new vector or retrieves an existing one
         I3PhotonSeries &outputPhotonSeries = outputPhotonMap.insert(std::make_pair(key, I3PhotonSeries())).first->second;
-        
+
         // append a new I3Photon to the list
         outputPhotonSeries.push_back(I3Photon());
-        
+
         // get a reference to the new photon
         I3Photon &outputPhoton = outputPhotonSeries.back();
 
@@ -932,14 +932,14 @@ void I3CLSimModule::AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
         }
 
         outputPhoton.SetDistanceInAbsorptionLengths(photon.GetDistInAbsLens());
-        
+
         if (photonHistories) {
             const I3CLSimPhotonHistory &photonHistory = (*photonHistories)[i];
-            
+
             if (photonHistory.size() > photon.GetNumScatters())
                 log_fatal("Logic error: photonHistory.size() [==%zu] > photon.GetNumScatters() [==%zu]",
                           photonHistory.size(), static_cast<std::size_t>(photon.GetNumScatters()));
-            
+
             for (std::size_t j=0;j<photonHistory.size();++j)
             {
                 outputPhoton.AppendToIntermediatePositionList(I3Position( photonHistory.GetX(j), photonHistory.GetY(j), photonHistory.GetZ(j) ),
@@ -947,30 +947,30 @@ void I3CLSimModule::AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
                                                              );
             }
         }
-        
+
         if (collectStatistics_)
         {
             // collect statistics
             (photonNumAtOMPerParticle.insert(std::make_pair(photon.identifier, 0)).first->second)++;
             (photonWeightSumAtOMPerParticle.insert(std::make_pair(photon.identifier, 0.)).first->second)+=photon.GetWeight();
         }
-        
+
         currentPhotonId++;
     }
-    
+
 }
 
 std::size_t I3CLSimModule::FlushFrameCache()
 {
     log_debug("Flushing frame cache..");
-    
+
     // start the connector thread if necessary
     if (!threadObj_) {
         log_trace("No thread found running during FlushFrameCache(), starting one.");
         StartThread();
     }
 
-    // tell the Geant4 converter to not accept any new data until it is finished 
+    // tell the Geant4 converter to not accept any new data until it is finished
     // with its current work.
     geant4ParticleToStepsConverter_->EnqueueBarrier();
 
@@ -980,7 +980,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
     // data from the infinite OpenCL queue.
     if (!threadObj_->joinable())
         log_fatal("Thread should be joinable at this point!");
-        
+
     {
         // allow other threads to access python
         ScopedGILRelease scopedGIL;
@@ -1015,7 +1015,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
 
     bool startThreadLater = false;
 
-    // at this point, if we have frames in the secondary cache, 
+    // at this point, if we have frames in the secondary cache,
     // immediately push them to Geant4 so it can start working on them
     for (;;)
     {
@@ -1045,11 +1045,11 @@ std::size_t I3CLSimModule::FlushFrameCache()
             res_list.push_back(res);
         }
     }
-    
+
     log_debug("results fetched from OpenCL.");
 
     // new frames were already sent to Geant4, we can re-start the thread right now
-    // since we are done with fetching results from OpenCL    
+    // since we are done with fetching results from OpenCL
     if (startThreadLater) {
         // start the connector thread if necessary
         if (!threadObj_) {
@@ -1061,7 +1061,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
     log_debug("Adding photons to frame.");
     std::size_t totalNumOutPhotons=0;
 
-    while (!res_list.empty()) 
+    while (!res_list.empty())
     {
         const I3CLSimStepToPhotonConverter::ConversionResult_t &res =
             res_list.front();
@@ -1077,7 +1077,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
                            photonNumAtOMPerParticle,
                            photonWeightSumAtOMPerParticle
                            );
-        
+
         totalNumOutPhotons += res.photons->size();
 
         res_list.pop_front();
@@ -1097,7 +1097,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
             }
         }
 
-        
+
         // generated photons (count)
         for(std::map<uint32_t, uint64_t>::const_iterator it=photonNumGeneratedPerParticle_old.begin();
             it!=photonNumGeneratedPerParticle_old.end();++it)
@@ -1108,10 +1108,10 @@ std::size_t I3CLSimModule::FlushFrameCache()
                 log_error("Internal error: unknown particle id from Geant4: %" PRIu32,
                           it->first);
             const particleCacheEntry &cacheEntry = it_cache->second;
-            
+
             if (cacheEntry.frameListEntry >= eventStatisticsForFrame.size())
                 log_fatal("Internal error: particle cache entry uses invalid frame cache position");
-            
+
             eventStatisticsForFrame[cacheEntry.frameListEntry]->AddNumPhotonsGeneratedWithWeights(it->second, 0.,
                                                                                                   cacheEntry.particleMajorID,
                                                                                                   cacheEntry.particleMinorID);
@@ -1127,7 +1127,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
                 log_fatal("Internal error: unknown particle id from Geant4: %" PRIu32,
                           it->first);
             const particleCacheEntry &cacheEntry = it_cache->second;
-            
+
             if (cacheEntry.frameListEntry >= eventStatisticsForFrame.size())
                 log_fatal("Internal error: particle cache entry uses invalid frame cache position");
 
@@ -1136,7 +1136,7 @@ std::size_t I3CLSimModule::FlushFrameCache()
                                                                                                   cacheEntry.particleMinorID);
         }
 
-        
+
         // photons @ DOMs(count)
         for(std::map<uint32_t, uint64_t>::const_iterator it=photonNumAtOMPerParticle.begin();
             it!=photonNumAtOMPerParticle.end();++it)
@@ -1147,15 +1147,15 @@ std::size_t I3CLSimModule::FlushFrameCache()
                 log_fatal("Internal error: unknown particle id from Geant4: %" PRIu32,
                           it->first);
             const particleCacheEntry &cacheEntry = it_cache->second;
-            
+
             if (cacheEntry.frameListEntry >= eventStatisticsForFrame.size())
                 log_fatal("Internal error: particle cache entry uses invalid frame cache position");
-            
+
             eventStatisticsForFrame[cacheEntry.frameListEntry]->AddNumPhotonsAtDOMsWithWeights(it->second, 0.,
                                                                                                cacheEntry.particleMajorID,
                                                                                                cacheEntry.particleMinorID);
         }
-        
+
         // photons @ DOMs (weight sum)
         for(std::map<uint32_t, double>::const_iterator it=photonWeightSumAtOMPerParticle.begin();
             it!=photonWeightSumAtOMPerParticle.end();++it)
@@ -1166,16 +1166,16 @@ std::size_t I3CLSimModule::FlushFrameCache()
                 log_fatal("Internal error: unknown particle id from Geant4: %" PRIu32,
                           it->first);
             const particleCacheEntry &cacheEntry = it_cache->second;
-            
+
             if (cacheEntry.frameListEntry >= eventStatisticsForFrame.size())
                 log_fatal("Internal error: particle cache entry uses invalid frame cache position");
-            
+
             eventStatisticsForFrame[cacheEntry.frameListEntry]->AddNumPhotonsAtDOMsWithWeights(0, it->second,
                                                                                                cacheEntry.particleMajorID,
                                                                                                cacheEntry.particleMinorID);
         }
 
-        
+
         // store statistics to frame
         for (std::size_t i=0;i<frameList_old.size();++i)
         {
@@ -1183,11 +1183,11 @@ std::size_t I3CLSimModule::FlushFrameCache()
                 frameList_old[i]->Put(statisticsName_, eventStatisticsForFrame[i]);
             }
         }
-    }    
-    
-    
+    }
+
+
     log_debug("finished.");
-    
+
     std::size_t framesPushed=0;
     for (std::size_t identifier=0;identifier<frameList_old.size();++identifier)
     {
@@ -1195,12 +1195,12 @@ std::size_t I3CLSimModule::FlushFrameCache()
             log_debug("putting photons into frame %zu...", identifier);
             frameList_old[identifier]->Put(photonSeriesMapName_, photonsForFrameList_old[identifier]);
         }
-        
+
         log_debug("pushing frame number %zu...", identifier);
         PushFrame(frameList_old[identifier]);
         ++framesPushed;
     }
-    
+
     return framesPushed;
 }
 
@@ -1215,32 +1215,32 @@ namespace {
         }
         return false;
     }
-    
+
     // version for point sources
     double DistToClosestDOM(const I3CLSimSimpleGeometry &geometry, const I3Position &pos)
     {
         double closestDist=NAN;
-        
+
         const std::vector<double> xVect = geometry.GetPosXVector();
         const std::vector<double> yVect = geometry.GetPosYVector();
         const std::vector<double> zVect = geometry.GetPosZVector();
 
-        
+
         for (std::size_t i=0;i<geometry.size();++i)
         {
             const double dx = xVect[i]-pos.GetX();
             const double dy = yVect[i]-pos.GetY();
             const double dz = zVect[i]-pos.GetZ();
-            
+
             const double thisDist = std::sqrt(dx*dx + dy*dy + dz*dz);
-            
+
             if (std::isnan(closestDist)) {
                 closestDist=thisDist;
             } else {
                 if (thisDist<closestDist) closestDist=thisDist;
             }
         }
-        
+
         if (std::isnan(closestDist)) return 0.;
         return closestDist;
     }
@@ -1249,47 +1249,47 @@ namespace {
     double DistToClosestDOM(const I3CLSimSimpleGeometry &geometry, const I3Position &pos, const I3Direction &dir, double length, bool nostart=false, bool nostop=false)
     {
         double closestDist=NAN;
-        
+
         const std::vector<double> xVect = geometry.GetPosXVector();
         const std::vector<double> yVect = geometry.GetPosYVector();
         const std::vector<double> zVect = geometry.GetPosZVector();
-        
-        
+
+
         for (std::size_t i=0;i<geometry.size();++i)
         {
             const double Ax = xVect[i]-pos.GetX();
             const double Ay = yVect[i]-pos.GetY();
             const double Az = zVect[i]-pos.GetZ();
-            
+
             double d_along = Ax*dir.GetX() + Ay*dir.GetY() + Az*dir.GetZ();
-            
+
             if (!nostart) {
                 if (d_along < 0.) d_along=0.;         // there is no track before its start
             }
-            
+
             if (!nostop) {
                 if (d_along > length) d_along=length; // there is no track after its end
             }
-            
+
             const double p_along_x = pos.GetX() + dir.GetX()*d_along;
             const double p_along_y = pos.GetY() + dir.GetY()*d_along;
             const double p_along_z = pos.GetZ() + dir.GetZ()*d_along;
 
             // distance from point to DOM
-            
+
             const double dx = xVect[i]-p_along_x;
             const double dy = yVect[i]-p_along_y;
             const double dz = zVect[i]-p_along_z;
-            
+
             const double thisDist = std::sqrt(dx*dx + dy*dy + dz*dz);
-            
+
             if (std::isnan(closestDist)) {
                 closestDist=thisDist;
             } else {
                 if (thisDist<closestDist) closestDist=thisDist;
             }
         }
-        
+
         if (std::isnan(closestDist)) return 0.;
         return closestDist;
     }
@@ -1305,7 +1305,7 @@ void I3CLSimModule::Process()
 {
     I3FramePtr frame = PopFrame();
     if (!frame) return;
-    
+
     if (frame->GetStop() == I3Frame::Geometry)
     {
         // special handling for Geometry frames
@@ -1317,7 +1317,7 @@ void I3CLSimModule::Process()
         PushFrame(frame);
         return;
     }
-    
+
     // if the cache is empty and the frame stop is not Physics/DAQ, we can immediately push it
     // (and not add it to the cache)
     if ((frameList_.empty()) && (workOnTheseStops_set_.count(frame->GetStop()) == 0) )
@@ -1325,7 +1325,7 @@ void I3CLSimModule::Process()
         PushFrame(frame);
         return;
     }
-    
+
     if ((totalEnergyToProcess_ > 0) && (!std::isnan(totalEnergyToProcess_)))
     {
         double totalLightEnergyInFrame = GetLightSourceEnergy(frame);
@@ -1341,7 +1341,7 @@ void I3CLSimModule::Process()
         }
         log_debug("Energy in Frame = %f GeV", totalLightEnergyInFrame);
     }
-    
+
     // it's either Physics or something else..
     if (frameListPhysicsFrameCounter_ < maxNumParallelEvents_)
     {
@@ -1351,23 +1351,23 @@ void I3CLSimModule::Process()
         DigestOtherFrame(frame);
         frameListPhysicsFrameCounter_++;
     }
-    else if (frameListPhysicsFrameCounter_ < maxNumParallelEvents_ + maxNumParallelEventsSecondFlush_) // maxNumParallelEvents_*2) 
+    else if (frameListPhysicsFrameCounter_ < maxNumParallelEvents_ + maxNumParallelEventsSecondFlush_) // maxNumParallelEvents_*2)
     {
-        // keep a second buffer so we have it available once 
+        // keep a second buffer so we have it available once
         // the first buffer has finished processing
         frameList2_.push_back(frame);
         frameListPhysicsFrameCounter_++;
     }
 
 
-    if (frameListPhysicsFrameCounter_ >= maxNumParallelEvents_ + maxNumParallelEventsSecondFlush_) //maxNumParallelEvents_*2) 
+    if (frameListPhysicsFrameCounter_ >= maxNumParallelEvents_ + maxNumParallelEventsSecondFlush_) //maxNumParallelEvents_*2)
     {
         log_debug("Flushing results for a total energy of %f GeV for %" PRIu64 " particles",
                  totalSimulatedEnergyForFlush_/I3Units::GeV, totalNumParticlesForFlush_);
-             
+
         totalSimulatedEnergyForFlush_= 0.;
         totalNumParticlesForFlush_=0;
-    
+
         // this will finish processing the first buffer and
         // push all its frames
         const std::size_t framesPushed =
@@ -1386,8 +1386,8 @@ void I3CLSimModule::Process()
             maxNumParallelEventsSecondFlush_ = 1;
         }
 
-            
-    
+
+
         log_debug("============== CACHE FLUSHED ================");
     }
 }
@@ -1397,35 +1397,35 @@ double I3CLSimModule::GetLightSourceEnergy(I3FramePtr frame)
     I3MCTreeConstPtr MCTree;
     I3CLSimFlasherPulseSeriesConstPtr flasherPulses;
     double totalLightSourceEnergy = 0;
-    
+
     if (MCTreeName_ != "")
         MCTree = frame->Get<I3MCTreeConstPtr>(MCTreeName_);
     if (flasherPulseSeriesName_ != "")
         flasherPulses = frame->Get<I3CLSimFlasherPulseSeriesConstPtr>(flasherPulseSeriesName_);
-    if (!MCTree) 
-    {   
+    if (!MCTree)
+    {
         log_warn("Frame will not be processed cause MCTree not present.");
         return totalLightSourceEnergy;
     }
-    if (flasherPulses) 
+    if (flasherPulses)
         log_fatal("Flashers! Cannot calculate how much energy is deposited in detector. "
                   "Set MaxNumParallelEvents > 0 and totalEnergyToProcess_ = 0");
-    
+
     std::deque<I3CLSimLightSource> lightSources;
     std::deque<double> timeOffsets;
     if (MCTree) ConvertMCTreeToLightSources(*MCTree, lightSources, timeOffsets);
-    
+
     for (std::size_t i=0;i<lightSources.size();++i)
     {
         const I3CLSimLightSource &lightSource = lightSources[i];
         if (lightSource.GetType() == I3CLSimLightSource::Particle)
         {
-            
+
             const I3Particle &particle = lightSource.GetParticle();
             if (particle.GetType() == I3Particle::MuMinus || particle.GetType() == I3Particle::MuPlus)
             {
                 // This is the upper estimate of the muon energy loss due to ionization
-                // We use the upper estimate to be conservative about how much 
+                // We use the upper estimate to be conservative about how much
                 // energy ends up in the detetor.
                 // It is taken from I3MuonSlicer Line 306. It originally comes from PPC.
                 totalLightSourceEnergy += (0.21+8.8e-3*log(particle.GetEnergy()/I3Units::GeV)/log(10.))*(I3Units::GeV/I3Units::m) * particle.GetLength();
@@ -1436,26 +1436,26 @@ double I3CLSimModule::GetLightSourceEnergy(I3FramePtr frame)
             }
             // log_info_stream(particle);
         }
-        
+
     }
-    
+
     return totalLightSourceEnergy;
 }
 
 bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
 {
     log_trace("%s", __PRETTY_FUNCTION__);
-    
+
     frameList_.push_back(frame);
     photonsForFrameList_.push_back(I3PhotonSeriesMapPtr(new I3PhotonSeriesMap()));
     currentPhotonIdForFrame_.push_back(0);
     std::size_t currentFrameListIndex = frameList_.size()-1;
     maskedOMKeys_.push_back(std::set<ModuleKey>()); // insert an empty ModuleKey mask
-    
+
     // check if we got a geometry before starting to work
     if (!geometryIsConfigured_)
         log_fatal("Received Physics frame before Geometry frame");
-    
+
     if (startThread)
     {
         // start the connector thread if necessary
@@ -1464,29 +1464,29 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
             StartThread();
         }
     }
-    
+
     // a few cases where we don't work with the frame:
-    
+
     //// not our designated Stop
     if (workOnTheseStops_set_.count(frame->GetStop()) == 0) {
         // nothing to do for this frame, it is chached, however
         frameIsBeingWorkedOn_.push_back(false); // do not touch this frame, just push it later on
         return false;
     }
-    
+
     // should we process it? (conditional module)
     const bool shouldDoProcess_fromConditionalModule =
     I3ConditionalModule::ShouldDoProcess(frame);
-    
+
     if (!shouldDoProcess_fromConditionalModule) {
         frameIsBeingWorkedOn_.push_back(false); // do not touch this frame, just push it later on
         return false;
     }
-    
+
     // does it include some work?
     I3MCTreeConstPtr MCTree;
     I3CLSimFlasherPulseSeriesConstPtr flasherPulses;
-    
+
     if (MCTreeName_ != "")
         MCTree = frame->Get<I3MCTreeConstPtr>(MCTreeName_);
     if (flasherPulseSeriesName_ != "")
@@ -1502,37 +1502,37 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
     I3VectorModuleKeyConstPtr moduleKeyMask;
     if (omKeyMaskName_ != "") {
         omKeyMask = frame->Get<I3VectorOMKeyConstPtr>(omKeyMaskName_);
-        
+
         if (!omKeyMask) {
             moduleKeyMask = frame->Get<I3VectorModuleKeyConstPtr>(omKeyMaskName_);
         }
     }
 
-    
+
     // work with this frame!
     frameIsBeingWorkedOn_.push_back(true); // this frame will receive results (->Put() will be called later)
-    
+
     std::deque<I3CLSimLightSource> lightSources;
     std::deque<double> timeOffsets;
     if (MCTree) ConvertMCTreeToLightSources(*MCTree, lightSources, timeOffsets);
     if (flasherPulses) ConvertFlasherPulsesToLightSources(*flasherPulses, lightSources, timeOffsets);
-    
+
     // support both vectors of OMKeys and vectors of ModuleKeys
-    
+
     if (omKeyMask) {
         // assign the current OMKey mask if there is one
         BOOST_FOREACH(const OMKey &key, *omKeyMask) {
             maskedOMKeys_.back().insert(ModuleKey(key.GetString(), key.GetOM()));
         }
     }
-    
+
     if (moduleKeyMask) {
         // assign the current ModuleKey mask if there is one
         BOOST_FOREACH(const ModuleKey &key, *moduleKeyMask) {
             maskedOMKeys_.back().insert(key);
         }
     }
-   
+
     for (std::size_t i=0;i<lightSources.size();++i)
     {
         const I3CLSimLightSource &lightSource = lightSources[i];
@@ -1541,19 +1541,19 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
         if (lightSource.GetType() == I3CLSimLightSource::Particle)
         {
             const I3Particle &particle = lightSource.GetParticle();
-            
+
             totalSimulatedEnergyForFlush_ += particle.GetEnergy();
             totalNumParticlesForFlush_++;
         }
-        
+
         geant4ParticleToStepsConverter_->EnqueueLightSource(lightSource, currentParticleCacheIndex_);
 
         if (particleCache_.find(currentParticleCacheIndex_) != particleCache_.end())
             log_fatal("Internal error. Particle cache index already used.");
-        
-        particleCacheEntry &cacheEntry = 
+
+        particleCacheEntry &cacheEntry =
         particleCache_.insert(std::make_pair(currentParticleCacheIndex_, particleCacheEntry())).first->second;
-        
+
         cacheEntry.frameListEntry = currentFrameListIndex;
         cacheEntry.timeShift = timeOffset;
         if (lightSource.GetType() == I3CLSimLightSource::Particle) {
@@ -1563,13 +1563,13 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
             cacheEntry.particleMajorID = 0; // flashers, etc. do get ID 0,0
             cacheEntry.particleMinorID = 0;
         }
-        
+
         // make a new index. This will eventually overflow,
         // but at that time, index 0 should be unused again.
         ++currentParticleCacheIndex_;
         if (currentParticleCacheIndex_==0) ++currentParticleCacheIndex_; // never use index==0
     }
-    
+
     lightSources.clear();
 
     return true;
@@ -1578,7 +1578,7 @@ bool I3CLSimModule::DigestOtherFrame(I3FramePtr frame, bool startThread)
 void I3CLSimModule::Finish()
 {
     log_trace("%s", __PRETTY_FUNCTION__);
-    
+
     log_debug("Flushing results for a total energy of %fGeV for %" PRIu64 " particles",
              totalSimulatedEnergyForFlush_/I3Units::GeV, totalNumParticlesForFlush_);
 
@@ -1614,26 +1614,26 @@ void I3CLSimModule::Finish()
     I3SummaryServicePtr summary = context_.Get<I3SummaryServicePtr>();
     if (summary) {
         const std::string prefix = "I3CLSimModule_" + GetName() + "_";
-        
+
         for (std::size_t i=0; i<openCLStepsToPhotonsConverters_.size(); ++i)
         {
             const std::string postfix = (openCLStepsToPhotonsConverters_.size()==1)?"":"_"+boost::lexical_cast<std::string>(i);
-            
+
             const double totalNumPhotonsGenerated = openCLStepsToPhotonsConverters_[i]->GetTotalNumPhotonsGenerated();
             const double totalDeviceTime = static_cast<double>(openCLStepsToPhotonsConverters_[i]->GetTotalDeviceTime())*I3Units::ns;
             const double totalHostTime = static_cast<double>(openCLStepsToPhotonsConverters_[i]->GetTotalHostTime())*I3Units::ns;
-            
+
             (*summary)[prefix+"TotalDeviceTime"           +postfix] = totalDeviceTime;
             (*summary)[prefix+"TotalHostTime"             +postfix] = totalHostTime;
             (*summary)[prefix+"NumKernelCalls"            +postfix] = openCLStepsToPhotonsConverters_[i]->GetNumKernelCalls();
             (*summary)[prefix+"TotalNumPhotonsGenerated"  +postfix] = totalNumPhotonsGenerated;
             (*summary)[prefix+"TotalNumPhotonsAtDOMs"     +postfix] = openCLStepsToPhotonsConverters_[i]->GetTotalNumPhotonsAtDOMs();
-            
+
             (*summary)[prefix+"AverageDeviceTimePerPhoton"+postfix] = totalDeviceTime/totalNumPhotonsGenerated;
             (*summary)[prefix+"AverageHostTimePerPhoton"  +postfix] = totalHostTime/totalNumPhotonsGenerated;
             (*summary)[prefix+"DeviceUtilization"         +postfix] = totalDeviceTime/totalHostTime;
         }
-        
+
     }
 
 }
@@ -1654,11 +1654,11 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
 
         // In-ice particles only
         if (particle_ref.GetLocationType() != I3Particle::InIce) continue;
-        
+
         // ignore particles with shape "Dark"
         if (particle_ref.GetShape() == I3Particle::Dark) continue;
 
-        // skip primaries that are clearly outside the ice 
+        // skip primaries that are clearly outside the ice
         // (those are probably cosmic rays that get marked as "InIce"
         // by ucr-icetray)
         if (particle_ref.GetShape() == I3Particle::Primary) {
@@ -1669,7 +1669,7 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
         const bool isMuon = (particle_ref.GetType() == I3Particle::MuMinus) || (particle_ref.GetType() == I3Particle::MuPlus);
         const bool isNeutrino = particle_ref.IsNeutrino();
         const bool isTrack = particle_ref.IsTrack();
-        
+
 
         // mmc-icetray currently stores continuous loss entries as "unknown"
 #ifdef I3PARTICLE_SUPPORTS_PDG_ENCODINGS
@@ -1683,23 +1683,23 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
 #else
         const bool isContinuousLoss = (particle_ref.GetType() == I3Particle::unknown);
 #endif
-        
+
         // ignore continuous loss entries
         if (isContinuousLoss) {
             log_debug("ignored a continuous loss I3MCTree entry");
             continue;
         }
-        
+
         // always ignore neutrinos
         if (isNeutrino) continue;
-        
+
         // ignore muons if requested
         if ((ignoreMuons_) && (isMuon)) continue;
-        
-        if (!isTrack) 
+
+        if (!isTrack)
         {
             const double distToClosestDOM = DistToClosestDOM(*geometry_, particle_ref.GetPos());
-            
+
             if (distToClosestDOM >= closestDOMDistanceCutoff_)
             {
                 log_debug("Ignored a non-track that is %fm (>%fm) away from the closest DOM.",
@@ -1707,16 +1707,16 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
                 continue;
             }
         }
-        
+
         // make a copy of the particle, we may need to change its length
         I3Particle particle = particle_ref;
-        
+
         if (isTrack)
         {
             bool nostart = false;
             bool nostop = false;
             double particleLength = particle.GetLength();
-            
+
             if (std::isnan(particleLength)) {
                 // assume infinite track (starting at given position)
                 nostop = true;
@@ -1727,7 +1727,7 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
                 // zero length: starting track
                 nostop = true;
             }
-            
+
             const double distToClosestDOM = DistToClosestDOM(*geometry_, particle.GetPos(), particle.GetDir(), particleLength, nostart, nostop);
             if (distToClosestDOM >= closestDOMDistanceCutoff_)
             {
@@ -1736,7 +1736,7 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
                 continue;
             }
         }
-        
+
         // ignore muons with muons as child particles
         // -> those already ran through MMC(-recc) or
         // were sliced with I3MuonSlicer. Only add their
@@ -1747,16 +1747,16 @@ void I3CLSimModule::ConvertMCTreeToLightSources(const I3MCTree &mcTree,
                 continue;
             }
         }
-        
+
         // simulate the particle around time 0, add the offset later
         const double particleTime = particle.GetTime();
         particle.SetTime(0.);
-        
+
         lightSources.push_back(I3CLSimLightSource(particle));
         timeOffsets.push_back(particleTime);
     }
-    
-    
+
+
 }
 
 

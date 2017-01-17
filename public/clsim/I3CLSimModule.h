@@ -80,17 +80,17 @@ public:
      * Builds an instance of this class
      */
     I3CLSimModule(const I3Context& ctx);
-    
+
     /**
      * Destroys an instance of this class
      */
     virtual ~I3CLSimModule();
-    
+
     /**
      * This module takes a configuration parameter and so it must be configured.
      */
     virtual void Configure();
-    
+
     /**
      * The module needs full control of all streams
      * -> implement Process()!
@@ -101,7 +101,7 @@ public:
      * Warn the user if the module is aborted prematurely
      */
     virtual void Finish();
-    
+
 
     /**
      * Hack to allow buffering. This ShouldDoProcess overrides
@@ -113,18 +113,18 @@ public:
      * This should retain frame ordering.
      */
     virtual bool ShouldDoProcess(I3FramePtr frame);
-    
+
 private:
     /**
      * The module needs to process Physics frames
      */
     bool DigestOtherFrame(I3FramePtr frame, bool startThread=true);
-    
+
     /**
      * The module needs to process Geometry frames
      */
     void DigestGeometry(I3FramePtr frame);
-    
+
     /**
      * Getting energy from light source to make sure to process
      * the right number of frames
@@ -132,14 +132,14 @@ private:
     double GetLightSourceEnergy(I3FramePtr frame);
 
     // parameters
-    
+
     /// Parameter: work on MCTrees found in the stream types ("stops") specified in this list
     std::vector<I3Frame::Stream> workOnTheseStops_;
     std::set<I3Frame::Stream> workOnTheseStops_set_; // will be converted to a set internally
-    
+
     /// Parameter: An instance I3CLSimLightSourceParameterizationSeries specifying the fast simulation parameterizations to be used.
     I3CLSimLightSourceParameterizationSeries parameterizationList_;
-    
+
     /// Parameter: A random number generating service (derived from I3RandomService).
     I3RandomServicePtr randomService_;
 
@@ -147,7 +147,7 @@ private:
     ///            according to a spectrum without dispersion. This does not change
     ///            the total number of photons, only the distribution of wavelengths.
     bool generateCherenkovPhotonsWithoutDispersion_;
-    
+
     /// Parameter: An instance of I3CLSimFunction describing the reciprocal weight a photon gets assigned as a function of its wavelength.
     ///            You can set this to the wavelength depended acceptance of your DOM to pre-scale the number of generated photons.
     I3CLSimFunctionConstPtr wavelengthGenerationBias_;
@@ -162,7 +162,7 @@ private:
     /// Parameter: Maximum number of events that will be processed by the GPU in parallel.
     unsigned int maxNumParallelEvents_;
     unsigned int maxNumParallelEventsSecondFlush_;
-    
+
     /// Parameter: Maximum energy to that will be processed by the GPU in parallel.
     double totalEnergyToProcess_;
 
@@ -190,10 +190,10 @@ private:
 
     /// Parameter: Name of a I3VectorOMKey with masked OMKeys. DOMs in this list will not record I3Photons.
     std::string omKeyMaskName_;
-    
+
     /// Parameter: If set to True, muons will not be propagated.
     bool ignoreMuons_;
-    
+
     /// Parameter: Geant4 physics list name. Examples are "QGSP_BERT_EMV" and "QGSP_BERT".
     std::string geant4PhysicsListName_;
 
@@ -206,7 +206,7 @@ private:
     /// Parameter: Collect statistics in this frame object (e.g. number of photons generated or reaching the DOMs)
     std::string statisticsName_;
     bool collectStatistics_;
-    
+
     /// Parameter: Ignore all OMKeys with these string IDs
     std::vector<int> ignoreStrings_;
 
@@ -234,17 +234,17 @@ private:
     ///   data to the GPU while a kernel is executing on the other buffer.
     ///   This has been observed to yield empty results results on older drivers for the nVidia
     ///   architecture, so it is disabled by default.
-    ///   
+    ///
     ///   Before enabling this for a certain driver/hardware combination, make sure that both correct results
     ///   are returned. Most of the time the second buffer results are always empty, so this error should be
     ///   easy to observe.
     bool enableDoubleBuffering_;
-    
+
     /// Parmeter: Enables double-precision support in the kernel. This slows down calculations and
     ///   requires more memory. The performance hit is minimal on CPUs but up to an order
     ///   of magnitude on GPUs.
     bool doublePrecision_;
-    
+
     /// Parmeter: Configures behaviour for photons that hit a DOM. If this is true (the default)
     ///   photons will be stopped once they hit a DOM. If this is false, they continue to
     ///   propagate.
@@ -275,7 +275,7 @@ private:
     ///  The DOM radius (supplied by the geometry) must also include
     ///  the oversizing factor.
     double pancakeFactor_;
-    
+
     /// Parmeter: Sets the number of scattering step positions that are saved for a photon hitting
     ///   a DOM. The last N photons are saved if there are more scattering points than available entries.
     uint32_t photonHistoryEntries_;
@@ -294,7 +294,7 @@ private:
     I3CLSimModule();
     I3CLSimModule(const I3CLSimModule&);
     I3CLSimModule& operator=(const I3CLSimModule&);
-    
+
     // thread stuff
     void StopThread();
     void StartThread();
@@ -307,7 +307,7 @@ private:
     bool threadFinishedOK_;
     std::vector<uint64_t> numBunchesSentToOpenCL_;
 
-    
+
     // helper functions
     std::size_t FlushFrameCache();
     void ConvertMCTreeToLightSources(const I3MCTree &mcTree,
@@ -317,28 +317,28 @@ private:
                                             std::deque<I3CLSimLightSource> &lightSources,
                                             std::deque<double> &timeOffsets);
 
-    
+
     // statistics will be collected here:
     std::map<uint32_t, uint64_t> photonNumGeneratedPerParticle_;
     std::map<uint32_t, double> photonWeightSumGeneratedPerParticle_;
 
 
 
-    
-    
+
+
     bool geometryIsConfigured_;
     uint32_t currentParticleCacheIndex_;
     double totalSimulatedEnergyForFlush_;
     double totalSimulatedEnergy_;
     uint64_t totalNumParticlesForFlush_;
-    
+
     // this is calculated using wavelengthGenerationBias:
     std::vector<I3CLSimRandomValueConstPtr> wavelengthGenerators_;
 
     I3CLSimSimpleGeometryFromI3GeometryPtr geometry_;
     std::vector<I3CLSimStepToPhotonConverterOpenCLPtr> openCLStepsToPhotonsConverters_;
     I3CLSimLightSourceToStepConverterGeant4Ptr geant4ParticleToStepsConverter_;
-    
+
     // list of all currently held frames, in order
     std::size_t frameListPhysicsFrameCounter_;
     std::vector<I3FramePtr> frameList_;
@@ -347,7 +347,7 @@ private:
     std::vector<int32_t> currentPhotonIdForFrame_;
     std::vector<bool> frameIsBeingWorkedOn_;
     std::vector<std::set<ModuleKey> > maskedOMKeys_;
-    
+
     struct particleCacheEntry
     {
         std::size_t frameListEntry; // pointer to the frame list by entry number
@@ -355,11 +355,11 @@ private:
         int particleMinorID;
         double timeShift; // optional time that needs to be added to the final output photon
     };
-    
+
     // list of all particles (with pointrs to their frames)
     // currently being simulated
     std::map<uint32_t, particleCacheEntry> particleCache_;
-    
+
     static void AddPhotonsToFrames(const I3CLSimPhotonSeries &photons,
                                    I3CLSimPhotonHistorySeriesConstPtr photonHistories,
                                    const std::vector<I3PhotonSeriesMapPtr> &photonsForFrameList_,
