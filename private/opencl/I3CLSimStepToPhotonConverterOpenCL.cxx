@@ -86,6 +86,7 @@ doublePrecision_(false),
 stopDetectedPhotons_(false),
 saveAllPhotons_(false),
 saveAllPhotonsPrescale_(0.001), // only save .1% of all photons when in "AllPhotons" mode
+maxNumOutputPhotonsCorrectionFactor_(10000.),
 fixedNumberOfAbsorptionLengths_(NAN),
 pancakeFactor_(1.),
 photonHistoryEntries_(0),
@@ -240,11 +241,15 @@ void I3CLSimStepToPhotonConverterOpenCL::Initialize()
         maxNumOutputPhotons_ = static_cast<uint32_t>(std::min(maxNumWorkitems_*10, static_cast<std::size_t>(std::numeric_limits<uint32_t>::max())));
         if (maxNumOutputPhotons_ < 1000) maxNumOutputPhotons_=1000; // use a sane minimum output buffer size
     } else {
-        // we need a lot more space for photon storage in case all photons are to be saved
-        std::size_t sizeIncreaseFactor = 10000.*saveAllPhotonsPrescale_;
+        // we need a lot more space for photon storage in case all photons are to be saved.
+        // Use 10000 as default memory allocation factor, but allow to specify a custom factor as a
+        // method to work around segmentation faults.
+        std::size_t sizeIncreaseFactor = maxNumOutputPhotonsCorrectionFactor_*saveAllPhotonsPrescale_;
         if (sizeIncreaseFactor < 1) sizeIncreaseFactor=1;
 
         maxNumOutputPhotons_ = static_cast<uint32_t>(std::min(maxNumWorkitems_*sizeIncreaseFactor, static_cast<std::size_t>(std::numeric_limits<uint32_t>::max())));
+
+        log_debug("maxNumOutputPhotons_: %u", maxNumOutputPhotons_);
     }
 
     // set up rng
@@ -1388,6 +1393,20 @@ void I3CLSimStepToPhotonConverterOpenCL::SetSaveAllPhotonsPrescale(double value)
 double I3CLSimStepToPhotonConverterOpenCL::GetSaveAllPhotonsPrescale() const
 {
     return saveAllPhotonsPrescale_;
+}
+
+
+void I3CLSimStepToPhotonConverterOpenCL::SetMaxNumOutputPhotonsCorrectionFactor(double value)
+{
+    if (initialized_)
+        throw I3CLSimStepToPhotonConverter_exception("I3CLSimStepToPhotonConverterOpenCL already initialized!");
+
+    maxNumOutputPhotonsCorrectionFactor_ = value;
+}
+
+double I3CLSimStepToPhotonConverterOpenCL::GetMaxNumOutputPhotonsCorrectionFactor() const
+{
+    return maxNumOutputPhotonsCorrectionFactor_;
 }
 
 

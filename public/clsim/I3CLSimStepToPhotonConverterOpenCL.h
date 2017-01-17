@@ -202,6 +202,20 @@ public:
     double GetSaveAllPhotonsPrescale() const;
 
     /**
+     * Multiply the photon memory allocation by this factor
+     * when saving all photons. Default is 10000.
+     *
+     * Will throw if already initialized.
+     */
+    void SetMaxNumOutputPhotonsCorrectionFactor(double value);
+
+    /**
+     * Returns photon memory allocation correction factor
+     * when saving all photons.
+     */
+    double GetMaxNumOutputPhotonsCorrectionFactor() const;
+
+    /**
      * Sets the maximum number of entries in the photon
      * history table. Each point in the table
      * will store the position of the photon
@@ -445,6 +459,7 @@ private:
     bool stopDetectedPhotons_;
     bool saveAllPhotons_;
     double saveAllPhotonsPrescale_;
+    double maxNumOutputPhotonsCorrectionFactor_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;
 

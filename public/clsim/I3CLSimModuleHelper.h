@@ -60,6 +60,7 @@ namespace I3CLSimModuleHelper {
         bool stopDetectedPhotons;
         bool saveAllPhotons;
         double saveAllPhotonsPrescale;
+        double maxNumOutputPhotonsCorrectionFactor;
         double fixedNumberOfAbsorptionLengths;
         double pancakeFactor;
         uint32_t photonHistoryEntries;

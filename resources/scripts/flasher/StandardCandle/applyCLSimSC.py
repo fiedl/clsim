@@ -114,8 +114,8 @@ tray.AddSegment(clsim.I3CLSimMakeHits, "makeCLSimHits",
     PhotonSeriesName = photonSeriesName,
     ParallelEvents = options.MAXPARALLELEVENTS,
     RandomService = randomService,
-    UseGPUs=False,
-    UseCPUs=True,
+    UseGPUs=True,
+    UseCPUs=False,
     IceModelLocation=expandvars("$I3_SRC/clsim/resources/ice/spice_mie"),
     FlasherPulseSeriesName="SCFlashes")
 

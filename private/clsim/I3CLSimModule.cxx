@@ -274,6 +274,12 @@ geometryIsConfigured_(false)
                  "Only this fraction of photons is actually generated.",
                  saveAllPhotonsPrescale_);
 
+    maxNumOutputPhotonsCorrectionFactor_ = 10000.;
+    AddParameter("MaxNumOutputPhotonsCorrectionFactor",
+                 "When saving all photons, multiply memory allocation by this factor. By default, this is set heuristically\n"
+                 "to 10000. In case of segmentation faults, try to vary this number.",
+                 maxNumOutputPhotonsCorrectionFactor_);
+
     fixedNumberOfAbsorptionLengths_=NAN;
     AddParameter("FixedNumberOfAbsorptionLengths",
                  "Sets the number of absorption lengths each photon should be propagated. If set to NaN (the default),\n"
@@ -428,6 +434,8 @@ void I3CLSimModule::Configure()
     GetParameter("StopDetectedPhotons", stopDetectedPhotons_);
     GetParameter("SaveAllPhotons", saveAllPhotons_);
     GetParameter("SaveAllPhotonsPrescale", saveAllPhotonsPrescale_);
+
+    GetParameter("MaxNumOutputPhotonsCorrectionFactor", maxNumOutputPhotonsCorrectionFactor_);
 
     GetParameter("FixedNumberOfAbsorptionLengths", fixedNumberOfAbsorptionLengths_);
 
@@ -753,6 +761,7 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     stopDetectedPhotons_,
                                                     saveAllPhotons_,
                                                     saveAllPhotonsPrescale_,
+                                                    maxNumOutputPhotonsCorrectionFactor_,
                                                     fixedNumberOfAbsorptionLengths_,
                                                     pancakeFactor_,
                                                     photonHistoryEntries_,

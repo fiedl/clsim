@@ -314,6 +314,7 @@ namespace I3CLSimModuleHelper {
     //         bool stopDetectedPhotons,
     //         bool saveAllPhotons,
     //         double saveAllPhotonsPrescale,
+    //         double maxNumOutputPhotonsCorrectionFactor,
     //         double fixedNumberOfAbsorptionLengths,
     //         double pancakeFactor,
     //         uint32_t photonHistoryEntries,
@@ -340,6 +341,8 @@ namespace I3CLSimModuleHelper {
         conv->SetStopDetectedPhotons(options.stopDetectedPhotons);
         conv->SetSaveAllPhotons(options.saveAllPhotons);
         conv->SetSaveAllPhotonsPrescale(options.saveAllPhotonsPrescale);
+
+        conv->SetMaxNumOutputPhotonsCorrectionFactor(options.maxNumOutputPhotonsCorrectionFactor);
 
         conv->SetFixedNumberOfAbsorptionLengths(options.fixedNumberOfAbsorptionLengths);
         conv->SetDOMPancakeFactor(options.pancakeFactor);

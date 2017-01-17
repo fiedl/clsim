@@ -257,6 +257,10 @@ private:
     ///   Only this fraction of photons is actually generated.
     double saveAllPhotonsPrescale_;
 
+    /// Parameter: Multiply photon memory allocation by this factor when saving all photons.
+    /// (Default is 10000.)
+    double maxNumOutputPhotonsCorrectionFactor_;
+
     /// Parameter: Sets the number of absorption lengths each photon
     ///   should be propagated. If set to NaN (the default),
     ///   the number is sampled from an exponential distribution.

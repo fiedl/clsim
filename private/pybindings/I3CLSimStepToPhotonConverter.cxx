@@ -174,6 +174,9 @@ void register_I3CLSimStepToPhotonConverter()
         .def("SetSaveAllPhotonsPrescale", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSaveAllPhotonsPrescale)
         .def("GetSaveAllPhotonsPrescale", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSaveAllPhotonsPrescale)
 
+        .def("SetMaxNumOutputPhotonsCorrectionFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetMaxNumOutputPhotonsCorrectionFactor)
+        .def("GetMaxNumOutputPhotonsCorrectionFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetMaxNumOutputPhotonsCorrectionFactor)
+
         .def("SetPhotonHistoryEntries", &I3CLSimStepToPhotonConverterOpenCLWrapper::SetPhotonHistoryEntries)
         .def("GetPhotonHistoryEntries", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetPhotonHistoryEntries)
 
@@ -191,6 +194,7 @@ void register_I3CLSimStepToPhotonConverter()
         .add_property("stopDetectedPhotons", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetStopDetectedPhotons, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetStopDetectedPhotons)
         .add_property("saveAllPhotons", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSaveAllPhotons, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSaveAllPhotons)
         .add_property("saveAllPhotonsPrescale", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetSaveAllPhotonsPrescale, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetSaveAllPhotonsPrescale)
+        .add_property("maxNumOutputPhotonsCorrectionFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetMaxNumOutputPhotonsCorrectionFactor, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetMaxNumOutputPhotonsCorrectionFactor)
         .add_property("photonHistoryEntries", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetPhotonHistoryEntries, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetPhotonHistoryEntries)
         .add_property("fixedNumberOfAbsorptionLengths", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetFixedNumberOfAbsorptionLengths, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetFixedNumberOfAbsorptionLengths)
         .add_property("DOMPancakeFactor", &I3CLSimStepToPhotonConverterOpenCLWrapper::GetDOMPancakeFactor, &I3CLSimStepToPhotonConverterOpenCLWrapper::SetDOMPancakeFactor)
