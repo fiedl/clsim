@@ -216,6 +216,44 @@ public:
     double GetMaxNumOutputPhotonsCorrectionFactor() const;
 
     /**
+     * Sets whether to simulate hole ice, i.e. to
+     * have cylinders with different absorption
+     * and refraction lengths.
+     *
+     * Will throw if already initialized.
+     */
+    void SetSimulateHoleIce(bool value);
+
+    /**
+     * Returns whether to simulate hole ice.
+     */
+    bool GetSimulateHoleIce() const;
+
+    /**
+     * Sets the factor the local scattering length
+     * is multiplied with within the hole ice.
+     */
+    void SetHoleIceScatteringLengthFactor(double value);
+
+    /**
+     * Returns the factor the local scattering length
+     * is multiplied with within the hole ice.
+     */
+    double GetHoleIceScatteringLengthFactor() const;
+
+    /**
+     * Sets the factor the local absorption length
+     * is multiplied with within the hole ice.
+     */
+    void SetHoleIceAbsorptionLengthFactor(double value);
+
+    /**
+     * Returns the factor the local absorption length
+     * is multiplied with within the hole ice.
+     */
+    double GetHoleIceAbsorptionLengthFactor() const;
+
+    /**
      * Sets the maximum number of entries in the photon
      * history table. Each point in the table
      * will store the position of the photon
@@ -460,6 +498,9 @@ private:
     bool saveAllPhotons_;
     double saveAllPhotonsPrescale_;
     double maxNumOutputPhotonsCorrectionFactor_;
+    bool simulateHoleIce_;
+    double holeIceScatteringLengthFactor_;
+    double holeIceAbsorptionLengthFactor_;
     double fixedNumberOfAbsorptionLengths_;
     double pancakeFactor_;
 

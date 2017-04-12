@@ -315,6 +315,9 @@ namespace I3CLSimModuleHelper {
     //         bool saveAllPhotons,
     //         double saveAllPhotonsPrescale,
     //         double maxNumOutputPhotonsCorrectionFactor,
+    //         bool simulateHoleIce,
+    //         double holeIceScatteringLengthFactor,
+    //         double holeIceAbsorptionLengthFactor,
     //         double fixedNumberOfAbsorptionLengths,
     //         double pancakeFactor,
     //         uint32_t photonHistoryEntries,
@@ -343,6 +346,9 @@ namespace I3CLSimModuleHelper {
         conv->SetSaveAllPhotonsPrescale(options.saveAllPhotonsPrescale);
 
         conv->SetMaxNumOutputPhotonsCorrectionFactor(options.maxNumOutputPhotonsCorrectionFactor);
+        conv->SetSimulateHoleIce(options.simulateHoleIce);
+        conv->SetHoleIceScatteringLengthFactor(options.holeIceScatteringLengthFactor);
+        conv->SetHoleIceAbsorptionLengthFactor(options.holeIceAbsorptionLengthFactor);
 
         conv->SetFixedNumberOfAbsorptionLengths(options.fixedNumberOfAbsorptionLengths);
         conv->SetDOMPancakeFactor(options.pancakeFactor);

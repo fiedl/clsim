@@ -280,6 +280,21 @@ geometryIsConfigured_(false)
                  "to 10000. In case of segmentation faults, try to vary this number.",
                  maxNumOutputPhotonsCorrectionFactor_);
 
+    simulateHoleIce_ = false;
+    AddParameter("SimulateHoleIce",
+                 "Enables hole ice simulation, i.e. using different absorption and refraction lengths for hole ice cylinders.",
+                 simulateHoleIce_);
+
+    holeIceScatteringLengthFactor_=0.6;
+    AddParameter("HoleIceScatteringLengthFactor",
+                 "Multiplies the local scattering length by this factor within the hole ice.",
+                 holeIceScatteringLengthFactor_);
+
+    holeIceAbsorptionLengthFactor_=0.6;
+    AddParameter("HoleIceAbsorptionLengthFactor",
+                 "Multiplies the local absorption length by this factor within the hole ice.",
+                 holeIceAbsorptionLengthFactor_);
+
     fixedNumberOfAbsorptionLengths_=NAN;
     AddParameter("FixedNumberOfAbsorptionLengths",
                  "Sets the number of absorption lengths each photon should be propagated. If set to NaN (the default),\n"
@@ -436,6 +451,9 @@ void I3CLSimModule::Configure()
     GetParameter("SaveAllPhotonsPrescale", saveAllPhotonsPrescale_);
 
     GetParameter("MaxNumOutputPhotonsCorrectionFactor", maxNumOutputPhotonsCorrectionFactor_);
+    GetParameter("SimulateHoleIce", simulateHoleIce_);
+    GetParameter("HoleIceScatteringLengthFactor", holeIceScatteringLengthFactor_);
+    GetParameter("HoleIceAbsorptionLengthFactor", holeIceAbsorptionLengthFactor_);
 
     GetParameter("FixedNumberOfAbsorptionLengths", fixedNumberOfAbsorptionLengths_);
 
@@ -762,6 +780,9 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     saveAllPhotons_,
                                                     saveAllPhotonsPrescale_,
                                                     maxNumOutputPhotonsCorrectionFactor_,
+                                                    simulateHoleIce_,
+                                                    holeIceScatteringLengthFactor_,
+                                                    holeIceAbsorptionLengthFactor_,
                                                     fixedNumberOfAbsorptionLengths_,
                                                     pancakeFactor_,
                                                     photonHistoryEntries_,

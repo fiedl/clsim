@@ -53,6 +53,9 @@ void register_I3ModuleHelper()
     //	      bp::arg("enableDoubleBuffering")=false, bp::arg("doublePrecision")=false,
     //	      bp::arg("stopDetectedPhotons")=true, bp::arg("saveAllPhotons")=false,
     //	      bp::arg("saveAllPhotonsPrescale")=0.01, bp::arg("fixedNumberOfAbsorptionLengths")=NAN,
+    //        bp::arg("simulateHoleIce")=false,
+    //        bp::arg("holeIceScatteringLengthFactor")=0.6,
+    //        bp::arg("holeIceAbsorptionLengthFactor")=0.6,
     //	      bp::arg("pancakeFactor")=1., bp::arg("photonHistoryEntries")=0,
     //	      bp::arg("limitWorkgroupSize")=0));
 
