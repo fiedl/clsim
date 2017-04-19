@@ -355,6 +355,9 @@ namespace I3CLSimModuleHelper {
 
         conv->SetPhotonHistoryEntries(options.photonHistoryEntries);
 
+        conv->SetHoleIceCylinderPositions(options.holeIceCylinderPositions);
+        conv->SetHoleIceCylinderRadii(options.holeIceCylinderRadii);
+
         conv->Compile();
         //log_trace("%s", conv.GetFullSource().c_str());
 

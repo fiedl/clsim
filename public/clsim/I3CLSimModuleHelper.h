@@ -68,6 +68,8 @@ namespace I3CLSimModuleHelper {
         double pancakeFactor;
         uint32_t photonHistoryEntries;
         uint32_t limitWorkgroupSize;
+        I3Vector<I3Position> holeIceCylinderPositions;
+        I3Vector<float> holeIceCylinderRadii;
     };
 
     I3CLSimStepToPhotonConverterOpenCLPtr

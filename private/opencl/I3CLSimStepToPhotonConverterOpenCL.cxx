@@ -410,6 +410,46 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         preamble += "__constant floating_t holeIceAbsorptionLengthFactor = "
             + boost::lexical_cast<std::string>(holeIceAbsorptionLengthFactor_)
             + ";\n";
+
+        // Hole ice cylinder geometry.
+        //
+        // To define the hole ice positions in the kernel,
+        // produce some kernel code like this:
+        //
+        //     __constant const unsigned int numberOfCylinders = 2;
+        //     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
+        //       {0, 1.2, 3.4, 18.0},
+        //       {0, -1.2, -3.4, 18.0}
+        //     };
+        //
+        preamble += "__constant const unsigned int numberOfCylinders = "
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + ";\n";
+
+        preamble += "__constant floating4_t cylinderPositionsAndRadii["
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + "] = {";
+
+        for (int i = 0; i < holeIceCylinderPositions_.size(); i++)
+        {
+            std::string cylinder_position_and_radius_str = "{"
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetX())
+                + ", "
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetY())
+                + ", "
+                + boost::lexical_cast<std::string>(holeIceCylinderPositions_.at(i).GetZ())
+                + ", "
+                + boost::lexical_cast<std::string>(holeIceCylinderRadii_.at(i))
+                + "}";
+            log_info("Hole ice cylinder at {x,y,z,radius}: %s \n",
+                cylinder_position_and_radius_str.c_str());
+
+            preamble += cylinder_position_and_radius_str;
+            if (i < holeIceCylinderPositions_.size() - 1)
+                preamble += ", ";
+        }
+
+        preamble += "};\n";
     }
 
     // Instead of sampling the number of absorption lengths from an
@@ -1515,6 +1555,26 @@ double I3CLSimStepToPhotonConverterOpenCL::GetDOMPancakeFactor() const
     return pancakeFactor_;
 }
 
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderPositions(I3Vector<I3Position> holeIceCylinderPositions)
+{
+    holeIceCylinderPositions_ = holeIceCylinderPositions;
+}
+
+I3Vector<I3Position> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderPositions()
+{
+    return holeIceCylinderPositions_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderRadii(I3Vector<float> holeIceCylinderRadii)
+{
+    holeIceCylinderRadii_ = holeIceCylinderRadii;
+}
+
+I3Vector<float> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderRadii()
+{
+    return holeIceCylinderRadii_;
+}
 
 
 void I3CLSimStepToPhotonConverterOpenCL::SetWlenGenerators(const std::vector<I3CLSimRandomValueConstPtr> &wlenGenerators)

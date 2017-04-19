@@ -703,6 +703,14 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
     //I3GeometryConstPtr geometryObject = frame->Get<I3GeometryConstPtr>();
     //if (!geometryObject) log_fatal("Geometry frame does not have an I3Geometry object!");
 
+    if (simulateHoleIce_) {
+        log_debug("Reading hole ice geometry from geometry frame..");
+        holeIceCylinderPositions_
+            = frame->Get< I3Vector<I3Position> >("HoleIceCylinderPositions");
+        holeIceCylinderRadii_
+            = frame->Get< I3Vector<float> >("HoleIceCylinderRadii");
+    }
+
     log_debug("Converting geometry..");
 
     std::set<int> ignoreStringsSet(ignoreStrings_.begin(), ignoreStrings_.end());
@@ -786,7 +794,9 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     fixedNumberOfAbsorptionLengths_,
                                                     pancakeFactor_,
                                                     photonHistoryEntries_,
-                                                    limitWorkgroupSize_
+                                                    limitWorkgroupSize_,
+                                                    holeIceCylinderPositions_,
+                                                    holeIceCylinderRadii_
                                                 } );
         if (!openCLStepsToPhotonsConverter)
             log_fatal("Could not initialize OpenCL!");

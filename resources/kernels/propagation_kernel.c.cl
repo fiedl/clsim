@@ -668,7 +668,8 @@ __kernel void propKernel(
         }
 
 #ifdef HOLE_ICE
-        printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL.\n");
+        float cylinder_radius = cylinderPositionsAndRadii[0][3];
+        printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL. The cylinder radius is %.3f.\n", cylinder_radius);
 #endif
 
 

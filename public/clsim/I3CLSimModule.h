@@ -301,6 +301,10 @@ private:
     ///   to them than this distance. (default is 300m)
     double closestDOMDistanceCutoff_;
 
+    /// Hole ice information read from geometry frame.
+    I3Vector<I3Position> holeIceCylinderPositions_;
+    I3Vector<float>      holeIceCylinderRadii_;
+
 
 private:
     // default, assignment, and copy constructor declared private

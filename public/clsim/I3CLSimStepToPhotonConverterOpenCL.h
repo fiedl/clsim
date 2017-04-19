@@ -310,6 +310,16 @@ public:
     double GetDOMPancakeFactor() const;
 
     /**
+     * Setters and getters for the hole ice cylinder positions and
+     * radii that are set in the geometry frame and passed to the
+     * propagation kernel.
+     */
+    void SetHoleIceCylinderPositions(I3Vector<I3Position> holeIceCylinderPositions);
+    void SetHoleIceCylinderRadii(I3Vector<float> holeIceCylinderRadii);
+    I3Vector<I3Position> GetHoleIceCylinderPositions();
+    I3Vector<float>      GetHoleIceCylinderRadii();
+
+    /**
      * Sets the wavelength generators.
      * The first generator (index 0) is assumed to return a Cherenkov
      * spectrum that may have a bias applied to it. This bias factor
@@ -505,6 +515,10 @@ private:
     double pancakeFactor_;
 
     uint32_t photonHistoryEntries_;
+
+    // hole ice cylinder positions and radii
+    I3Vector<I3Position> holeIceCylinderPositions_;
+    I3Vector<float>      holeIceCylinderRadii_;
 
     // some kernel sources loaded on construction
     std::string prependSource_;
