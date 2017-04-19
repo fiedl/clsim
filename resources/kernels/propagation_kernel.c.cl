@@ -667,6 +667,10 @@ __kernel void propKernel(
 
         }
 
+#ifdef HOLE_ICE
+        printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL.\n");
+#endif
+
 
 #ifndef SAVE_ALL_PHOTONS
         // no photon collission detection in case all photons should be saved

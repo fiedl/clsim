@@ -399,8 +399,11 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         preamble = preamble + "#define NUM_PHOTONS_IN_HISTORY " + boost::lexical_cast<std::string>(photonHistoryEntries_) + "\n";
     }
 
-    // Ice parameter correction factors for hole-ice simulation.
+    // Information required for hole ice simulations.
     if (simulateHoleIce_) {
+        preamble += "#define HOLE_ICE\n";
+
+        // Ice parameter correction factors for hole ice simulations.
         preamble += "__constant floating_t holeIceScatteringLengthFactor = "
             + boost::lexical_cast<std::string>(holeIceScatteringLengthFactor_)
             + ";\n";
