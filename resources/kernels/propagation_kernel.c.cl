@@ -99,10 +99,10 @@ void scatterDirectionByAngle(floating_t cosa,
     const floating_t cosb=my_cos(b);
     const floating_t sinb=my_sin(b);
 
-    // Rotate new direction into absolute frame of reference 
+    // Rotate new direction into absolute frame of reference
     const floating_t sinth = my_sqrt(max(ZERO, ONE-(*direction).z*(*direction).z));
-    
-    if(sinth>0.f){  // Current direction not vertical, so rotate 
+
+    if(sinth>0.f){  // Current direction not vertical, so rotate
         const floating4_t oldDir = *direction;
 
         (*direction).x=oldDir.x*cosa-my_divide((oldDir.y*cosb+oldDir.z*oldDir.x*sinb)*sina,sinth);
@@ -154,7 +154,7 @@ inline void createPhotonFromTrack(struct I3CLSimStep *step,
     if (step->sourceType == 0) {
 #endif
         // sourceType==0 is always Cherenkov light with the correct angle w.r.t. the particle/step
-        
+
         // our photon still needs a wavelength. create one!
         const floating_t wavelength = generateWavelength_0(RNG_ARGS_TO_CALL);
 
@@ -173,9 +173,9 @@ inline void createPhotonFromTrack(struct I3CLSimStep *step,
 #ifndef NO_FLASHER
     } else {
         // steps >= 1 are flasher emissions, they do not need cherenkov rotation
-        
+
         const floating_t wavelength = generateWavelength(convert_uint(step->sourceType), RNG_ARGS_TO_CALL);
-        
+
         // use the step direction as the photon direction
         (*photonDirAndWlen).xyz = stepDir.xyz;
         (*photonDirAndWlen).w = wavelength;
@@ -243,15 +243,15 @@ inline bool savePath(
 {
     // NB: the quantum efficiency of the receiver is already taken into
     //     account though the bias in the input photon spectrum
-    floating_t impactWeight = 
+    floating_t impactWeight =
 #ifndef TABULATE_IMPACT_ANGLE
         step->weight*getAngularAcceptance(photonDirAndWlen.z);
 #else
         step->weight;
 #endif
-    
+
     //dbg_printf("step depth %e + %e impactWeight %e\n", depth, thisStepDepth, impactWeight);
-    
+
     floating_t d = *prevStepLength;
     //dbg_printf("first step is %f\n", d);
     uint offset = *entry_counter;
@@ -272,14 +272,14 @@ inline bool savePath(
         pos.y += DOM_RADIUS*toCenter.y;
         pos.z += DOM_RADIUS*toCenter.z;
 #endif
-        
+
         coordinate_t coords = getCoordinates(pos, photonDirAndWlen, source, RNG_ARGS_TO_CALL);
-        
+
         if (isOutOfBounds(coords)) {
             *stop = true;
             break;
         }
-        
+
         entries[thread_id*TABLE_ENTRIES_PER_STREAM + offset].index
             = getBinIndex(coords);
         // Weight the photon by its probability of:
@@ -289,7 +289,7 @@ inline bool savePath(
         entries[thread_id*TABLE_ENTRIES_PER_STREAM + offset].weight =
             impactWeight*my_exp(-(depth + (d/thisStepLength)*thisStepDepth));
     }
-    
+
     if (d < thisStepLength && !(*stop)) {
         // we ran out of space. erase.
         return false;
@@ -379,8 +379,8 @@ inline void saveHit(
 #endif
 
     }
-    
-    
+
+
 }
 
 __kernel void propKernel(
@@ -422,7 +422,7 @@ __kernel void propKernel(
     // copy the geo data to our local memory (this is done by a whole work group in parallel)
     event_t copyFinishedEvent =
         async_work_group_copy(geoLayerToOMNumIndexPerStringSetLocal,
-        geoLayerToOMNumIndexPerStringSet, 
+        geoLayerToOMNumIndexPerStringSet,
         (size_t)GEO_geoLayerToOMNumIndexPerStringSet_BUFFER_SIZE,
         0);
     wait_group_events(1, &copyFinishedEvent);
@@ -488,7 +488,7 @@ __kernel void propKernel(
     uint photonsLeftToPropagate=step.numPhotons;
     floating_t abs_lens_left=ZERO;
     floating_t abs_lens_initial=ZERO;
-    
+
     floating4_t photonStartPosAndTime;
     floating4_t photonStartDirAndWlen;
     floating4_t photonPosAndTime;
@@ -529,14 +529,14 @@ __kernel void propKernel(
                 RNG_ARGS_TO_CALL,
                 &photonPosAndTime,
                 &photonDirAndWlen);
-            
+
             // save the start position and time
             photonStartPosAndTime=photonPosAndTime;
             photonStartDirAndWlen=photonDirAndWlen;
-            
+
             photonNumScatters=0;
             photonTotalPathLength=ZERO;
-            
+
 #ifdef TABULATE
             // randomize the first sub-step
             prevStepRemainder = VOLUME_MODE_STEP * RNG_CALL_UNIFORM_OC;
@@ -550,13 +550,13 @@ __kernel void propKernel(
             //    photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
             //    photonPosAndTime.w, photonDirAndWlen.w/1e-9f);
 #endif
-            
+
 #ifdef getTiltZShift_IS_CONSTANT
             currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
 #endif
 
             inv_groupvel = my_recip(getGroupVelocity(0, photonDirAndWlen.w));
-            
+
             // the photon needs a lifetime. determine distance to next scatter and absorption
             // (this is in units of absorption/scattering lengths)
 #ifdef PROPAGATE_FOR_FIXED_NUMBER_OF_ABSORPTION_LENGTHS
@@ -587,7 +587,7 @@ __kernel void propKernel(
 #endif
 
             const floating_t photon_dz=photonDirAndWlen.z;
-            
+
             // add a correction factor to the number of absorption lengths abs_lens_left
             // before the photon is absorbed. This factor will be taken out after this
             // propagation step. Usually the factor is 1 and thus has no effect, but it
@@ -604,21 +604,21 @@ __kernel void propKernel(
 #ifdef PRINTF_ENABLED
             //dbg_printf("   - next scatter in %f scattering lengths\n", sca_step_left);
 #endif
-            
+
             floating_t currentScaLen = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
             floating_t currentAbsLen = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
-            
+
             floating_t ais=( photon_dz*sca_step_left - my_divide((mediumBoundary-effective_z),currentScaLen) )*(ONE/(floating_t)MEDIUM_LAYER_THICKNESS);
             floating_t aia=( photon_dz*abs_lens_left - my_divide((mediumBoundary-effective_z),currentAbsLen) )*(ONE/(floating_t)MEDIUM_LAYER_THICKNESS);
 
 #ifdef PRINTF_ENABLED
             //dbg_printf("   - ais=%f, aia=%f, j_initial=%i\n", ais, aia, currentPhotonLayer);
 #endif
-        
+
             // propagate through layers
             int j=currentPhotonLayer;
             if(photon_dz<0) {
-                for (; (j>0) && (ais<ZERO) && (aia<ZERO); 
+                for (; (j>0) && (ais<ZERO) && (aia<ZERO);
                      mediumBoundary-=(floating_t)MEDIUM_LAYER_THICKNESS,
                      currentScaLen=getScatteringLength(j, photonDirAndWlen.w),
                      currentAbsLen=getAbsorptionLength(j, photonDirAndWlen.w),
@@ -632,11 +632,11 @@ __kernel void propKernel(
                      ais-=my_recip(currentScaLen),
                      aia-=my_recip(currentAbsLen)) ++j;
             }
-        
+
 #ifdef PRINTF_ENABLED
             //dbg_printf("   - j_final=%i\n", j);
 #endif
-        
+
             floating_t distanceToAbsorption;
             if ((currentPhotonLayer==j) || ((my_fabs(photon_dz))<EPSILON)) {
                 distancePropagated=sca_step_left*currentScaLen;
@@ -649,11 +649,11 @@ __kernel void propKernel(
 #ifdef getTiltZShift_IS_CONSTANT
             currentPhotonLayer=j;
 #endif
-            
+
 #ifdef PRINTF_ENABLED
             //dbg_printf("   - distancePropagated=%f\n", distancePropagated);
 #endif
-        
+
             // get overburden for distance
             if (distanceToAbsorption<distancePropagated) {
                 distancePropagated=distanceToAbsorption;
@@ -674,7 +674,7 @@ __kernel void propKernel(
 
 #ifndef SAVE_ALL_PHOTONS
         // no photon collission detection in case all photons should be saved
-        
+
         // the photon is now either being absorbed or scattered.
         // Check for collisions in its way
 #ifdef STOP_PHOTONS_ON_DETECTION
@@ -684,10 +684,10 @@ __kernel void propKernel(
 #else //DEBUG_STORE_GENERATED_PHOTONS
         bool
 #endif //DEBUG_STORE_GENERATED_PHOTONS
-        collided = 
+        collided =
 #endif //STOP_PHOTONS_ON_DETECTION
-        checkForCollision(photonPosAndTime, 
-            photonDirAndWlen, 
+        checkForCollision(photonPosAndTime,
+            photonDirAndWlen,
             inv_groupvel,
             photonTotalPathLength,
             photonNumScatters,
@@ -696,20 +696,20 @@ __kernel void propKernel(
             photonStartDirAndWlen,
             &step,
 #ifdef STOP_PHOTONS_ON_DETECTION
-            &distancePropagated, 
+            &distancePropagated,
 #else //STOP_PHOTONS_ON_DETECTION
-            distancePropagated, 
+            distancePropagated,
 #endif //STOP_PHOTONS_ON_DETECTION
-            hitIndex, 
-            maxHitIndex, 
-            outputPhotons, 
+            hitIndex,
+            maxHitIndex,
+            outputPhotons,
 #ifdef SAVE_PHOTON_HISTORY
             photonHistory,
             currentPhotonHistory,
 #endif //SAVE_PHOTON_HISTORY
             geoLayerToOMNumIndexPerStringSetLocal
             );
-            
+
 #ifdef STOP_PHOTONS_ON_DETECTION
 #ifdef DEBUG_STORE_GENERATED_PHOTONS
         collided = true;
@@ -719,15 +719,15 @@ __kernel void propKernel(
             abs_lens_left = ZERO;
 
 #ifdef PRINTF_ENABLED
-            //dbg_printf("    . colission detected, step limited to thisStepLength=%f!\n", 
+            //dbg_printf("    . colission detected, step limited to thisStepLength=%f!\n",
             //    distancePropagated);
 #endif //PRINTF_ENABLED
         }
 #endif //STOP_PHOTONS_ON_DETECTION
-        
+
 #endif //not SAVE_ALL_PHOTONS
-        
-        
+
+
 #ifdef TABULATE
         bool stop = false;
         if (!savePath(&step, &refParticle,
@@ -768,16 +768,16 @@ __kernel void propKernel(
 
 
         // absorb or scatter the photon
-        if (abs_lens_left < EPSILON) 
+        if (abs_lens_left < EPSILON)
         {
             // photon was absorbed.
             // a new one will be generated at the begin of the loop.
             --photonsLeftToPropagate;
-            
+
 #if defined(SAVE_ALL_PHOTONS) && !defined(TABULATE)
             // save every. single. photon.
-            
-            if (RNG_CALL_UNIFORM_CO < SAVE_ALL_PHOTONS_PRESCALE) {  
+
+            if (RNG_CALL_UNIFORM_CO < SAVE_ALL_PHOTONS_PRESCALE) {
                 saveHit(
                     photonPosAndTime,
                     photonDirAndWlen,
@@ -799,20 +799,20 @@ __kernel void propKernel(
                     currentPhotonHistory
 #endif //SAVE_PHOTON_HISTORY
                     );
-            }            
+            }
 #endif //SAVE_ALL_PHOTONS
-            
+
         }
         else
         {
             // photon was NOT absorbed. scatter it and re-start the loop
-            
+
 #ifdef SAVE_PHOTON_HISTORY
             // save the photon scatter point
             currentPhotonHistory[photonNumScatters%NUM_PHOTONS_IN_HISTORY].xyz = photonPosAndTime.xyz;
             currentPhotonHistory[photonNumScatters%NUM_PHOTONS_IN_HISTORY].w = abs_lens_initial-abs_lens_left;
 #endif
-            
+
             // calculate a new direction
 #ifdef PRINTF_ENABLED
             //dbg_printf("   - photon is not yet absorbed (abs_len_left=%f)! Scattering!\n", abs_lens_left);
