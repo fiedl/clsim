@@ -8,3 +8,6 @@ resources/scripts/photonPaths/*.gif
 /resources/safeprimes_base32.gz
 
 benchmark.xml
+
+/resources/kernels/lib/intersection/intersection_opencl_tests
+/resources/kernels/lib/intersection/intersection_tests

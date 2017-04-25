@@ -66,8 +66,8 @@ inline floating_t my_fabs(floating_t a) {return (a<ZERO)?(-a):(a);}
 inline floating_t my_fabs(floating_t a) {return fabs(a);}
 #endif
 inline floating_t sqr(floating_t a) {return a*a;}
-
-
+inline floating_t my_nan() { return NAN; }
+inline bool my_is_nan(floating_t a) { return isnan(a); }
 
 
 inline int findLayerForGivenZPos(floating_t posZ)
@@ -383,6 +383,11 @@ inline void saveHit(
 
 }
 
+#ifdef HOLE_ICE
+// `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
+#include "__CLSIM_DIR__/resources/kernels/lib/intersection/intersection.c"
+#endif
+
 __kernel void propKernel(
 #ifndef TABULATE
     __global uint *hitIndex,   // deviceBuffer_CurrentNumOutputPhotons
@@ -668,8 +673,25 @@ __kernel void propKernel(
         }
 
 #ifdef HOLE_ICE
-        float cylinder_radius = cylinderPositionsAndRadii[0][3];
-        printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL. The cylinder radius is %.3f.\n", cylinder_radius);
+        for (int i = 0; i < numberOfCylinders; i++)
+        {
+
+          // Calculate intersection points of photon trajectory and hole-ice cylinder.
+          // See lib/intersection/README.md.
+          IntersectionProblemParameters_t p = {
+              photonPosAndTime.x,
+              photonPosAndTime.y,
+              photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
+              photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
+              cylinderPositionsAndRadii[i].x,
+              cylinderPositionsAndRadii[i].y,
+              cylinderPositionsAndRadii[i].w // radius
+          };
+
+          int num_of_intersections = number_of_intersections(p);
+          printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL. %i Intersections with cylinder %i.\n", num_of_intersections, i);
+
+        }
 #endif
 
 
