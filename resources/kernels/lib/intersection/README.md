@@ -35,6 +35,17 @@ printf("AX2 / AB = %e\n", intersection_s2(parameters));
 
 For an example how to use this with OpenCL on a GPU, have a look at [intersection_opencl_tests_kernel.cl](intersection_opencl_tests_kernel.cl) and the code that launches the kernel in [intersection_opencl_tests.c](intersection_opencl_tests.c).
 
+You may also make use of these helper functions:
+
+```c
+floating_t squared_distance_from_center(floating_t X, floating_t Y, floating_t MX, floating_t MY)
+bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
+inline bool intersecting_trajectory_starts_outside(IntersectionProblemParameters_t p)
+floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
+```
+
+The most helpful one might be the latter, which calculates the fraction of the trajectory that is inside the circle.
+
 ## Requirements
 
 In order to be able to adjust the accuracy, the type of the variables and return values is `floating_t`. You need to define this type either to be `float` or `double`:

@@ -670,29 +670,102 @@ __kernel void propKernel(
             // hoist the correction factor back out of the absorption length
             abs_lens_left=my_divide(abs_lens_left, abs_len_correction_factor);
 
-        }
-
 #ifdef HOLE_ICE
-        for (int i = 0; i < numberOfCylinders; i++)
-        {
+      // The holeIceScatteringLengthFactor and the holeIceAbsorptionLengthFactor
+      // are set during kernel compilation and can be changed by setting the
+      // correpsonding icetray module parameters.
 
-          // Calculate intersection points of photon trajectory and hole-ice cylinder.
-          // See lib/intersection/README.md.
-          IntersectionProblemParameters_t p = {
-              photonPosAndTime.x,
-              photonPosAndTime.y,
-              photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
-              photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
-              cylinderPositionsAndRadii[i].x,
-              cylinderPositionsAndRadii[i].y,
-              cylinderPositionsAndRadii[i].w // radius
-          };
+      // For some reason, there are photons with photonPosAndTime coordinates
+      // nan. I will have to ignore them.
+      // TODO: Why?
+      if (!(my_is_nan(photonPosAndTime.x) || my_is_nan(distancePropagated))) {
 
-          int num_of_intersections = number_of_intersections(p);
-          printf("HELLO FROM THE HOLE ICE SIMULATION IN THE GPU KERNEL. %i Intersections with cylinder %i.\n", num_of_intersections, i);
+        // TODO: Move before overburden calculation.
+        for (unsigned int i = 0; i < numberOfCylinders; i++) {
 
-        }
+          // Is the cylinder in range?
+          if (sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) +
+                  sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <=
+              sqr(distancePropagated +
+                  cylinderPositionsAndRadii[i].w /* radius */)) {
+
+            // Calculate intersection points of photon trajectory and hole-ice
+            // cylinder. See lib/intersection/intersection.c.
+            IntersectionProblemParameters_t p = {
+                photonPosAndTime.x,
+                photonPosAndTime.y,
+                photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
+                photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
+                cylinderPositionsAndRadii[i].x,
+                cylinderPositionsAndRadii[i].y,
+                cylinderPositionsAndRadii[i].w // radius
+            };
+            floating_t trajectory_ratio_inside_of_the_cylinder =
+                intersection_ratio_inside(p);
+
+            if ((!trajectory_ratio_inside_of_the_cylinder == ZERO) &
+                (!my_is_nan(trajectory_ratio_inside_of_the_cylinder))) {
+
+              // printf("HOLE ICE -> trajectory inside: %f\n",
+              //    trajectory_ratio_inside_of_the_cylinder);
+
+              // The propagated distance and the absorpotion lengths left have
+              // to be corrected for the modified ice-properties within the hole
+              // ice along the part of the trajectory that is within the
+              // hole-ice cylinder.
+
+              // printf(" -> distancePropagated before: %f\n",
+              // distancePropagated);
+
+              // Correct for the modified scattering length.
+              floating_t distanceInsideTheCylinder =
+                  distancePropagated * trajectory_ratio_inside_of_the_cylinder;
+              distancePropagated -= distanceInsideTheCylinder *
+                                    (ONE / holeIceScatteringLengthFactor - ONE);
+              if (distancePropagated < ZERO)
+                distancePropagated = ZERO;
+              sca_step_left -= distanceInsideTheCylinder *
+                               (ONE / holeIceScatteringLengthFactor - ONE) /
+                               (currentScaLen * holeIceScatteringLengthFactor);
+              if (sca_step_left < ZERO)
+                sca_step_left = ZERO;
+              abs_lens_left += distanceInsideTheCylinder *
+                               (ONE / holeIceScatteringLengthFactor - ONE) /
+                               (currentAbsLen * holeIceAbsorptionLengthFactor);
+
+              // printf(" -> distancePropagated AFTER: %f\n",
+              // distancePropagated);
+
+              // Correct for the modified absorption length.
+              abs_lens_left -= distanceInsideTheCylinder *
+                               (ONE / holeIceAbsorptionLengthFactor - ONE) /
+                               (currentAbsLen * holeIceAbsorptionLengthFactor);
+              if (abs_lens_left < ZERO)
+                abs_lens_left = ZERO;
+
+#ifdef PRINTF_ENABLED
+              if (my_is_nan(abs_lens_left)) {
+                printf("WARNING: THIS SHOULD NOT BE REACHED. abs_lens_left == "
+                       "nan!\n");
+                printf("distance inside = %f\n", distanceInsideTheCylinder);
+                printf("absorption factor = %f\n",
+                       holeIceAbsorptionLengthFactor);
+                printf("currentAbsLen = %f\n", currentAbsLen);
+                printf("holeIceScatteringLengthFactor = %f\n",
+                       holeIceScatteringLengthFactor);
+                printf("distancePropagated = %f\n", distancePropagated);
+                printf("trajectory_ratio_inside_of_the_cylinder = %f\n",
+                       trajectory_ratio_inside_of_the_cylinder);
+              }
 #endif
+            }
+          }
+        }
+      }
+#endif
+
+
+  }
 
 
 #ifndef SAVE_ALL_PHOTONS

@@ -93,3 +93,44 @@ int number_of_intersections(IntersectionProblemParameters_t p)
   printf("ERROR: THIS POINT SHOULD NOT BE REACHED. in number_of_intersections().\n");
   return my_nan();
 }
+
+floating_t squared_distance_from_center(floating_t X, floating_t Y, floating_t MX, floating_t MY)
+{
+    return (sqr(MX - X) + sqr(MY - Y));
+}
+
+bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
+{
+    return (squared_distance_from_center(p.ax, p.ay, p.mx, p.my) < sqr(p.r));
+}
+
+inline bool intersecting_trajectory_starts_outside(IntersectionProblemParameters_t p)
+{
+    return ( ! intersecting_trajectory_starts_inside(p));
+}
+
+floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
+{
+    bool starts_inside = intersecting_trajectory_starts_inside(p);
+    int num_of_intersections = number_of_intersections(p);
+
+    // printf("HOLE ICE - INTERSECTION\n");
+    // printf(" -> num of intersections = %i\n", num_of_intersections);
+    // if (starts_inside) printf(" -> starts inside.\n");
+
+    if (( ! starts_inside ) && ( num_of_intersections == 0 ))
+        return 0.0;
+    if (( ! starts_inside ) && ( num_of_intersections == 1 ))
+        return 1.0 - intersection_s1(p);
+    if (( ! starts_inside ) && ( num_of_intersections == 2 ))
+        return intersection_s2(p) - intersection_s1(p);
+    if (( starts_inside ) && ( num_of_intersections == 0 ))
+        return 1.0;
+    if (( starts_inside ) && ( num_of_intersections == 1 ))
+        return intersection_s2(p);
+
+#ifdef PRINTF_ENABLED
+    printf("ERROR. This point should not be reached! in intersection_ratio_inside().\n");
+#endif
+    return my_nan();
+}
