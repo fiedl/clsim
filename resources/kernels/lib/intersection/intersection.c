@@ -1,13 +1,4 @@
-typedef struct IntersectionProblemParameters {
-  floating_t ax;
-  floating_t ay;
-  floating_t bx;
-  floating_t by;
-  floating_t mx;
-  floating_t my;
-  floating_t r;
-} IntersectionProblemParameters_t;
-
+#include "intersection.h"
 
 floating_t intersection_alpha(IntersectionProblemParameters_t p)
 {
@@ -133,4 +124,14 @@ floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
     printf("ERROR. This point should not be reached! in intersection_ratio_inside().\n");
 #endif
     return my_nan();
+}
+
+floating_t intersection_trajectory_length(IntersectionProblemParameters_t p)
+{
+  return my_sqrt(sqr(p.ax - p.bx) + sqr(p.ay - p.by));
+}
+
+floating_t intersection_trajectory_length_inside(IntersectionProblemParameters_t p)
+{
+  return intersection_trajectory_length(p) * intersection_ratio_inside(p);
 }
