@@ -45,6 +45,7 @@ inline floating_t hole_ice_corrected_distance(floating_t trajectory_length, floa
 
   // Case 3: The trajectory begins outside, but ends inside the hole ice.
   if ((num_of_intersections == 1) && !starts_in_hole_ice) {
+#ifdef PRINTF_ENABLED
     printf("intersection_ratio_inside = %f\n", intersection_ratio_inside(p));
     printf("intersection_alpha = %f\n", intersection_alpha(p));
     printf("intersection_beta = %f\n", intersection_beta(p));
@@ -64,6 +65,7 @@ inline floating_t hole_ice_corrected_distance(floating_t trajectory_length, floa
 
 
     printf("trajectory_length_within_hole_ice = %f\n", trajectory_length_within_hole_ice);
+#endif
     return trajectory_length + (interaction_length_factor - 1.0) * trajectory_length_within_hole_ice;
   }
 
@@ -94,11 +96,15 @@ inline floating_t hole_ice_corrected_distance(floating_t trajectory_length, floa
   // We ignore this case as the cylinders are too far away from each other.
   // If this case is reached, this should raise an error.
   if ((num_of_intersections == 2) && starts_in_hole_ice) {
+#ifdef PRINTF_ENABLED
     printf("WARNING: INTERSECTION CASE 6 REACHED. This is not implemented, yet.");
+#endif
     // TODO: Raise error.
   }
 
+#ifdef PRINTF_ENABLED
   printf("WARNING: UNHANDLED INTERSECTION CASE. This point should not be reached.");
+#endif
   // TODO: Raise error if `num_of_intersections` is anything else.
 
   return my_nan();

@@ -118,7 +118,9 @@ inline int number_of_intersections(IntersectionProblemParameters_t p)
     return 2;
   }
 
+#ifdef PRINTF_ENABLED
   printf("ERROR: THIS POINT SHOULD NOT BE REACHED. in number_of_intersections().\n");
+#endif
   return my_nan();
 }
 
@@ -148,9 +150,11 @@ inline floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
     if (( starts_inside ) && ( num_of_intersections == 1 ))
         return intersection_s2(p);
 
+#ifdef PRINTF_ENABLED
     printf("ERROR. This point should not be reached! in intersection_ratio_inside().\n");
     printf("starts_inside = %d\n", starts_inside);
     printf("num_of_intersections = %i\n", num_of_intersections);
+#endif
     return my_nan();
 }
 

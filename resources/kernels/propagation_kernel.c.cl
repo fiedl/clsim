@@ -702,7 +702,7 @@ __kernel void propKernel(
               holeIceScatteringLengthFactor,
               p
             );
-
+#ifdef PRINTF_ENABLED
             printf("distancePropagated = %f\n", distancePropagated);
 
             // In a second setp, based on the hole-ice-corrected `distancePropagated`, the correction
@@ -721,9 +721,10 @@ __kernel void propKernel(
               holeIceAbsorptionLengthFactor,
               p
             );
-
+#endif
+#ifdef PRINTF_ENABLED
             printf("distanceToAbsorption = %f\n", distanceToAbsorption);
-
+#endif
             // We don't need to calculate a correction for `abs_lens_left` and `sca_step_left`, because
             // `abs_lens_left` is recalculated after the hole-ice code, and `sca_step_left` is not used
             // for this loop anymore.
