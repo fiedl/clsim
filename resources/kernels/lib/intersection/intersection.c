@@ -86,6 +86,11 @@ inline bool intersecting_trajectory_ends_inside(IntersectionProblemParameters_t 
     return (squared_distance_from_center(p.bx, p.by, p.mx, p.my) < sqr(p.r));
 }
 
+inline bool is_tangent(IntersectionProblemParameters_t p)
+{
+  return intersection_s2(p) == intersection_s1(p);
+}
+
 inline int number_of_intersections(IntersectionProblemParameters_t p)
 {
   const floating_t d = intersection_discriminant(p);
@@ -141,8 +146,13 @@ inline floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
 
     if (( ! starts_inside ) && ( num_of_intersections == 0 ))
         return 0.0;
-    if (( ! starts_inside ) && ( num_of_intersections == 1 ))
-        return 1.0 - intersection_s1(p);
+    if (( ! starts_inside ) && ( num_of_intersections == 1 )) {
+        if (is_tangent(p)) {
+            return 0.0;
+        } else {
+            return 1.0 - intersection_s1(p);
+        }
+    }
     if (( ! starts_inside ) && ( num_of_intersections == 2 ))
         return intersection_s2(p) - intersection_s1(p);
     if (( starts_inside ) && ( num_of_intersections == 0 ))
