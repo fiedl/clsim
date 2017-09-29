@@ -9,6 +9,8 @@ resources/scripts/photonPaths/*.gif
 
 benchmark.xml
 
-/resources/kernels/lib/intersection/intersection_opencl_tests
-/resources/kernels/lib/intersection/intersection_tests
+/resources/kernels/lib/intersection/intersection_test_opencl
+/resources/kernels/lib/intersection/intersection_test
 /resources/kernels/lib/hole_ice/hole_ice_tests
+*.a
+*.o

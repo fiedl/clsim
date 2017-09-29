@@ -1,5 +1,5 @@
-#ifndef INTERSECTION_TESTS_H
-#define INTERSECTION_TESTS_H
+#ifndef INTERSECTION_TEST_H
+#define INTERSECTION_TEST_H
 
 typedef double floating_t;
 

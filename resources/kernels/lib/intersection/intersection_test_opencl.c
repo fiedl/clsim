@@ -13,11 +13,14 @@
 #include <CL/cl.h>
 #endif
 
+#include "gtest/gtest.h"
+
 #define MEM_SIZE (10)
 #define MAX_SOURCE_SIZE (0x100000)
 
-int main()
-{
+
+TEST(RunningIntersectionTestOnGpu, OneIntersection) {
+
   cl_device_id device_id = NULL;
   cl_context context = NULL;
   cl_command_queue command_queue = NULL;
@@ -33,7 +36,7 @@ int main()
   results = (float *)malloc(MEM_SIZE * sizeof(float));
 
   FILE *fp;
-  char fileName[] = "./intersection_opencl_tests_kernel.cl";
+  char fileName[] = "./intersection_test_opencl_kernel.cl";
   char *source_str;
   size_t source_size;
 
@@ -96,6 +99,7 @@ int main()
   ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0,
   MEM_SIZE * sizeof(float),results, 0, NULL, NULL);
 
+
   /* Display Result */
   printf("number_of_intersections: %e\n", results[0]);
   printf("intersection_x1: %e\n", results[1]);
@@ -104,6 +108,15 @@ int main()
   printf("intersection_y2: %e\n", results[4]);
   printf("intersection_s1: %e\n", results[5]);
   printf("intersection_s2: %e\n", results[6]);
+
+  /* gtest */
+  EXPECT_EQ(results[0], 1);
+  EXPECT_NEAR(results[1], 1.0, 0.001);
+  EXPECT_NEAR(results[2], 0.5, 0.001);
+  EXPECT_NEAR(results[3], 1.0, 0.001);
+  EXPECT_NEAR(results[4], 0.5, 0.001);
+  EXPECT_NEAR(results[5], 0.2, 0.001);
+  EXPECT_NEAR(results[6], 0.2, 0.001);
 
   /* Finalization */
   ret = clFlush(command_queue);
@@ -115,6 +128,4 @@ int main()
   ret = clReleaseContext(context);
 
   free(source_str);
-
-  return 0;
 }

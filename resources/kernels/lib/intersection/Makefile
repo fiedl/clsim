@@ -1,26 +1,47 @@
-all: test
-run: test
+GTEST_DIR = ../gtest
+USER_DIR = .
+CPPFLAGS += -isystem $(GTEST_DIR)/include
+CXXFLAGS += -g -Wall -Wextra -pthread
+TESTS = intersection_test
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+								$(GTEST_DIR)/include/gtest/internal/*.h
 
-test: clean test_cpu test_gpu
+all : $(TESTS) test
+clean :
+	rm -f $(TESTS) gtest.a gtest_main.a *.o
 
-test_cpu: intersection_tests
-	./intersection_tests
+GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
-test_gpu: intersection_opencl_tests
-	./intersection_opencl_tests
+gtest-all.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+						$(GTEST_DIR)/src/gtest-all.cc
 
-intersection_tests: intersection_tests.c intersection_tests.h intersection.c
-	gcc \
-		-Wno-implicit-function-declaration \
-		-o intersection_tests \
-		intersection_tests.c
+gtest_main.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+						$(GTEST_DIR)/src/gtest_main.cc
 
-intersection_opencl_tests: intersection_opencl_tests.c intersection_opencl_tests_kernel.cl intersection.c
-	gcc \
-	  -o intersection_opencl_tests \
-		intersection_opencl_tests.c \
-		-framework opencl
+gtest.a : gtest-all.o
+		$(AR) $(ARFLAGS) $@ $^
 
-clean:
-	touch intersection_tests; rm intersection_tests
-	touch intersection_opencl_tests; rm intersection_opencl_tests
+gtest_main.a : gtest-all.o gtest_main.o
+		$(AR) $(ARFLAGS) $@ $^
+
+#intersection.o : $(USER_DIR)/intersection.c $(USER_DIR)/intersection.h $(GTEST_HEADERS)
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/intersection.c
+
+intersection_test.o : $(USER_DIR)/intersection_test.c \
+										 $(USER_DIR)/intersection.c $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/intersection_test.c
+
+intersection_test : intersection_test.o gtest_main.a
+		$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+intersection_test_opencl.o : $(USER_DIR)/intersection_test_opencl.c $(USER_DIR)/intersection.c $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/intersection_test_opencl.c
+
+intersection_test_opencl: intersection_test_opencl.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ -framework opencl
+
+test : intersection_test intersection_test_opencl
+	$(USER_DIR)/intersection_test
+	$(USER_DIR)/intersection_test_opencl
