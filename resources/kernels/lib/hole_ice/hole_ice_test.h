@@ -1,5 +1,5 @@
-#ifndef HOLE_ICE_TESTS_H
-#define HOLE_ICE_TESTS_H
+#ifndef HOLE_ICE_TEST_H
+#define HOLE_ICE_TEST_H
 
 typedef double floating_t;
 

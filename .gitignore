@@ -11,6 +11,6 @@ benchmark.xml
 
 /resources/kernels/lib/intersection/intersection_test_opencl
 /resources/kernels/lib/intersection/intersection_test
-/resources/kernels/lib/hole_ice/hole_ice_tests
+/resources/kernels/lib/hole_ice/hole_ice_test
 *.a
 *.o

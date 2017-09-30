@@ -1,14 +1,44 @@
-all: test
-run: test
+GTEST_DIR = ../gtest
+USER_DIR = .
+CPPFLAGS += -isystem $(GTEST_DIR)/include
+CXXFLAGS += -g -Wall -Wextra -pthread
+TESTS = hole_ice_test
+GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
+								$(GTEST_DIR)/include/gtest/internal/*.h
 
-test: hole_ice_tests
-	./hole_ice_tests
+all : $(TESTS) test
+clean :
+	rm -f $(TESTS) gtest.a gtest_main.a *.o
 
-hole_ice_tests: hole_ice_tests.c hole_ice_tests.h hole_ice.c
-	gcc \
-		-Wno-implicit-function-declaration \
-		-o hole_ice_tests \
-		hole_ice_tests.c
+GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
-clean:
-	touch hole_ice_tests; rm hole_ice_tests
+gtest-all.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+						$(GTEST_DIR)/src/gtest-all.cc
+
+gtest_main.o : $(GTEST_SRCS_)
+	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
+						$(GTEST_DIR)/src/gtest_main.cc
+
+gtest.a : gtest-all.o
+		$(AR) $(ARFLAGS) $@ $^
+
+gtest_main.a : gtest-all.o gtest_main.o
+		$(AR) $(ARFLAGS) $@ $^
+
+hole_ice_test.o : $(USER_DIR)/hole_ice_test.c \
+										 $(USER_DIR)/hole_ice.c $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/hole_ice_test.c
+
+hole_ice_test : hole_ice_test.o gtest_main.a
+		$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+#hole_ice_test_opencl.o : $(USER_DIR)/hole_ice_test_opencl.c $(USER_DIR)/hole_ice.c $(GTEST_HEADERS)
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/hole_ice_test_opencl.c
+
+#hole_ice_test_opencl: hole_ice_test_opencl.o gtest_main.a
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ -framework opencl
+
+test : hole_ice_test #hole_ice_test_opencl
+	$(USER_DIR)/hole_ice_test
+#	$(USER_DIR)/hole_ice_test_opencl
