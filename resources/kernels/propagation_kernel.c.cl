@@ -660,85 +660,107 @@ __kernel void propKernel(
 #endif
 
 #ifdef HOLE_ICE
-      // The holeIceScatteringLengthFactor and the holeIceAbsorptionLengthFactor
-      // are set during kernel compilation and can be changed by setting the
-      // correpsonding icetray module parameters.
+            // The `holeIceScatteringLengthFactor` and the `holeIceAbsorptionLengthFactor`
+            // are set during kernel compilation and can be changed by setting the
+            // correpsonding icetray module parameters.
 
-      // For some reason, there are photons with photonPosAndTime coordinates
-      // nan. I will have to ignore them.
-      // TODO: Why?
-      if (!(my_is_nan(photonPosAndTime.x) || my_is_nan(distancePropagated))) {
+            // To account for the hole ice, we need to calculate corrections for both
+            // `distancePropagated` and `distanceToAbsorption`. But neither `sca_step_left`
+            // nor `abs_lens_left` need to be corrected, because both are recalculated
+            // outside the hole ice code before they are used.
 
-        for (unsigned int i = 0; i < numberOfCylinders; i++) {
+            // The algorithm for the hole ice corrections is as follows:
+            //
+            // 1. intersection problem p = (vec A, vec B, vec M, r)
+            //
+            //    vec A is the position of the photon at the beginning of this
+            //    simulation step.
+            //
+            //    vec B is the position of the photon at the end of this simulation
+            //    step:
+            //
+            //        vec B = vec photonPosition + vec photonDirection * distancePropagated
+            //
+            // 2. distancePropagated += hole_ice_distance_correction(distancePropagated,
+            //        holeIceScatteringLengthFactor, p)
+            //
+            // 3. Gamma = min(distancePropagated, distanceToAbsorption)
+            //
+            //    distancePropagated is the already corrected distance until the next
+            //    scattering point.
+            //
+            //    Gamma is the distance between vec A and vec B that is used to calculate
+            //    the hole ice correction for the distance to absorption. We need to take
+            //    the min here, because, if the photon is scattered away before reaching
+            //    the point of absorption, only a fraction of the path, i.e. Gamma rather
+            //    then the whole distance to absorption, is affected by the hole ice.
+            //
+            // 4. p.vec B = vec photonPosition + vec photonDirection * Gamma
+            //
+            // 5. distanceToAbsorption += hole_ice_distance_correction(Gamma,
+            //        holeIceAbsorptionLengthFactor, p)
+            //
+            // After these steps, both `distancePropagated` and `distanceToAbsorption`
+            // have been properly corrected for this simulation step.
 
-          // Is the cylinder in range?
-          if (sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) +
-                  sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <=
-              sqr(distancePropagated +
-                  cylinderPositionsAndRadii[i].w /* radius */)) {
+            // For some reason, there are photons with photonPosAndTime coordinates
+            // nan. I will have to ignore them.
+            // TODO: Why?
+            if (!(my_is_nan(photonPosAndTime.x) || my_is_nan(distancePropagated))) {
 
-            // Calculate intersection points of photon trajectory and hole-ice
-            // cylinder. See lib/intersection/intersection.c.
-            // Depending on which is nearerer, we need to
-            // The trajectory is calculated from the current position to the next
-            // scattering point and the next absorption point. Then, the shorter
-            // path wins.
-            IntersectionProblemParameters_t p = {
-                photonPosAndTime.x,
-                photonPosAndTime.y,
-                photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
-                photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
-                cylinderPositionsAndRadii[i].x,
-                cylinderPositionsAndRadii[i].y,
-                cylinderPositionsAndRadii[i].w // radius
-            };
+              for (unsigned int i = 0; i < numberOfCylinders; i++) {
 
+                // Is the cylinder in range?
+                if (sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) +
+                    sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <=
+                      sqr(distancePropagated + cylinderPositionsAndRadii[i].w /* radius */))
+                {
 
-            // In a first step, the correction for the `distancePropagated` is calculated,
-            // which is the distance to the next scattering point.
+                  IntersectionProblemParameters_t p = {
+                    photonPosAndTime.x,
+                    photonPosAndTime.y,
+                    photonPosAndTime.x + photonDirAndWlen.x * distancePropagated,
+                    photonPosAndTime.y + photonDirAndWlen.y * distancePropagated,
+                    cylinderPositionsAndRadii[i].x,
+                    cylinderPositionsAndRadii[i].y,
+                    cylinderPositionsAndRadii[i].w // radius
+                  };
 
-            distancePropagated = hole_ice_corrected_distance(
-              distancePropagated,
-              holeIceScatteringLengthFactor,
-              p
-            );
-#ifdef PRINTF_ENABLED
-            printf("distancePropagated = %f\n", distancePropagated);
+                  distancePropagated += hole_ice_distance_correction(
+                    distancePropagated,
+                    holeIceScatteringLengthFactor,
+                    p
+                  );
 
-            // In a second setp, based on the hole-ice-corrected `distancePropagated`, the correction
-            // for the `distanceToAbsorption` is calculated.
+// #ifdef PRINTF_ENABLED
+//             printf("distancePropagated = %f\n", distancePropagated);
+// #endif
 
-            const floating_t distanceToConsiderForAbsorption = min(
-              distancePropagated, // after hole-ice correction
-              distanceToAbsorption // before hole-ice correction
-            );
+                  const floating_t distanceToConsiderForAbsorption = min( // Gamma
+                    distancePropagated, // after hole-ice correction
+                    distanceToAbsorption // before hole-ice correction
+                  );
 
-            p.bx = photonPosAndTime.x + photonDirAndWlen.x * distanceToConsiderForAbsorption;
-            p.by = photonPosAndTime.y + photonDirAndWlen.y * distanceToConsiderForAbsorption;
+                  p.bx = photonPosAndTime.x + photonDirAndWlen.x * distanceToConsiderForAbsorption;
+                  p.by = photonPosAndTime.y + photonDirAndWlen.y * distanceToConsiderForAbsorption;
 
-            distanceToAbsorption = hole_ice_corrected_distance(
-              distanceToConsiderForAbsorption,
-              holeIceAbsorptionLengthFactor,
-              p
-            );
-#endif
-#ifdef PRINTF_ENABLED
-            printf("distanceToAbsorption = %f\n", distanceToAbsorption);
-#endif
-            // We don't need to calculate a correction for `abs_lens_left` and `sca_step_left`, because
-            // `abs_lens_left` is recalculated after the hole-ice code, and `sca_step_left` is not used
-            // for this loop anymore.
+                  distanceToAbsorption += hole_ice_distance_correction(
+                    distanceToConsiderForAbsorption,
+                    holeIceAbsorptionLengthFactor,
+                    p
+                  );
 
+// #ifdef PRINTF_ENABLED
+//             printf("distanceToAbsorption = %f\n", distanceToAbsorption);
+// #endif
 
-            //distancePropagated = hole_ice_corrected_distance_propagated(distancePropagated, p);
-            //distanceToAbsorption = hole_ice_corrected_distance_to_absorption(distanceToAbsorption, p);
-            //sca_step_left = hole_ice_corrected_sca_step_left(sca_step_left, p);
-            //abs_lens_left = hole_ice_corrected_abs_lens_left(abs_lens_left, p);
+                  // We don't need to calculate a correction for `abs_lens_left` and `sca_step_left`, because
+                  // `abs_lens_left` is recalculated after the hole-ice code, and `sca_step_left` is not used
+                  // for this loop anymore.
 
-
-                // TODO: Test the code from 2014 with the hole_ice_tests.c
-                // before deleting the following code from 2014.
-                // Is the old code also correct but more efficient?
+                  // TODO: Test the code from 2014 with the hole_ice_tests.c
+                  // before deleting the following code from 2014.
+                  // Is the old code also correct but more efficient?
 
             //floating_t trajectory_ratio_inside_of_the_cylinder =
             //    intersection_ratio_inside(p);
