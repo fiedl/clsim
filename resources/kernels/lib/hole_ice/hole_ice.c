@@ -83,7 +83,7 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
 #endif
 
     if (interaction_length_factor * distance > ax) {
-      return (interaction_length_factor - 1.0) * distance_within_hole_ice;
+      return (1.0 - 1.0 / interaction_length_factor) * ax;
     } else {
       // Scaled trajectory is too short for this case. Fall back to case 2.
       return (interaction_length_factor - 1.0) * ab;
@@ -103,7 +103,7 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
 #endif
 
     if (interaction_length_factor * yb > yx) {
-      return (interaction_length_factor - 1.0) * distance_within_hole_ice;
+      return (1.0 - 1.0 / interaction_length_factor) * yx;
     } else {
       // Scaled trajectory is too short for this case. Fall back to case 3.
       return (interaction_length_factor - 1.0) * yb;
