@@ -1,3 +1,6 @@
+#include <stdio.h>
+#define PRINTF_ENABLED
+
 #include "hole_ice_test.h"
 #include "hole_ice.c"
 #include "gtest/gtest.h"
@@ -71,7 +74,7 @@ namespace {
   }
 
   TEST(DistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = 20.0;
+    p.ax = 0.0; p.bx = 30.0;
     const floating_t dst = p.bx - p.ax;
     EXPECT_NEAR(hole_ice_distance_correction(dst, interactionFactor, p), -5.0, 0.001);
   }
@@ -83,7 +86,7 @@ namespace {
   }
 
   TEST(DistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = -20.0; p.bx = 20.0;
+    p.ax = -35.0; p.bx = 35.0;
     const floating_t dst = p.bx - p.ax;
     EXPECT_NEAR(hole_ice_distance_correction(dst, interactionFactor, p), -10.0, 0.001);
   }

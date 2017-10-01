@@ -94,15 +94,17 @@ inline bool is_tangent(IntersectionProblemParameters_t p)
 inline int number_of_intersections(IntersectionProblemParameters_t p)
 {
   const floating_t d = intersection_discriminant(p);
+  const floating_t s1 = intersection_s1(p);
+  const floating_t s2 = intersection_s2(p);
 
   if (d < 0) return 0;
   else if (d == 0) return 1;
   else if (d > 0) {
     // Both intersection points behind the trajectory starting point A:
-    if (my_is_nan(intersection_s2(p))) return 0;
+    if (my_is_nan(s1) && my_is_nan(s2)) return 0;
 
     // One intersection point behind the trajectory starting point A:
-    if (my_is_nan(intersection_s1(p))) {
+    if (my_is_nan(s1) || my_is_nan(s2)) {
       // Here, a numerical issue may arise: See 2017-05-27 notes.
       // If the photon starts outside and ends outside, then there can only be
       // 0 or 2 intersection points, not 1. This can happen when the
