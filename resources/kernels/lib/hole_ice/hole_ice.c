@@ -62,7 +62,8 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
   }
 
   const floating_t distance_within_hole_ice = distance * intersection_ratio_inside(p);
-  const floating_t ab = my_sqrt(sqr(p.bx - p.ax) + sqr(p.by - p.ay));
+  //const floating_t ab = my_sqrt(sqr(p.bx - p.ax) + sqr(p.by - p.ay));
+  const floating_t ab = distance;
 
 #ifdef PRINTF_ENABLED
   printf("distance_within_hole_ice = %f\n", distance_within_hole_ice);
