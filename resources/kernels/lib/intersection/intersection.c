@@ -29,6 +29,10 @@ inline floating_t intersection_s(IntersectionProblemParameters_t p, int sign)
   floating_t scale_parameter = (-intersection_beta(p) +
     sign * my_sqrt(intersection_discriminant(p))) / 2 / intersection_alpha(p);
 
+#ifdef PRINTF_ENABLED
+  printf("DEBUG: SCALE_PARAMETER = %f\n", scale_parameter);
+#endif
+
   // If the intersection point is outside, i.e. before or after the trajectory,
   // return 'not a number'.
   if (( scale_parameter < 0.0 ) || ( scale_parameter > 1.0 )) scale_parameter = my_nan();

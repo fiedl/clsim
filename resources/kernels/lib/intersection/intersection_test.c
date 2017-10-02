@@ -1,3 +1,6 @@
+// #include <stdio.h>
+// #define PRINTF_ENABLED
+
 #include "intersection_test.h"
 #include "intersection.c"
 #include "gtest/gtest.h"
@@ -36,6 +39,14 @@ IntersectionProblemParameters_t parameters_for_trajectory_starting_inside = {
   1.0       // r
 };
 
+IntersectionProblemParameters_t parameters_for_two_intersections_from_right_to_left = {
+  2.0, 1.0, // A
+ -3.0, 1.0, // B
+  1.0, 1.0, // M
+  0.5       // r
+};
+
+
 TEST(NumberOfIntersectionsTest, TangentPoint) {
   EXPECT_EQ(number_of_intersections(parameters_for_tangent), 1);
 }
@@ -47,6 +58,9 @@ TEST(NumberOfIntersectionsTest, NoIntersectionPoint) {
 }
 TEST(NumberOfIntersectionsTest, StartingInside) {
   EXPECT_EQ(number_of_intersections(parameters_for_trajectory_starting_inside), 1);
+}
+TEST(NumberOfintersectionsTest, TwoIntersectionPointsRtlDirection) {
+  EXPECT_EQ(number_of_intersections(parameters_for_two_intersections_from_right_to_left), 2);
 }
 
 TEST(IntersectionPointsTest, TangentPoint) {
@@ -89,6 +103,10 @@ TEST(IntersectionRatioTest, NoIntersectionPoint) {
 TEST(IntersectionRatioTest, StartingInside) {
   EXPECT_TRUE(my_is_nan(intersection_s1(parameters_for_trajectory_starting_inside)));
   EXPECT_EQ(intersection_s2(parameters_for_trajectory_starting_inside), 0.25);
+}
+TEST(IntersectionRatioTest, TwoIntersectionPointsRtlDirection) {
+  EXPECT_EQ(intersection_s1(parameters_for_two_intersections_from_right_to_left), 0.1);
+  EXPECT_EQ(intersection_s2(parameters_for_two_intersections_from_right_to_left), 0.3);
 }
 
 TEST(TrajectoryStartsInside, TangentPoint) {

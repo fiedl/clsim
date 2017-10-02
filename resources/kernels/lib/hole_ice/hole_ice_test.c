@@ -143,3 +143,49 @@ namespace {
     EXPECT_NEAR(hole_ice_distance_correction(dst, asymInteractionFactor, p), -16.5, 0.001);
   }
 }
+
+namespace {
+  floating_t rtlInteractionFactor = 0.5;
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
+    p.ax = -15.0; p.bx = -20.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), 0.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
+    p.ax = 5.0; p.bx = -5.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -5.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
+    p.ax = 15.0; p.bx = 0.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -5.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
+    p.ax = 0.0; p.bx = -30.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -10.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
+    p.ax = 0.0; p.bx = -12.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -6.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
+    p.ax = 35.0; p.bx = -35.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -20.0, 0.001);
+  }
+
+  TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
+    p.ax = 20.0; p.bx = -12.0;
+    const floating_t dst = -(p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -11.0, 0.001);
+  }
+}
