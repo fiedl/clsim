@@ -189,3 +189,50 @@ namespace {
     EXPECT_NEAR(hole_ice_distance_correction(dst, rtlInteractionFactor, p), -11.0, 0.001);
   }
 }
+
+namespace {
+  floating_t threeDInteractionFactor = 0.5;
+  floating_t threeDScalingFactor = 2.0;
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
+    p.ax = 15.0; p.bx = 20.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), 0.0, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
+    p.ax = -5.0; p.bx = 5.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-5.0) * threeDScalingFactor, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
+    p.ax = -15.0; p.bx = 0.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-5.0) * threeDScalingFactor, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
+    p.ax = 0.0; p.bx = 30.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-10.0) * threeDScalingFactor, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
+    p.ax = 0.0; p.bx = 12.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-6.0) * threeDScalingFactor, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
+    p.ax = -35.0; p.bx = 35.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-20.0) * threeDScalingFactor, 0.001);
+  }
+
+  TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
+    p.ax = -20.0; p.bx = 12.0;
+    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-11.0) * threeDScalingFactor, 0.001);
+  }
+}

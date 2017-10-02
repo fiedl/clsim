@@ -62,18 +62,23 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
   }
 
   const floating_t distance_within_hole_ice = distance * intersection_ratio_inside(p);
-  //const floating_t ab = my_sqrt(sqr(p.bx - p.ax) + sqr(p.by - p.ay));
-  const floating_t ab = distance;
 
 #ifdef PRINTF_ENABLED
   printf("distance_within_hole_ice = %f\n", distance_within_hole_ice);
-  printf("ab = %f\n", ab);
 #endif
 
   // Case 3: The trajectory begins outside, but ends inside the hole ice.
   if ((num_of_intersections == 1) && !starts_in_hole_ice) {
     return (interaction_length_factor - 1.0) * distance_within_hole_ice;
   }
+
+  const floating_t ab = my_sqrt(sqr(p.bx - p.ax) + sqr(p.by - p.ay));
+  const floating_t scalingFactorFor3D = distance / ab;
+
+#ifdef PRINTF_ENABLED
+  printf("ab = %f\n", ab);
+  printf("scalingFactorFor3D = %f\n", scalingFactorFor3D);
+#endif
 
   // Case 4: The trajectory begins inside, but ends outside the hole ice.
   if ((num_of_intersections == 1) && starts_in_hole_ice) {
@@ -83,18 +88,16 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
     printf("ax = %f\n", ax);
 #endif
 
-    if (interaction_length_factor * distance > ax) {
-      return (1.0 - 1.0 / interaction_length_factor) * ax;
+    if (interaction_length_factor * ab > ax) {
+      return (1.0 - 1.0 / interaction_length_factor) * ax * scalingFactorFor3D;
     } else {
       // Scaled trajectory is too short for this case. Fall back to case 2.
-      return (interaction_length_factor - 1.0) * ab;
+      return (interaction_length_factor - 1.0) * distance;
     }
   }
 
   // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
   if ((num_of_intersections == 2) && !starts_in_hole_ice) {
-    // YB = ((1 - intersection_s1(p)) * trajectory_length)
-    //if (interaction_length_factor * ((1.0 - intersection_s1(p)) * trajectory_length) > trajectory_length_within_hole_ice) {
     const floating_t yb = ab * (1.0 - intersection_s1(p));
     const floating_t yx = ab * (intersection_s2(p) - intersection_s1(p));
 
@@ -104,10 +107,10 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
 #endif
 
     if (interaction_length_factor * yb > yx) {
-      return (1.0 - 1.0 / interaction_length_factor) * yx;
+      return (1.0 - 1.0 / interaction_length_factor) * yx * scalingFactorFor3D;
     } else {
       // Scaled trajectory is too short for this case. Fall back to case 3.
-      return (interaction_length_factor - 1.0) * yb;
+      return (interaction_length_factor - 1.0) * yb * scalingFactorFor3D;
     }
   }
 
