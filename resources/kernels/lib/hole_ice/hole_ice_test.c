@@ -10,6 +10,7 @@ inline floating_t my_sqrt(floating_t a) {return sqrt(a);}
 inline floating_t sqr(floating_t a) {return a * a;}
 inline floating_t my_nan() { return NAN; }
 inline bool my_is_nan(floating_t a) { return isnan(a); }
+inline floating_t min(floating_t a, floating_t b) { return fmin(a, b); }
 
 IntersectionProblemParameters_t p = {
   0.0, 0.0, // A
@@ -234,5 +235,99 @@ namespace {
     p.ax = -20.0; p.bx = 12.0;
     const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
     EXPECT_NEAR(hole_ice_distance_correction(dst, threeDInteractionFactor, p), (-11.0) * threeDScalingFactor, 0.001);
+  }
+}
+
+namespace {
+  // TODO: Hole ice scenario with absorption and scattering.
+  // Test apply_hole_ice_correction.
+  
+  floating4_t photonPosAndTime = {0.0, 10.0, 1.0, 0.0};
+  floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+  unsigned int numberOfCylinders = 1;
+  floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+  
+  TEST(ApplyHoleIceCorrection, ScatterBeforeHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 5;
+    floating_t distanceToAbsorption = 400;
+      
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 5.0, 0.001);
+    EXPECT_NEAR(distanceToAbsorption, 400.0, 0.001);
+  }
+  
+  TEST(ApplyHoleIceCorrection, ScatterWithinHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 20;
+    floating_t distanceToAbsorption = 400;
+      
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 15.0, 0.001);
+    EXPECT_NEAR(distanceToAbsorption, (400.0 + 5.0 * (0.8 - 1)), 0.001);
+  }
+  
+  TEST(ApplyHoleIceCorrection, ScatterAfterHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 60;
+    floating_t distanceToAbsorption = 400;
+      
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 40.0, 0.001);
+    EXPECT_NEAR(distanceToAbsorption, (400.0 + 20.0 * (0.8 - 1)), 0.001);
+  }
+  
+  TEST(ApplyHoleIceCorrection, ImmediateAbsorptionInHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 1.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.0;
+    floating_t distancePropagated = 40;
+    floating_t distanceToAbsorption = 400;
+      
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 20.0, 0.001);
+    EXPECT_NEAR(distanceToAbsorption, 20.0, 0.001);
   }
 }

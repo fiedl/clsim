@@ -3,7 +3,7 @@
 
 #include "../intersection/intersection.c"
 
-inline floating_t hole_ice_distance_correction(floating_t distance, floating_t interaction_length_factor, IntersectionProblemParameters_t p)
+inline floating_t hole_ice_distance_correction(floating_t distance, floating_t terminusDistance, floating_t interaction_length_factor, IntersectionProblemParameters_t p)
 {
   // Depending on the fraction of the distance the photon is traveling
   // within the hole ice, there are six cases to consider.
@@ -132,7 +132,12 @@ inline floating_t hole_ice_distance_correction(floating_t distance, floating_t i
   return my_nan();
 }
 
+#ifdef HOLE_ICE_TEST_H
+inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floating4_t photonDirAndWlen, unsigned int numberOfCylinders, floating4_t *cylinderPositionsAndRadii, floating_t holeIceScatteringLengthFactor, floating_t holeIceAbsorptionLengthFactor, floating_t *distancePropagated, floating_t *distanceToAbsorption)
+#endif
+#ifndef HOLE_ICE_TEST_H
 inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floating4_t photonDirAndWlen, unsigned int numberOfCylinders, __constant floating4_t *cylinderPositionsAndRadii, floating_t holeIceScatteringLengthFactor, floating_t holeIceAbsorptionLengthFactor, floating_t *distancePropagated, floating_t *distanceToAbsorption)
+#endif
 {
             // The algorithm for the hole ice corrections is as follows:
             //
@@ -190,50 +195,50 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
                     cylinderPositionsAndRadii[i].y,
                     cylinderPositionsAndRadii[i].w // radius
                   };
-                  
+
 		              //printf("distancePropagated = %f\n", distancePropagated);
-		              
+
                   const floating_t scaCorrection = hole_ice_distance_correction(
                     *distancePropagated,
                     holeIceScatteringLengthFactor,
                     p
                   );
-                  
-		              //printf("scaCorrection = %f\n", scaCorrection);
-                    
-                  floating_t sum = *distancePropagated;
-                    
-                  floating_t d;
-                  d = -0.1; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.2; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.3; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.4; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.5; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.6; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.7; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.8; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -0.9; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.0; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.1; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.2; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.3; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.4; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.5; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.6; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.7; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.8; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -1.9; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
-                  d = -2.0; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
 
-                  //distancePropagated += scaCorrection; // Seltsam. Ohne diese Zeile geht es.
-                  
+		              //printf("scaCorrection = %f\n", scaCorrection);
+
+                  // floating_t sum = *distancePropagated;
+                  //
+                  // floating_t d;
+                  // d = -0.1; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.2; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.3; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.4; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.5; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.6; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.7; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.8; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -0.9; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.0; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.1; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.2; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.3; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.4; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.5; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.6; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.7; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.8; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -1.9; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+                  // d = -2.0; if ((scaCorrection < d) && (scaCorrection > (d - 0.1))) sum = *distancePropagated + d;
+
+                  *distancePropagated += scaCorrection; // Seltsam. Ohne diese Zeile geht es.
+
 		              //const floating_t sum = distancePropagated + scaCorrection;
 		              //printf("sum = %f\n", sum);
-                  *distancePropagated = sum;
-                  
+                  //*distancePropagated = sum;
+
 		              //const floating_t foo = 0.9 * distancePropagated;  // geht
 		              //distancePropagated = distancePropagated + foo;
-                  
+
 		              //distancePropagated = distancePropagated; // geht.
 		              //distancePropagated = distancePropagated + 0.0 * scaCorrection; // geht nicht.
 
@@ -244,50 +249,108 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 
                   // geht: d.h. es liegt nicht am Schreiben in die Variable, sondern
                   // irgendwo bei der Weiterverarbeitung.
-                  //distancePropagated += scaCorrection; 
+                  //distancePropagated += scaCorrection;
                   //distancePropagated = 1.0;
-                                    
+
                   // // geht:
                   // distancePropagated *= holeIceScatteringLengthFactor;
                   // printf("holeIceScatteringLengthFactor = %f\n", holeIceScatteringLengthFactor);
-                  
+
                   //distancePropagated += 0 * scaCorrection;
                   //distancePropagated *= holeIceScatteringLengthFactor;
                   //printf("distancePropagated = %f NEW\n", distancePropagated);
 
-                  
+
 
                   //printf("distancePropagated = %f before resetting to 1.0\n", distancePropagated);
                   //distancePropagated = 1.0;
-      		  
 
-                  const floating_t distanceToConsiderForAbsorption = min( // Gamma
-                    *distancePropagated, // after hole-ice correction
-                    *distanceToAbsorption // before hole-ice correction
+
+                  // const floating_t distanceToConsiderForAbsorption = min( // Gamma
+                  //   *distancePropagated, // after hole-ice correction
+                  //   *distanceToAbsorption // before hole-ice correction
+                  // );
+                  //
+                  // p.bx = photonPosAndTime.x + photonDirAndWlen.x * distanceToConsiderForAbsorption;
+                  // p.by = photonPosAndTime.y + photonDirAndWlen.y * distanceToConsiderForAbsorption;
+                  //
+                  // const floating_t absCorrection = hole_ice_distance_correction(
+                  //   distanceToConsiderForAbsorption,
+                  //   holeIceAbsorptionLengthFactor,
+                  //   p
+                  // );
+
+                  const floating_t terminus = min(
+                    *distanceToAbsorption,
+                    *distancePropagated
                   );
 
-                  p.bx = photonPosAndTime.x + photonDirAndWlen.x * distanceToConsiderForAbsorption;
-                  p.by = photonPosAndTime.y + photonDirAndWlen.y * distanceToConsiderForAbsorption;
+                  p.bx = photonPosAndTime.x + photonDirAndWlen.x * *distanceToAbsorption;
+                  p.by = photonPosAndTime.y + photonDirAndWlen.y * *distanceToAbsorption;
 
                   const floating_t absCorrection = hole_ice_distance_correction(
-                    distanceToConsiderForAbsorption,
+                    *distanceToAbsorption,
                     holeIceAbsorptionLengthFactor,
                     p
                   );
-                  
-                  sum = 0;  
-                  for (floating_t d = -0.0; d > -5.0; d -= 0.1) {
-                    if ((absCorrection < d) && (absCorrection > (d - 0.1))) sum = *distanceToAbsorption + d;
+
+                  printf("absCorrection = %f\n", absCorrection);
+                  printf("(*distanceToAbsorption - *distancePropagated) / holeIceAbsorptionLengthFactor = %f\n", (*distanceToAbsorption - *distancePropagated) / holeIceAbsorptionLengthFactor);
+
+                  *distanceToAbsorption += absCorrection;
+
+                  if (*distanceToAbsorption > *distancePropagated) {
+                    *distanceToAbsorption += (*distanceToAbsorption - *distancePropagated) / holeIceAbsorptionLengthFactor;
                   }
-                  //printf("  absCorrection = %f\n", absCorrection);
-                  printf("  sum = %f\n", sum);
-                  *distanceToAbsorption = sum;
-                    
+
+                  // sum = 0;
+                  // for (floating_t d = -0.0; d > -5.0; d -= 0.1) {
+                  //   if ((absCorrection < d) && (absCorrection > (d - 0.1))) sum = *distanceToAbsorption + d;
+                  // }
+                  // //printf("  absCorrection = %f\n", absCorrection);
+                  // printf("  sum = %f\n", sum);
+                  // *distanceToAbsorption = sum;
+
+                  //*distanceToAbsorption += absCorrection;
+
+                  // const floating_t distanceToInteraction = min(
+                  //   *distancePropagated + scaCorrection,
+                  //   *distanceToAbsorption + absCorrection
+                  // );
+                  //
+                  // printf("distanceToInteraction = %f\n", distanceToInteraction);
+                  //
+                  // if (distanceToInteraction > *distancePropagated + scaCorrection) {
+                  //   *distancePropagated += hole_ice_distance_correction(
+                  //     distanceToInteraction,
+                  //     holeIceScatteringLengthFactor,
+                  //     p
+                  //   );
+                  // } else {
+                  //   *distancePropagated += scaCorrection;
+                  // }
+                  //
+                  // if (distanceToInteraction > *distanceToAbsorption + absCorrection) {
+                  //   p.bx = photonPosAndTime.x + photonDirAndWlen.x * distanceToInteraction;
+                  //   p.by = photonPosAndTime.y + photonDirAndWlen.y * distanceToInteraction;
+                  //
+                  //   *distanceToAbsorption += hole_ice_distance_correction(
+                  //     distanceToInteraction,
+                  //     holeIceAbsorptionLengthFactor,
+                  //     p
+                  //   );
+                  // } else {
+                  //   *distanceToAbsorption += absCorrection;
+                  // }
+
+
+
+
 // 		  printf("HOLE ICE DEBUG:\n");
 // 		  printf("  distancePropagated = %f\n", distancePropagated);
 // 		  printf("  correction         = %f\n", hole_ice_distance_correction(distancePropagated, holeIceScatteringLengthFactor, p));
 
-		  
+
 // #ifdef PRINTF_ENABLED
 //             printf("distanceToAbsorption = %f\n", distanceToAbsorption);
 // #endif
@@ -362,7 +425,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
                 }
               }
 	          }
-  
+
 }
 
 #endif
