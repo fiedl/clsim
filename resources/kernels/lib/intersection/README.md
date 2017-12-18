@@ -73,7 +73,7 @@ inline floating_t my_nan() { return NAN; }
 inline bool my_is_nan(floating_t a) { return isnan(a); }
 ```
 
-## Installation
+## Installation and Tests
 
 To install this script on your development machine and run the automated tests, you may follow the these steps:
 
