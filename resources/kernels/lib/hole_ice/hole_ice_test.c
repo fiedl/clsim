@@ -368,4 +368,30 @@ namespace {
     EXPECT_NEAR(distancePropagated, 40.0, desired_numeric_accuracy);
     EXPECT_NEAR(distanceToAbsorption, 400.0, desired_numeric_accuracy);
   }
+
+  TEST(ApplyHoleIceCorrection, PhotonStartsOnLeftCylinderBoarder) {
+    floating_t holeIceScatteringLengthFactor = 1.0;
+    floating_t holeIceAbsorptionLengthFactor = 1.0;
+    floating_t distancePropagated = 40;
+    floating_t distanceToAbsorption = 400;
+
+    // // set above:
+    // floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    // floating4_t photonPosAndTime = {0.0, 10.0, 1.0, 0.0};
+    photonPosAndTime.x = 10.0;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 40.0, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, 400.0, desired_numeric_accuracy);
+  }
 }
