@@ -19,6 +19,16 @@ IntersectionProblemParameters_t p = {
   10.0      // r
 };
 
+HoleIceProblemParameters_t hip = {
+  0.0,   // distance
+  0.0,   // interaction_length_factor
+  0.0,   // entry_point_ratio
+  0.0,   // termination_point_ratio
+  false, // starts_within_hole_ice
+  0,     // number_of_medium_changes (will be calculated)
+  0      // distance_ratio_inside_hole_ice (will be calcualted)
+};
+
 namespace {
   floating_t extremeInteractionFactor = 0.0;
 
