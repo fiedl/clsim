@@ -69,6 +69,7 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   //  printf("distance = %f\n", distance);
   //#endif
 
+  //printf("p.number_of_medium_changes = %i\n", p.number_of_medium_changes);
 
   // Case 1: The trajectory is completely outside of the hole ice.
   // Thus, needs no correction.
@@ -80,7 +81,6 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   if ((p.number_of_medium_changes == 0) && p.starts_within_hole_ice) {
     return (p.interaction_length_factor - 1.0) * p.distance;
   }
-
 
   p.distance_ratio_inside_hole_ice = distance_ratio_inside_hole_ice(p);
   const floating_t distance_within_hole_ice = p.distance * p.distance_ratio_inside_hole_ice;
@@ -95,7 +95,6 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   // Case 4: The trajectory begins inside, but ends outside the hole ice.
   if ((p.number_of_medium_changes == 1) && p.starts_within_hole_ice) {
     const floating_t ac = ab * p.termination_point_ratio;
-
     if (p.interaction_length_factor * ab > ac) {
       return (1.0 - 1.0 / p.interaction_length_factor) * ac;
     } else {
@@ -252,17 +251,17 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         const floating_t absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
         *distanceToAbsorption += absCorrection;
 
-        printf("*distanceToAbsorption = %f\n", *distanceToAbsorption);
-        printf("absCorrection = %f\n", absCorrection);
-        printf("holeIceAbsorptionLengthFactor = %f\n", holeIceAbsorptionLengthFactor);
-        printf("intersection_s1(p) = %f\n", intersection_s1(p));
-        printf("absorptionTerminationPointRatio = %f\n", absorptionTerminationPointRatio);
-        if (intersecting_trajectory_starts_inside(p)) { printf("intersecting_trajectory_starts_inside\n"); }
+        // printf("*distanceToAbsorption = %f\n", *distanceToAbsorption);
+        // printf("absCorrection = %f\n", absCorrection);
+        // printf("holeIceAbsorptionLengthFactor = %f\n", holeIceAbsorptionLengthFactor);
+        // printf("intersection_s1(p) = %f\n", intersection_s1(p));
+        // printf("absorptionTerminationPointRatio = %f\n", absorptionTerminationPointRatio);
+        // if (intersecting_trajectory_starts_inside(p)) { printf("intersecting_trajectory_starts_inside\n"); }
         // printf("*distancePropagated = %f\n", *distancePropagated);
         // printf("scaCorrection = %f\n", scaCorrection);
-        printf("intersection_s1(p) = %f\n", intersection_s1(p));
-        printf("intersection_s2(p) = %f\n", intersection_s2(p));
-        printf("projectedDistanceToAbsorption = %f\n", projectedDistanceToAbsorption);
+        // printf("intersection_s1(p) = %f\n", intersection_s1(p));
+        // printf("intersection_s2(p) = %f\n", intersection_s2(p));
+        // printf("projectedDistanceToAbsorption = %f\n", projectedDistanceToAbsorption);
         // printf("absorptionTerminationPointRatio = %f\n", absorptionTerminationPointRatio);
 
 
