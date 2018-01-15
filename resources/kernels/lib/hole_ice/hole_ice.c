@@ -7,6 +7,7 @@
 inline unsigned int number_of_medium_changes(HoleIceProblemParameters_t p)
 {
   if (my_is_nan(p.entry_point_ratio) && my_is_nan(p.termination_point_ratio)) return 0;
+  if (my_is_nan(p.entry_point_ratio) && (p.termination_point_ratio == 0)) return 0; // starting on the border facing outwards
   if (my_is_nan(p.entry_point_ratio) || my_is_nan(p.termination_point_ratio)) return 1;
   if (p.entry_point_ratio == p.termination_point_ratio) return 0; // tangent
   return 2;
