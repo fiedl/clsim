@@ -46,7 +46,7 @@ inline floating_t intersection_s(IntersectionProblemParameters_t p, int sign)
 
   // If the intersection point is outside, i.e. before or after the trajectory,
   // return 'not a number'.
-  if (( scale_parameter < 0.0 ) || ( scale_parameter > 1.0 )) scale_parameter = my_nan();
+  if (( scale_parameter <= 0.0 ) || ( scale_parameter >= 1.0 )) scale_parameter = my_nan();
 
   return scale_parameter;
 }
