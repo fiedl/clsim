@@ -49,26 +49,11 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   // TODO: Histogram to find out which case is most probable.
   // The probable ones need to come first for best performane.
 
-  //#ifdef PRINTF_ENABLED
-  //  printf("PARAMETERS:\n");
-  //  printf("intersecting_trajectory_starts_inside = %d\n", intersecting_trajectory_starts_inside(p));
-  //  printf("intersection_ratio_inside = %f\n", intersection_ratio_inside(p));
-  //  printf("intersection_alpha = %f\n", intersection_alpha(p));
-  //  printf("intersection_beta = %f\n", intersection_beta(p));
-  //  printf("intersection_gamma = %f\n", intersection_gamma(p));
-  //  printf("intersection_discriminant = %f\n", intersection_discriminant(p));
-  //  printf("intersection_s1 = %f\n", intersection_s1(p));
-  //  printf("intersection_s2 = %f\n", intersection_s2(p));
-  //  printf("intersecting_trajectory_starts_inside = %d\n", intersecting_trajectory_starts_inside(p));
-  //  printf("number_of_intersections = %i\n", number_of_intersections(p));
-  //  printf("squared radius = %f\n", sqr(p.r));
-  //  printf("squared_distance_from_center = %f\n", squared_distance_from_center(p.ax, p.ay, p.mx, p.my));
-  //  printf("A = (%f, %f)\n", p.ax, p.ay);
-  //  printf("B = (%f, %f)\n", p.bx, p.by);
-  //  printf("M = (%f, %f)\n", p.mx, p.my);
-  //  printf("r = %f\n", p.r);
-  //  printf("distance = %f\n", distance);
-  //#endif
+  // #ifdef PRINTF_ENABLED
+  //   printf("HOLE ICE DISTANCE CORRECTION DEBUG:\n");
+  //   printf("  p.number_of_medium_changes = %i\n", p.number_of_medium_changes);
+  //   printf("  p.distance = %f\n", p.distance);
+  // #endif
 
   //printf("p.number_of_medium_changes = %i\n", p.number_of_medium_changes);
 
@@ -85,6 +70,12 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
   p.distance_ratio_inside_hole_ice = distance_ratio_inside_hole_ice(p);
   const floating_t distance_within_hole_ice = p.distance * p.distance_ratio_inside_hole_ice;
+
+  // #ifdef PRINTF_ENABLED
+  //   printf("HOLE ICE DISTANCE CORRECTION DEBUG:\n");
+  //   printf("  p.distance_ratio_inside_hole_ice = %f\n", p.distance_ratio_inside_hole_ice);
+  //   printf("  p.distance_within_hole_ice = %f\n", distance_within_hole_ice);
+  // #endif
 
   // Case 3: The trajectory begins outside, but ends inside the hole ice.
   if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) {
@@ -137,6 +128,23 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
 inline floating_t hole_ice_distance_correction_for_intersection_problem(floating_t distance, floating_t interaction_length_factor, IntersectionProblemParameters_t p)
 {
+  // #ifdef PRINTF_ENABLED
+  //   printf("HOLE ICE DISTANCE CORRECTION INTERSECTION PROBLEM DEBUG:\n");
+  //   printf("  intersecting_trajectory_starts_inside(p) = %d\n", intersecting_trajectory_starts_inside(p));
+  //   printf("  intersection_alpha(p) = %f\n", intersection_alpha(p));
+  //   printf("  intersection_beta(p) = %f\n", intersection_beta(p));
+  //   printf("  intersection_gamma(p) = %f\n", intersection_gamma(p));
+  //   printf("  intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+  //   printf("  intersection_s1(p) = %f\n", intersection_s1(p));
+  //   printf("  intersection_s2(p) = %f\n", intersection_s2(p));
+  //   printf("  intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
+  //   printf("  intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
+  //   printf("  A = (%f, %f)\n", p.ax, p.ay);
+  //   printf("  B = (%f, %f)\n", p.bx, p.by);
+  //   printf("  M = (%f, %f)\n", p.mx, p.my);
+  //   printf("  r = %f\n", p.r);
+  // #endif
+
   HoleIceProblemParameters_t hip = {
     distance,
     interaction_length_factor,
@@ -208,6 +216,10 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 
         // TODO: Update algorithm description above.
 
+        // printf("HOLE ICE DEBUG:\n");
+        // printf("  *distancePropagated = %f\n", *distancePropagated);
+        // printf("  *distanceToAbsorption = %f\n", *distanceToAbsorption);
+
         IntersectionProblemParameters_t p = {
           photonPosAndTime.x,
           photonPosAndTime.y,
@@ -231,6 +243,19 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         const floating_t scaCorrection = hole_ice_distance_correction(scatteringCorrectionParameters);
         *distancePropagated += scaCorrection;
 
+        // printf("  SCATTERING CORRECTION:\n");
+        // printf("    scaCorrection = %f\n", scaCorrection);
+        // printf("    *distancePropagated = %f\n", *distancePropagated);
+        // printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+        // printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+        // printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+        // printf("    number_of_intersections(p) = %i\n", number_of_intersections(p));
+        // printf("    number_of_medium_changes = %i\n", scatteringCorrectionParameters.number_of_medium_changes);
+        // printf("    distance_ratio_inside_hole_ice = %f\n", scatteringCorrectionParameters.distance_ratio_inside_hole_ice);
+        // printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
+        // printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
+        // if (intersecting_trajectory_starts_inside(p)) { printf("    intersecting_trajectory_starts_inside = true\n"); }
+
         const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
         p.bx = photonDirAndWlen.x * projectedDistanceToAbsorption;
         p.by = photonDirAndWlen.y * projectedDistanceToAbsorption;
@@ -252,23 +277,25 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         const floating_t absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
         *distanceToAbsorption += absCorrection;
 
-        // printf("*distanceToAbsorption = %f\n", *distanceToAbsorption);
-        // printf("absCorrection = %f\n", absCorrection);
-        // printf("holeIceAbsorptionLengthFactor = %f\n", holeIceAbsorptionLengthFactor);
-        // printf("intersection_s1(p) = %f\n", intersection_s1(p));
-        // printf("absorptionTerminationPointRatio = %f\n", absorptionTerminationPointRatio);
-        // if (intersecting_trajectory_starts_inside(p)) { printf("intersecting_trajectory_starts_inside\n"); }
-        // printf("*distancePropagated = %f\n", *distancePropagated);
-        // printf("scaCorrection = %f\n", scaCorrection);
-        // printf("intersection_s1(p) = %f\n", intersection_s1(p));
-        // printf("intersection_s2(p) = %f\n", intersection_s2(p));
-        // printf("projectedDistanceToAbsorption = %f\n", projectedDistanceToAbsorption);
-        // printf("absorptionTerminationPointRatio = %f\n", absorptionTerminationPointRatio);
-
-
-
-
-
+        printf("  ABSORPTION CORRECTION:\n");
+        printf("    absCorrection = %f\n", absCorrection);
+        printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
+        // printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+        // printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+        // printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+        // printf("    number_of_intersections(p) = %i\n", number_of_intersections(p));
+        // printf("    number_of_medium_changes = %i\n", absorptionCorrectionParameters.number_of_medium_changes);
+        // printf("    distance_ratio_inside_hole_ice = %f\n", absorptionCorrectionParameters.distance_ratio_inside_hole_ice);
+        // printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
+        // printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
+        //
+        // if (intersecting_trajectory_starts_inside(p)) {
+        //   printf("    intersecting_trajectory_starts_inside = true\n");
+        // } else {
+        //   printf("    intersecting_trajectory_starts_inside = false\n");
+        // }
+        // printf("    squared_distance_from_center(p.ax, p.ay, p.mx, p.my) = %f\n", squared_distance_from_center(p.ax, p.ay, p.mx, p.my));
+        // printf("    sqr(p.r) = %f\n", sqr(p.r));
 
 //
 //
