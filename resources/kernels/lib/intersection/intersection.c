@@ -81,11 +81,6 @@ inline floating_t intersection_y2(IntersectionProblemParameters_t p)
   return p.ay + (p.by - p.ay) * intersection_s2(p);
 }
 
-inline floating_t squared_distance_from_center(floating_t X, floating_t Y, floating_t MX, floating_t MY)
-{
-    return (sqr(MX - X) + sqr(MY - Y));
-}
-
 inline bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
 {
   return (intersection_s1_for_lines(p) <= 0) &&
@@ -105,96 +100,3 @@ inline bool intersecting_trajectory_ends_inside(IntersectionProblemParameters_t 
       (intersection_discriminant(p) > 0);
 }
 
-inline bool is_tangent(IntersectionProblemParameters_t p)
-{
-  return intersection_s2(p) == intersection_s1(p);
-}
-
-inline int number_of_intersections(IntersectionProblemParameters_t p)
-{
-  const floating_t d = intersection_discriminant(p);
-  const floating_t s1 = intersection_s1(p);
-  const floating_t s2 = intersection_s2(p);
-
-  if (d < 0) return 0;
-  else if (d == 0) return 1;
-  else if (d > 0) {
-    // Both intersection points behind the trajectory starting point A:
-    if (my_is_nan(s1) && my_is_nan(s2)) return 0;
-
-    // One intersection point behind the trajectory starting point A:
-    if (my_is_nan(s1) || my_is_nan(s2)) {
-      // Here, a numerical issue may arise: See 2017-05-27 notes.
-      // If the photon starts outside and ends outside, then there can only be
-      // 0 or 2 intersection points, not 1. This can happen when the
-      // trajectory starts near the circle radius. The intersection
-      // point does not exist but results from a numerical issue.
-      const bool start_inside = intersecting_trajectory_starts_inside(p);
-      const bool end_inside = intersecting_trajectory_ends_inside(p);
-
-      if (start_inside && end_inside) {
-        return 0;
-      } else if (( ! start_inside) && ( ! end_inside)) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }
-    // Both intersection points on the positive trajectory:
-    return 2;
-  }
-
-#ifdef PRINTF_ENABLED
-  printf("ERROR: THIS POINT SHOULD NOT BE REACHED. in number_of_intersections().\n");
-#endif
-  return my_nan();
-}
-
-inline floating_t intersection_ratio_inside(IntersectionProblemParameters_t p)
-{
-    bool starts_inside = intersecting_trajectory_starts_inside(p);
-    int num_of_intersections = number_of_intersections(p);
-
-    // printf("HOLE ICE - INTERSECTION\n");
-    //printf(" -> num of intersections = %i\n", num_of_intersections);
-    //if (starts_inside) printf(" -> starts inside.\n");
-
-    //printf("intersection_alpha = %f\n", intersection_alpha(p));
-    //printf("intersection_beta = %f\n", intersection_beta(p));
-    //printf("intersection_gamma = %f\n", intersection_gamma(p));
-    //printf("intersection_discriminant = %f\n", intersection_discriminant(p));
-    //printf("intersection_s1 = %f\n", intersection_s1(p));
-
-    if (( ! starts_inside ) && ( num_of_intersections == 0 ))
-        return 0.0;
-    if (( ! starts_inside ) && ( num_of_intersections == 1 )) {
-        if (is_tangent(p)) {
-            return 0.0;
-        } else {
-            return 1.0 - intersection_s1(p);
-        }
-    }
-    if (( ! starts_inside ) && ( num_of_intersections == 2 ))
-        return intersection_s2(p) - intersection_s1(p);
-    if (( starts_inside ) && ( num_of_intersections == 0 ))
-        return 1.0;
-    if (( starts_inside ) && ( num_of_intersections == 1 ))
-        return intersection_s2(p);
-
-#ifdef PRINTF_ENABLED
-    printf("ERROR. This point should not be reached! in intersection_ratio_inside().\n");
-    printf("starts_inside = %d\n", starts_inside);
-    printf("num_of_intersections = %i\n", num_of_intersections);
-#endif
-    return my_nan();
-}
-
-inline floating_t intersection_trajectory_length(IntersectionProblemParameters_t p)
-{
-  return my_sqrt(sqr(p.ax - p.bx) + sqr(p.ay - p.by));
-}
-
-inline floating_t intersection_trajectory_length_inside(IntersectionProblemParameters_t p)
-{
-  return intersection_trajectory_length(p) * intersection_ratio_inside(p);
-}

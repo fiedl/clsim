@@ -81,28 +81,6 @@ IntersectionProblemParameters_t parameters_for_trajectory_starting_outside_no_in
   10.0        // r
 };
 
-TEST(NumberOfIntersectionsTest, TangentPoint) {
-  EXPECT_EQ(number_of_intersections(parameters_for_tangent), 1);
-}
-TEST(NumberOfIntersectionsTest, TwoIntersectionPoints) {
-  EXPECT_EQ(number_of_intersections(parameters_for_two_intersections), 2);
-}
-TEST(NumberOfIntersectionsTest, NoIntersectionPoint) {
-  EXPECT_EQ(number_of_intersections(parameters_for_no_intersection), 0);
-}
-TEST(NumberOfIntersectionsTest, StartingInside) {
-  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_starting_inside), 1);
-}
-TEST(NumberOfintersectionsTest, TwoIntersectionPointsRtlDirection) {
-  EXPECT_EQ(number_of_intersections(parameters_for_two_intersections_from_right_to_left), 2);
-}
-TEST(NumberOfintersectionsTest, StartingOnBorderOutwards) {
-  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_starting_on_border_outwards), 0);
-}
-TEST(NumberOfintersectionsTest, EndingOnBorder) {
-  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_ending_on_border), 0);
-}
-
 TEST(IntersectionPointsTest, TangentPoint) {
   EXPECT_EQ(intersection_x1(parameters_for_tangent), 1.0);
   EXPECT_EQ(intersection_y1(parameters_for_tangent), 0.5);
@@ -181,20 +159,3 @@ TEST(TrajectoryEndsInside, EndingOnBorder) {
   EXPECT_TRUE(intersecting_trajectory_ends_inside(parameters_for_trajectory_ending_on_border));
 }
 
-TEST(IntersectionRatioInside, TangentPoint) {
-  EXPECT_EQ(intersection_ratio_inside(parameters_for_tangent), 0.0);
-}
-TEST(IntersectionRatioInside, TwoIntersectionPoints) {
-  // Due to numeric issues, this is not exactly 0.2.
-  EXPECT_GT(intersection_ratio_inside(parameters_for_two_intersections), 0.19);
-  EXPECT_LT(intersection_ratio_inside(parameters_for_two_intersections), 0.21);
-}
-TEST(IntersectionRatioInside, NoIntersectionPoint) {
-  EXPECT_EQ(intersection_ratio_inside(parameters_for_no_intersection), 0.0);
-}
-TEST(IntersectionRatioInside, StartingInside) {
-  EXPECT_EQ(intersection_ratio_inside(parameters_for_trajectory_starting_inside), 0.25);
-}
-TEST(IntersectionRatioInside, StartingOnBorderOutwards) {
-  EXPECT_EQ(intersection_ratio_inside(parameters_for_trajectory_starting_on_border_outwards), 0.0);
-}

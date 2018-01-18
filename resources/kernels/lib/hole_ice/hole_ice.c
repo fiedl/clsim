@@ -14,16 +14,6 @@ inline unsigned int number_of_medium_changes(HoleIceProblemParameters_t p)
   return 2;
 }
 
-inline floating_t distance_ratio_inside_hole_ice(HoleIceProblemParameters_t p)
-{
-  if ((p.number_of_medium_changes == 0) && !p.starts_within_hole_ice) return 0.0;
-  if ((p.number_of_medium_changes == 0) && p.starts_within_hole_ice) return 1.0;
-  if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) return 1.0 - p.entry_point_ratio;
-  if ((p.number_of_medium_changes == 1) && p.starts_within_hole_ice) return p.termination_point_ratio;
-  if (p.number_of_medium_changes == 2) return p.termination_point_ratio - p.entry_point_ratio;
-  return my_nan();
-}
-
 inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 {
   // Depending on the fraction of the distance the photon is traveling
@@ -68,8 +58,8 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
     return (p.interaction_length_factor - 1.0) * p.distance;
   }
 
-  p.distance_ratio_inside_hole_ice = distance_ratio_inside_hole_ice(p);
-  const floating_t distance_within_hole_ice = p.distance * p.distance_ratio_inside_hole_ice;
+  // p.distance_ratio_inside_hole_ice = distance_ratio_inside_hole_ice(p);
+  // const floating_t distance_within_hole_ice = p.distance * p.distance_ratio_inside_hole_ice;
 
   // #ifdef PRINTF_ENABLED
   //   printf("HOLE ICE DISTANCE CORRECTION DEBUG:\n");
@@ -79,7 +69,7 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
   // Case 3: The trajectory begins outside, but ends inside the hole ice.
   if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) {
-    return (p.interaction_length_factor - 1.0) * distance_within_hole_ice;
+    return (p.interaction_length_factor - 1.0) * p.distance * (1.0 - p.entry_point_ratio);
   }
 
   const floating_t ab = p.distance;
@@ -98,7 +88,7 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
   if ((p.number_of_medium_changes == 2) && !p.starts_within_hole_ice) {
     const floating_t yb = ab * (1.0 - p.entry_point_ratio);
-    const floating_t yc = ab * p.distance_ratio_inside_hole_ice;
+    const floating_t yc = ab * (p.termination_point_ratio - p.entry_point_ratio);
 
     if (p.interaction_length_factor * yb > yc) {
       return (1.0 - 1.0 / p.interaction_length_factor) * yc;
@@ -151,8 +141,7 @@ inline floating_t hole_ice_distance_correction_for_intersection_problem(floating
     intersection_s1(p), // entry_point_ratio
     intersection_s2(p), // termination_point_ratio
     intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
-    0, // number_of_medium_changes (will be calculated)
-    0 // distance_ratio_inside_hole_ice (will be calcualted)
+    0 // number_of_medium_changes (will be calculated)
   };
   return hole_ice_distance_correction(hip);
 }
@@ -236,8 +225,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           intersection_s1(p), // entry_point_ratio
           intersection_s2(p), // termination_point_ratio
           intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
-          0, // number_of_medium_changes (will be calculated)
-          0 // distance_ratio_inside_hole_ice (will be calcualted)
+          0 // number_of_medium_changes (will be calculated)
         };
 
         const floating_t scaCorrection = hole_ice_distance_correction(scatteringCorrectionParameters);
@@ -270,8 +258,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           intersection_s1(p), // entry_point_ratio
           absorptionTerminationPointRatio, // termination_point_ratio
           intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
-          0, // number_of_medium_changes (will be calculated)
-          0 // distance_ratio_inside_hole_ice (will be calcualted)
+          0 // number_of_medium_changes (will be calculated)
         };
 
         const floating_t absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);

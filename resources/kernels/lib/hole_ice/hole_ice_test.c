@@ -27,8 +27,7 @@ HoleIceProblemParameters_t hip = {
   0.0,   // entry_point_ratio
   0.0,   // termination_point_ratio
   false, // starts_within_hole_ice
-  0,     // number_of_medium_changes (will be calculated)
-  0      // distance_ratio_inside_hole_ice (will be calcualted)
+  0      // number_of_medium_changes (will be calculated)
 };
 
 namespace {

@@ -29,7 +29,7 @@ __kernel void test_intersection_with_gpu(__global floating_t* results)
     0.5       // r
   };
 
-  results[0] = number_of_intersections(parameters);
+  results[0] = 0;
   results[1] = intersection_x1(parameters);
   results[2] = intersection_y1(parameters);
   results[3] = intersection_x2(parameters);

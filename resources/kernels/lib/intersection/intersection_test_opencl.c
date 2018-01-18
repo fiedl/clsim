@@ -101,7 +101,6 @@ TEST(RunningIntersectionTestOnGpu, OneIntersection) {
 
 
   /* Display Result */
-  printf("number_of_intersections: %e\n", results[0]);
   printf("intersection_x1: %e\n", results[1]);
   printf("intersection_y1: %e\n", results[2]);
   printf("intersection_x2: %e\n", results[3]);
@@ -110,7 +109,6 @@ TEST(RunningIntersectionTestOnGpu, OneIntersection) {
   printf("intersection_s2: %e\n", results[6]);
 
   /* gtest */
-  EXPECT_EQ(results[0], 1);
   EXPECT_NEAR(results[1], 1.0, 0.001);
   EXPECT_NEAR(results[2], 0.5, 0.001);
   EXPECT_NEAR(results[3], 1.0, 0.001);

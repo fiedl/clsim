@@ -8,7 +8,6 @@ typedef struct HoleIceProblemParameters {
   floating_t termination_point_ratio;
   bool starts_within_hole_ice;
   unsigned int number_of_medium_changes; // will be calculated
-  floating_t distance_ratio_inside_hole_ice; // will be calculated
 } HoleIceProblemParameters_t;
 
 #endif
