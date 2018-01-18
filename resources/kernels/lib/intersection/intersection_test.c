@@ -46,13 +46,40 @@ IntersectionProblemParameters_t parameters_for_two_intersections_from_right_to_l
   0.5       // r
 };
 
-IntersectionProblemParameters_t parameters_for_trajectory_starting_on_border = {
-  30.0, 10.0, // A
+IntersectionProblemParameters_t parameters_for_trajectory_starting_on_border_outwards = {
+  30.0, 10.0,  // A
   100.0, 10.0, // B
-  20.0, 10.0, // M
-  10.0       // r
+  20.0, 10.0,  // M
+  10.0         // r
 };
 
+IntersectionProblemParameters_t parameters_for_trajectory_starting_on_border_inwards = {
+  30.0, 10.0, // A
+  20.0, 10.0, // B
+  20.0, 10.0, // M
+  10.0        // r
+};
+
+IntersectionProblemParameters_t parameters_for_trajectory_ending_on_border = {
+  20.0, 10.0, // A
+  30.0, 10.0, // B
+  20.0, 10.0, // M
+  10.0        // r
+};
+
+IntersectionProblemParameters_t parameters_for_trajectory_starting_outside_no_intersection_outwards = {
+  15.0, 10.0, // A
+  20.0, 10.0, // B
+  0.0, 10.0,  // M
+  10.0        // r
+};
+
+IntersectionProblemParameters_t parameters_for_trajectory_starting_outside_no_intersection_towards = {
+  20.0, 10.0, // A
+  15.0, 10.0, // B
+  0.0, 10.0,  // M
+  10.0        // r
+};
 
 TEST(NumberOfIntersectionsTest, TangentPoint) {
   EXPECT_EQ(number_of_intersections(parameters_for_tangent), 1);
@@ -69,8 +96,11 @@ TEST(NumberOfIntersectionsTest, StartingInside) {
 TEST(NumberOfintersectionsTest, TwoIntersectionPointsRtlDirection) {
   EXPECT_EQ(number_of_intersections(parameters_for_two_intersections_from_right_to_left), 2);
 }
-TEST(NumberOfintersectionsTest, StartingOnBorder) {
-  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_starting_on_border), 0);
+TEST(NumberOfintersectionsTest, StartingOnBorderOutwards) {
+  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_starting_on_border_outwards), 0);
+}
+TEST(NumberOfintersectionsTest, EndingOnBorder) {
+  EXPECT_EQ(number_of_intersections(parameters_for_trajectory_ending_on_border), 0);
 }
 
 TEST(IntersectionPointsTest, TangentPoint) {
@@ -131,8 +161,24 @@ TEST(TrajectoryStartsInside, NoIntersectionPoint) {
 TEST(TrajectoryStartsInside, StartingInside) {
   EXPECT_TRUE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_inside));
 }
-TEST(TrajectoryStartsInside, StartingOnBorder) {
-  EXPECT_FALSE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_on_border));
+TEST(TrajectoryStartsInside, StartingOnBorderOutwards) {
+  EXPECT_FALSE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_on_border_outwards));
+}
+TEST(TrajectoryStartsInside, StartingOnBorderInwards) {
+  EXPECT_TRUE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_on_border_inwards));
+}
+TEST(TrajectoryStartsInside, StartingOutsideNoIntersectionOutwards) {
+  EXPECT_FALSE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_outside_no_intersection_outwards));
+}
+TEST(TrajectoryStartsInside, StartingOutsideNoIntersectionTowards) {
+  EXPECT_FALSE(intersecting_trajectory_starts_inside(parameters_for_trajectory_starting_outside_no_intersection_towards));
+}
+
+TEST(TrajectoryEndsInside, EndingOnBorder) {
+  // printf("TEST DEBUG:  s1 = %f\n", intersection_s1(parameters_for_trajectory_ending_on_border));
+  // printf("TEST DEBUG:  s2 = %f\n", intersection_s2(parameters_for_trajectory_ending_on_border));
+  // printf("TEST DEBUG:  d  = %f\n", intersection_discriminant(parameters_for_trajectory_ending_on_border));
+  EXPECT_TRUE(intersecting_trajectory_ends_inside(parameters_for_trajectory_ending_on_border));
 }
 
 TEST(IntersectionRatioInside, TangentPoint) {
@@ -149,6 +195,6 @@ TEST(IntersectionRatioInside, NoIntersectionPoint) {
 TEST(IntersectionRatioInside, StartingInside) {
   EXPECT_EQ(intersection_ratio_inside(parameters_for_trajectory_starting_inside), 0.25);
 }
-TEST(IntersectionRatioInside, StartingOnBorder) {
-  EXPECT_EQ(intersection_ratio_inside(parameters_for_trajectory_starting_on_border), 0.0);
+TEST(IntersectionRatioInside, StartingOnBorderOutwards) {
+  EXPECT_EQ(intersection_ratio_inside(parameters_for_trajectory_starting_on_border_outwards), 0.0);
 }

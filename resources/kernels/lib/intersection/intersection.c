@@ -24,10 +24,25 @@ inline floating_t intersection_discriminant(IntersectionProblemParameters_t p)
   return sqr(intersection_beta(p)) - 4 * intersection_alpha(p) * intersection_gamma(p);
 }
 
+inline floating_t intersection_s_for_lines(IntersectionProblemParameters_t p, int sign)
+{
+  return (-intersection_beta(p) +
+      sign * my_sqrt(intersection_discriminant(p))) / 2 / intersection_alpha(p);
+}
+
+inline floating_t intersection_s1_for_lines(IntersectionProblemParameters_t p)
+{
+  return intersection_s_for_lines(p, -1);
+}
+
+inline floating_t intersection_s2_for_lines(IntersectionProblemParameters_t p)
+{
+  return intersection_s_for_lines(p, +1);
+}
+
 inline floating_t intersection_s(IntersectionProblemParameters_t p, int sign)
 {
-  floating_t scale_parameter = (-intersection_beta(p) +
-    sign * my_sqrt(intersection_discriminant(p))) / 2 / intersection_alpha(p);
+  floating_t scale_parameter = intersection_s_for_lines(p, sign);
 
   // If the intersection point is outside, i.e. before or after the trajectory,
   // return 'not a number'.
@@ -73,17 +88,21 @@ inline floating_t squared_distance_from_center(floating_t X, floating_t Y, float
 
 inline bool intersecting_trajectory_starts_inside(IntersectionProblemParameters_t p)
 {
-    return (squared_distance_from_center(p.ax, p.ay, p.mx, p.my) < sqr(p.r));
+  return (intersection_s1_for_lines(p) <= 0) &&
+      (intersection_s2_for_lines(p) > 0) &&
+      (intersection_discriminant(p) > 0);
 }
 
 inline bool intersecting_trajectory_starts_outside(IntersectionProblemParameters_t p)
 {
-    return ( ! intersecting_trajectory_starts_inside(p));
+  return ( ! intersecting_trajectory_starts_inside(p));
 }
 
 inline bool intersecting_trajectory_ends_inside(IntersectionProblemParameters_t p)
 {
-    return (squared_distance_from_center(p.bx, p.by, p.mx, p.my) < sqr(p.r));
+  return (intersection_s1_for_lines(p) < 1) &&
+      (intersection_s2_for_lines(p) >= 1) &&
+      (intersection_discriminant(p) > 0);
 }
 
 inline bool is_tangent(IntersectionProblemParameters_t p)
