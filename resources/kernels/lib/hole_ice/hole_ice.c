@@ -50,11 +50,27 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   // Case 1: The trajectory is completely outside of the hole ice.
   // Thus, needs no correction.
   if ((p.number_of_medium_changes == 0) && !p.starts_within_hole_ice) {
+    printf("FALL 1\n");
     return 0;
+  }
+
+  // Case 4: The trajectory begins inside, but ends outside the hole ice.
+  if ((p.number_of_medium_changes == 1) && p.starts_within_hole_ice) {
+    printf("FALL 4\n");
+    const floating_t ac = p.distance * p.termination_point_ratio;
+    if (p.interaction_length_factor * p.distance > ac) {
+      printf("FALL 4a\n");
+      return (1.0 - 1.0 / p.interaction_length_factor) * ac;
+    } else {
+      printf("FALL 4b\n");
+      // Scaled trajectory is too short for this case. Fall back to case 2.
+      return (p.interaction_length_factor - 1.0) * p.distance;
+    }
   }
 
   // Case 2: The trajectory is completely within the hole ice.
   if ((p.number_of_medium_changes == 0) && p.starts_within_hole_ice) {
+    printf("FALL 2\n");
     return (p.interaction_length_factor - 1.0) * p.distance;
   }
 
@@ -67,41 +83,39 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   //   printf("  p.distance_within_hole_ice = %f\n", distance_within_hole_ice);
   // #endif
 
-  // Case 3: The trajectory begins outside, but ends inside the hole ice.
-  if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) {
-    return (p.interaction_length_factor - 1.0) * p.distance * (1.0 - p.entry_point_ratio);
-  }
-
-  const floating_t ab = p.distance;
-
-  // Case 4: The trajectory begins inside, but ends outside the hole ice.
-  if ((p.number_of_medium_changes == 1) && p.starts_within_hole_ice) {
-    const floating_t ac = ab * p.termination_point_ratio;
-    if (p.interaction_length_factor * ab > ac) {
-      return (1.0 - 1.0 / p.interaction_length_factor) * ac;
-    } else {
-      // Scaled trajectory is too short for this case. Fall back to case 2.
-      return (p.interaction_length_factor - 1.0) * p.distance;
-    }
-  }
+  //const floating_t ab = p.distance;
 
   // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
   if ((p.number_of_medium_changes == 2) && !p.starts_within_hole_ice) {
-    const floating_t yb = ab * (1.0 - p.entry_point_ratio);
-    const floating_t yc = ab * (p.termination_point_ratio - p.entry_point_ratio);
+    printf("FALL 5\n");
+
+    const floating_t yb = p.distance * (1.0 - p.entry_point_ratio);
+    const floating_t yc = p.distance * (p.termination_point_ratio - p.entry_point_ratio);
 
     if (p.interaction_length_factor * yb > yc) {
+      printf("FALL 5a\n");
+
       return (1.0 - 1.0 / p.interaction_length_factor) * yc;
     } else {
+      printf("FALL 5b\n");
+
       // Scaled trajectory is too short for this case. Fall back to case 3.
       return (p.interaction_length_factor - 1.0) * yb;
     }
+  }
+
+  // Case 3: The trajectory begins outside, but ends inside the hole ice.
+  if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) {
+    printf("FALL 3\n");
+    return (p.interaction_length_factor - 1.0) * p.distance * (1.0 - p.entry_point_ratio);
   }
 
   // Case 6: The trajectory starts in one cylinder, ends in another one.
   // We ignore this case as the cylinders are too far away from each other.
   // If this case is reached, this should raise an error.
   if ((p.number_of_medium_changes == 2) && p.starts_within_hole_ice) {
+    printf("FALL 6\n");
+
 #ifdef PRINTF_ENABLED
     printf("WARNING: INTERSECTION CASE 6 REACHED. This is not implemented, yet.");
 #endif
@@ -112,6 +126,8 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   printf("WARNING: UNHANDLED INTERSECTION CASE. This point should not be reached.");
 #endif
   // TODO: Raise error if `p.number_of_medium_changes` is anything else.
+
+  printf("FALL 0\n");
 
   return my_nan();
 }
