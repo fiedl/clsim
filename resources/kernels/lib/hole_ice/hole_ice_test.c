@@ -253,7 +253,7 @@ namespace {
   // TODO: Hole ice scenario with absorption and scattering.
   // Test apply_hole_ice_correction.
 
-  floating4_t photonPosAndTime = {0.0, 10.0, 1.0, 0.0};
+  floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
   floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
   unsigned int numberOfCylinders = 1;
   floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
@@ -282,48 +282,6 @@ namespace {
   TEST(ApplyHoleIceCorrection, ScatterWithinHoleIce) {
     floating_t holeIceScatteringLengthFactor = 0.5;
     floating_t holeIceAbsorptionLengthFactor = 0.8;
-    floating_t distancePropagated = 20;
-    floating_t distanceToAbsorption = 400;
-
-    apply_hole_ice_correction(
-      photonPosAndTime,
-      photonDirAndWlen,
-      numberOfCylinders,
-      cylinderPositionsAndRadii,
-      holeIceScatteringLengthFactor,
-      holeIceAbsorptionLengthFactor,
-      &distancePropagated,
-      &distanceToAbsorption
-    );
-
-    EXPECT_NEAR(distancePropagated, 15.0, desired_numeric_accuracy);
-    EXPECT_NEAR(distanceToAbsorption, (400.0 + 5.0 * (1 - 1.0 / 0.8)), desired_numeric_accuracy);
-  }
-
-  TEST(ApplyHoleIceCorrection, ScatterAfterHoleIce) {
-    floating_t holeIceScatteringLengthFactor = 0.5;
-    floating_t holeIceAbsorptionLengthFactor = 0.8;
-    floating_t distancePropagated = 60;
-    floating_t distanceToAbsorption = 400;
-
-    apply_hole_ice_correction(
-      photonPosAndTime,
-      photonDirAndWlen,
-      numberOfCylinders,
-      cylinderPositionsAndRadii,
-      holeIceScatteringLengthFactor,
-      holeIceAbsorptionLengthFactor,
-      &distancePropagated,
-      &distanceToAbsorption
-    );
-
-    EXPECT_NEAR(distancePropagated, (60 + 20 * (1 - 1 / 0.5)), desired_numeric_accuracy);
-    EXPECT_NEAR(distanceToAbsorption, (400.0 + 20.0 * (1 - 1 / 0.8)), desired_numeric_accuracy);
-  }
-
-  TEST(ApplyHoleIceCorrection, ImmediateAbsorptionInHoleIce) {
-    floating_t holeIceScatteringLengthFactor = 1.0;
-    floating_t holeIceAbsorptionLengthFactor = 0.0;
     floating_t distancePropagated = 40;
     floating_t distanceToAbsorption = 400;
 
@@ -338,8 +296,50 @@ namespace {
       &distanceToAbsorption
     );
 
-    EXPECT_NEAR(distancePropagated, 40.0, desired_numeric_accuracy); // Will not be corrected, because this case is already dealt with after the hole ice code in the propagation kernel.
-    EXPECT_NEAR(distanceToAbsorption, 10.0, desired_numeric_accuracy);
+    EXPECT_NEAR(distancePropagated, 40.0 - 0.5 * 10.0, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, (400.0 + 5.0 * (1 - 1.0 / 0.8)), desired_numeric_accuracy);
+  }
+
+  TEST(ApplyHoleIceCorrection, ScatterAfterHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 80;
+    floating_t distanceToAbsorption = 400;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, (80 + 20 * (1 - 1 / 0.5)), desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, (400.0 + 20.0 * (1 - 1 / 0.8)), desired_numeric_accuracy);
+  }
+
+  TEST(ApplyHoleIceCorrection, ImmediateAbsorptionInHoleIce) {
+    floating_t holeIceScatteringLengthFactor = 1.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.0;
+    floating_t distancePropagated = 60;
+    floating_t distanceToAbsorption = 400;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 60.0, desired_numeric_accuracy); // Will not be corrected, because this case is already dealt with after the hole ice code in the propagation kernel.
+    EXPECT_NEAR(distanceToAbsorption, 20.0 + 10.0, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, PhotonStartsOnRightCylinderBoarder) {
