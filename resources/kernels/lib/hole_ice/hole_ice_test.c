@@ -426,4 +426,41 @@ namespace {
     EXPECT_NEAR(distancePropagated, 0.485262, desired_numeric_accuracy);
     EXPECT_NEAR(distanceToAbsorption, 59.835110, desired_numeric_accuracy);
   }
+
+  TEST(ApplyHoleIceCorrection, NanIssue14InstantAbsorption) {
+    photonPosAndTime.x = -255.680984; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.060303;
+    photonDirAndWlen.x = -0.352114; photonDirAndWlen.y = -0.008777; photonDirAndWlen.z = 0.935916;
+    numberOfCylinders = 1;
+    cylinderPositionsAndRadii[0].x = -256.023010;
+    cylinderPositionsAndRadii[0].y = -521.281982;
+    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating_t holeIceScatteringLengthFactor = 1.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.0;
+    floating_t distancePropagated = 0.485262;
+    floating_t distanceToAbsorption = 59.835110;
+
+    const floating_t xyProjectionFactor = my_sqrt(1 - sqr(photonDirAndWlen.z));
+    IntersectionProblemParameters_t intersection_problem = {
+      -255.680984, -521.281982, // A
+      -255.680984 + (-0.352114 * distancePropagated * xyProjectionFactor), -521.281982 + (-0.008777 * distancePropagated * xyProjectionFactor), // B
+      -256.023010, -521.281982, // M
+      0.300000 // r
+    };
+    const floating_t distance_to_first_intersection_point = intersection_s1(intersection_problem) * distancePropagated;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 0.485262, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, distance_to_first_intersection_point, desired_numeric_accuracy);
+  }
+
 }
