@@ -266,8 +266,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         }
 
         const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
-        p.bx = photonDirAndWlen.x * projectedDistanceToAbsorption;
-        p.by = photonDirAndWlen.y * projectedDistanceToAbsorption;
+        p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
+        p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
         const floating_t absorptionTerminationPointRatio = my_is_nan(intersection_s2(p)) ? my_nan() : min(
           *distancePropagated / *distanceToAbsorption,
           intersection_s2(p)
