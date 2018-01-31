@@ -12,7 +12,7 @@ inline floating_t my_nan() { return NAN; }
 inline bool my_is_nan(floating_t a) { return isnan(a); }
 inline floating_t min(floating_t a, floating_t b) { return fmin(a, b); }
 
-const floating_t desired_numeric_accuracy = 0.03;
+const floating_t desired_numeric_accuracy = 0.001;
 
 IntersectionProblemParameters_t p = {
   0.0, 0.0, // A
