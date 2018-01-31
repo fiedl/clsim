@@ -393,4 +393,37 @@ namespace {
     EXPECT_NEAR(distancePropagated, 40.0, desired_numeric_accuracy);
     EXPECT_NEAR(distanceToAbsorption, 400.0, desired_numeric_accuracy);
   }
+
+  TEST(ApplyHoleIceCorrection, NanIssue14) {
+    // This is a reproduction of this issue:
+    // https://github.com/fiedl/hole-ice-study/issues/14
+    //
+    // Example dataset from the logs:
+    // NAN DEBUG: scaCorrection=0.000000, absCorrection=nan, photonPosAndTime=(-255.680984,-521.281982,499.060303,.), photonDirAndWlen=(-0.352114,-0.008777,0.935916,.), cylinderPositionsAndRadii={{-256.023010,-521.281982,0.000000,0.300000}}, holeIceScatteringLengthFactor=1.000000, holeIceAbsorptionLengthFactor=1.000000, distancePropagatedBeforeCorrection=0.485262, distanceToAbsorptionBeforeCorrection=59.835110
+
+    photonPosAndTime.x = -255.680984; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.060303;
+    photonDirAndWlen.x = -0.352114; photonDirAndWlen.y = -0.008777; photonDirAndWlen.z = 0.935916;
+    numberOfCylinders = 1;
+    cylinderPositionsAndRadii[0].x = -256.023010;
+    cylinderPositionsAndRadii[0].y = -521.281982;
+    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating_t holeIceScatteringLengthFactor = 1.0;
+    floating_t holeIceAbsorptionLengthFactor = 1.0;
+    floating_t distancePropagated = 0.485262;
+    floating_t distanceToAbsorption = 59.835110;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 0.485262, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, 59.835110, desired_numeric_accuracy);
+  }
 }
