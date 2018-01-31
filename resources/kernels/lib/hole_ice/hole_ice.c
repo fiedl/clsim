@@ -258,7 +258,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         printf("    intersection_s1(p) = %f\n", intersection_s1(p));
         printf("    intersection_s2(p) = %f\n", intersection_s2(p));
         printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-        printf("    number_of_medium_changes = %i\n", scatteringCorrectionParameters.number_of_medium_changes);
+        printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
         if (scatteringCorrectionParameters.starts_within_hole_ice) {
           printf("    starts_within_hole_ice = true\n");
         } else {
@@ -291,7 +291,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         printf("    intersection_s1(p) = %f\n", intersection_s1(p));
         printf("    intersection_s2(p) = %f\n", intersection_s2(p));
         printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-        printf("    number_of_medium_changes = %i\n", absorptionCorrectionParameters.number_of_medium_changes);
+        printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
         printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
         printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
         if (absorptionCorrectionParameters.starts_within_hole_ice) {
