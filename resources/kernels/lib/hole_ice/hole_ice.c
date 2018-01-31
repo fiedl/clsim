@@ -208,6 +208,11 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
   // TODO: Why?
   if (!(my_is_nan(photonPosAndTime.x) || my_is_nan(*distancePropagated))) {
 
+    // TODO: Remove those after debugging:
+    const floating_t distancePropagatedBeforeCorrection = *distancePropagated;
+    const floating_t distanceToAbsorptionBeforeCorrection = *distanceToAbsorption;
+
+
     for (unsigned int i = 0; i < numberOfCylinders; i++) {
 
       // Is the cylinder in range?
@@ -294,6 +299,29 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         } else {
           printf("    starts_within_hole_ice = false\n");
         }
+
+        printf(
+          "NAN DEBUG: "
+          "scaCorrection=%f, "
+          "absCorrection=%f, "
+          "photonPosAndTime=(%f,%f,%f,.), "
+          "photonDirAndWlen=(%f,%f,%f,.), "
+          "cylinderPositionsAndRadii={{%f,%f,%f,%f}}, "
+          "holeIceScatteringLengthFactor=%f, "
+          "holeIceAbsorptionLengthFactor=%f, "
+          "distancePropagatedBeforeCorrection=%f, "
+          "distanceToAbsorptionBeforeCorrection=%f"
+          "\n",
+          scaCorrection,
+          absCorrection,
+          photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z,
+          photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
+          cylinderPositionsAndRadii[0].x, cylinderPositionsAndRadii[0].y, cylinderPositionsAndRadii[0].z, cylinderPositionsAndRadii[0].w,
+          holeIceScatteringLengthFactor,
+          holeIceAbsorptionLengthFactor,
+          distancePropagatedBeforeCorrection,
+          distanceToAbsorptionBeforeCorrection
+        );
 
 //
 //
