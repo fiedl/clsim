@@ -67,7 +67,7 @@ inline floating_t my_fabs(floating_t a) {return fabs(a);}
 #endif
 inline floating_t sqr(floating_t a) {return a*a;}
 inline floating_t my_nan() { return NAN; }
-inline bool my_is_nan(floating_t a) { return isnan(a); }
+inline bool my_is_nan(floating_t a) { return (a != a); }
 
 
 inline int findLayerForGivenZPos(floating_t posZ)
