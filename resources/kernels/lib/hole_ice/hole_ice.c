@@ -6,10 +6,45 @@
 
 inline unsigned int number_of_medium_changes(HoleIceProblemParameters_t p)
 {
+  printf("number_of_medium_changes()\n");
+  printf("    p.entry_point_ratio = %f\n", p.entry_point_ratio);
+  printf("    p.termination_point_ratio = %f\n", p.termination_point_ratio);
+  if (my_is_nan(p.entry_point_ratio)) { printf("    my_is_nan(p.entry_point_ratio)\n"); }
+  if (my_is_nan(p.termination_point_ratio)) { printf("    my_is_nan(p.termination_point_ratio)\n"); }
+
+  const bool entry_nan = (my_is_nan(p.entry_point_ratio));
+  const bool termination_nan = (my_is_nan(p.termination_point_ratio));
+  if (entry_nan) printf("    entry_nan = true\n");
+  if (termination_nan) printf("    termination_nan = true\n");
+  if (entry_nan && termination_nan) printf("    (entry_nan && termination_nan) = true\n");
+  if (entry_nan || termination_nan) printf("    (entry_nan || termination_nan) = true\n");
+  if (false || false) printf("    (false || false) = true\n");
+
+  bool alternate_entry_nan = false; //my_is_nan(p.entry_point_ratio) ? true : false;
+  if (my_is_nan(p.entry_point_ratio) == 1) { alternate_entry_nan = true; }
+  bool alternate_termination_nan = false; //my_is_nan(p.termination_point_ratio) ? true : false;
+  if (my_is_nan(p.termination_point_ratio) == 1) { alternate_termination_nan = true; }
+  if (alternate_entry_nan) printf("    alternate_entry_nan = true\n");
+  if (alternate_termination_nan) printf("    alternate_termination_nan = true\n");
+  if (alternate_entry_nan && alternate_termination_nan) printf("    (alternate_entry_nan && alternate_termination_nan) = true\n");
+  if (alternate_entry_nan || alternate_termination_nan) printf("    (alternate_entry_nan || alternate_termination_nan) = true\n");
+
+  printf("    isnan(p.entry_point_ratio) = %i\n", isnan(p.entry_point_ratio));
+  printf("    isnan(p.termination_point_ratio) = %i\n", isnan(p.termination_point_ratio));
+  printf("    isnan(p.entry_point_ratio) + isnan(p.termination_point_ratio) = %i\n", isnan(p.entry_point_ratio) + isnan(p.termination_point_ratio));
+  if ((isnan(p.entry_point_ratio) > 0)) printf("    > 0\n");
+  if ((isnan(p.entry_point_ratio) > 0.5)) printf("    > 0.5\n");
+  if (isnan(p.entry_point_ratio) + isnan(p.termination_point_ratio) > 1) printf("    > 1\n");
+
+  if (p.entry_point_ratio != p.entry_point_ratio) { printf("    https://stackoverflow.com/a/8498056/2066546 entry\n"); }
+  if (p.termination_point_ratio != p.termination_point_ratio) { printf("    https://stackoverflow.com/a/8498056/2066546 termination\n"); }
+  if ((p.entry_point_ratio != p.entry_point_ratio) || (p.termination_point_ratio != p.termination_point_ratio)) { printf("    https://stackoverflow.com/a/8498056/2066546 or\n"); }
+
+
   // These are ordered by their frequency of occurrance in order
   // to optimize for performance.
-  if (my_is_nan(p.entry_point_ratio) && my_is_nan(p.termination_point_ratio)) return 0;
-  if (my_is_nan(p.entry_point_ratio) || my_is_nan(p.termination_point_ratio)) return 1;
+  if (my_is_nan(p.entry_point_ratio) && my_is_nan(p.termination_point_ratio)) { printf("number_of_medium_changes(): Fall 0\n"); return 0; }
+  if (my_is_nan(p.entry_point_ratio) || my_is_nan(p.termination_point_ratio)) { printf("number_of_medium_changes(): Fall 1\n"); return 1; }
   if (p.entry_point_ratio == p.termination_point_ratio) return 0; // tangent
   return 2;
 }
@@ -257,7 +292,11 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         printf("    *distancePropagated = %f\n", *distancePropagated);
         printf("    intersection_s1(p) = %f\n", intersection_s1(p));
         printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+        printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
+        printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
         printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+        printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
+        printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
         printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
         if (scatteringCorrectionParameters.starts_within_hole_ice) {
           printf("    starts_within_hole_ice = true\n");
@@ -290,6 +329,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
         printf("    intersection_s1(p) = %f\n", intersection_s1(p));
         printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+        printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
+        printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
         printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
         printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
         printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
