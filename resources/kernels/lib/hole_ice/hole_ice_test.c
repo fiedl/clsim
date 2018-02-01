@@ -9,7 +9,7 @@
 inline floating_t my_sqrt(floating_t a) {return sqrt(a);}
 inline floating_t sqr(floating_t a) {return a * a;}
 inline floating_t my_nan() { return NAN; }
-inline bool my_is_nan(floating_t a) { return isnan(a); }
+inline bool my_is_nan(floating_t a) { return (a != a); }
 inline floating_t min(floating_t a, floating_t b) { return fmin(a, b); }
 
 const floating_t desired_numeric_accuracy = 0.001;
