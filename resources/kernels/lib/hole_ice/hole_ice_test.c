@@ -250,15 +250,16 @@ namespace {
 }
 
 namespace {
-  // TODO: Hole ice scenario with absorption and scattering.
-  // Test apply_hole_ice_correction.
 
-  floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
-  floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
-  unsigned int numberOfCylinders = 1;
-  floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
 
   TEST(ApplyHoleIceCorrection, ScatterBeforeHoleIce) {
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 0.5;
     floating_t holeIceAbsorptionLengthFactor = 0.8;
     floating_t distancePropagated = 5;
@@ -280,6 +281,10 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, ScatterWithinHoleIce) {
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 0.5;
     floating_t holeIceAbsorptionLengthFactor = 0.8;
     floating_t distancePropagated = 40;
@@ -301,6 +306,10 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, ScatterAfterHoleIce) {
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 0.5;
     floating_t holeIceAbsorptionLengthFactor = 0.8;
     floating_t distancePropagated = 80;
@@ -322,6 +331,10 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, ImmediateAbsorptionInHoleIce) {
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 1.0;
     floating_t holeIceAbsorptionLengthFactor = 0.0;
     floating_t distancePropagated = 60;
@@ -343,15 +356,14 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, PhotonStartsOnRightCylinderBoarder) {
+    floating4_t photonPosAndTime = {30.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 1.0;
     floating_t holeIceAbsorptionLengthFactor = 1.0;
     floating_t distancePropagated = 40;
     floating_t distanceToAbsorption = 400;
-
-    // // set above:
-    // floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
-    // floating4_t photonPosAndTime = {0.0, 10.0, 1.0, 0.0};
-    photonPosAndTime.x = 30.0;
 
     apply_hole_ice_correction(
       photonPosAndTime,
@@ -369,15 +381,14 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, PhotonStartsOnLeftCylinderBoarder) {
+    floating4_t photonPosAndTime = {10.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
     floating_t holeIceScatteringLengthFactor = 1.0;
     floating_t holeIceAbsorptionLengthFactor = 1.0;
     floating_t distancePropagated = 40;
     floating_t distanceToAbsorption = 400;
-
-    // // set above:
-    // floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
-    // floating4_t photonPosAndTime = {0.0, 10.0, 1.0, 0.0};
-    photonPosAndTime.x = 10.0;
 
     apply_hole_ice_correction(
       photonPosAndTime,
@@ -401,12 +412,10 @@ namespace {
     // Example dataset from the logs:
     // NAN DEBUG: scaCorrection=0.000000, absCorrection=nan, photonPosAndTime=(-255.680984,-521.281982,499.060303,.), photonDirAndWlen=(-0.352114,-0.008777,0.935916,.), cylinderPositionsAndRadii={{-256.023010,-521.281982,0.000000,0.300000}}, holeIceScatteringLengthFactor=1.000000, holeIceAbsorptionLengthFactor=1.000000, distancePropagatedBeforeCorrection=0.485262, distanceToAbsorptionBeforeCorrection=59.835110
 
-    photonPosAndTime.x = -255.680984; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.060303;
-    photonDirAndWlen.x = -0.352114; photonDirAndWlen.y = -0.008777; photonDirAndWlen.z = 0.935916;
-    numberOfCylinders = 1;
-    cylinderPositionsAndRadii[0].x = -256.023010;
-    cylinderPositionsAndRadii[0].y = -521.281982;
-    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating4_t photonPosAndTime = {-255.680984, -521.281982, 499.060303, 0.0};
+    floating4_t photonDirAndWlen = {-0.352114, -0.008777, 0.935916, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
     floating_t holeIceScatteringLengthFactor = 1.0;
     floating_t holeIceAbsorptionLengthFactor = 1.0;
     floating_t distancePropagated = 0.485262;
@@ -428,12 +437,10 @@ namespace {
   }
 
   TEST(ApplyHoleIceCorrection, NanIssue14InstantAbsorption) {
-    photonPosAndTime.x = -255.680984; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.060303;
-    photonDirAndWlen.x = -0.352114; photonDirAndWlen.y = -0.008777; photonDirAndWlen.z = 0.935916;
-    numberOfCylinders = 1;
-    cylinderPositionsAndRadii[0].x = -256.023010;
-    cylinderPositionsAndRadii[0].y = -521.281982;
-    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating4_t photonPosAndTime = {-255.680984, -521.281982, 499.060303, 0.0};
+    floating4_t photonDirAndWlen = {-0.352114, -0.008777, 0.935916, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
     floating_t holeIceScatteringLengthFactor = 1.0;
     floating_t holeIceAbsorptionLengthFactor = 0.0;
     floating_t distancePropagated = 0.485262;
@@ -468,12 +475,10 @@ namespace {
     // Absorption and scattering should not be corrected in this case.
     // https://github.com/fiedl/hole-ice-study/issues/17
 
-    photonPosAndTime.x = -255.523010; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.133972;
-    photonDirAndWlen.x = -0.496493; photonDirAndWlen.y = 0.001049; photonDirAndWlen.z = 0.868040;
-    numberOfCylinders = 1;
-    cylinderPositionsAndRadii[0].x = -256.023010;
-    cylinderPositionsAndRadii[0].y = -521.281982;
-    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating4_t photonPosAndTime = {-255.523010, -521.281982, 499.133972, 0.0};
+    floating4_t photonDirAndWlen = {-0.496493, 0.001049, 0.868040, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
     floating_t holeIceScatteringLengthFactor = 0.1;
     floating_t holeIceAbsorptionLengthFactor = 0.1;
     floating_t distancePropagatedBeforeCorrection = 0.648981;
