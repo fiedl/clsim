@@ -250,6 +250,28 @@ namespace {
 }
 
 namespace {
+  TEST(ApplyHoleIceCorrection, NoIntersectionAtAll) {
+    floating4_t photonPosAndTime = {-20.0, 50.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 0.1;
+    floating_t holeIceAbsorptionLengthFactor = 0.1;
+    floating_t distancePropagatedBeforeCorrection = 100.0;
+    floating_t distanceToAbsorptionBeforeCorrection = 100.0;
+    floating_t distancePropagated = distancePropagatedBeforeCorrection;
+    floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
 
     EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
     EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
