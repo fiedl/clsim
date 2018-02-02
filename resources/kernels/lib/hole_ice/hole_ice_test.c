@@ -251,6 +251,8 @@ namespace {
 
 namespace {
   TEST(ApplyHoleIceCorrection, NoIntersectionAtAll) {
+    // This is case (a) from https://github.com/fiedl/hole-ice-study/issues/20.
+
     floating4_t photonPosAndTime = {-20.0, 50.0, 1.0, 0.0};
     floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
     unsigned int numberOfCylinders = 1;
@@ -261,6 +263,93 @@ namespace {
     floating_t distanceToAbsorptionBeforeCorrection = 100.0;
     floating_t distancePropagated = distancePropagatedBeforeCorrection;
     floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
+  TEST(ApplyHoleIceCorrection, StartingAtTangentPoint) {
+    // This is case (b) from https://github.com/fiedl/hole-ice-study/issues/20.
+
+    floating4_t photonPosAndTime = {20.0, 20.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {-1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 100;
+    floating_t distanceToAbsorption = 100;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
+  TEST(ApplyHoleIceCorrection, TangentFlyingAway) {
+    // This is case (c) from https://github.com/fiedl/hole-ice-study/issues/20.
+
+    floating4_t photonPosAndTime = {-20.0, 20.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {-1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 100;
+    floating_t distanceToAbsorption = 100;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
+  TEST(ApplyHoleIceCorrection, TangentFlyingTowards) {
+    // This is case (d) from https://github.com/fiedl/hole-ice-study/issues/20.
+
+    floating4_t photonPosAndTime = {-20.0, 20.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 0.8;
+    floating_t distancePropagated = 100;
+    floating_t distanceToAbsorption = 100;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
 
     apply_hole_ice_correction(
       photonPosAndTime,
