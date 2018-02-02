@@ -463,4 +463,37 @@ namespace {
     EXPECT_NEAR(distanceToAbsorption, distance_to_first_intersection_point, desired_numeric_accuracy);
   }
 
+  TEST(ApplyHoleIceCorrection, SignIssue17) {
+    // In this scenario the photon is scattered away before reaching the hole ice.
+    // Absorption and scattering should not be corrected in this case.
+    // https://github.com/fiedl/hole-ice-study/issues/17
+
+    photonPosAndTime.x = -255.523010; photonPosAndTime.y = -521.281982; photonPosAndTime.z = 499.133972;
+    photonDirAndWlen.x = -0.496493; photonDirAndWlen.y = 0.001049; photonDirAndWlen.z = 0.868040;
+    numberOfCylinders = 1;
+    cylinderPositionsAndRadii[0].x = -256.023010;
+    cylinderPositionsAndRadii[0].y = -521.281982;
+    cylinderPositionsAndRadii[0].w = 0.300000;
+    floating_t holeIceScatteringLengthFactor = 0.1;
+    floating_t holeIceAbsorptionLengthFactor = 0.1;
+    floating_t distancePropagatedBeforeCorrection = 0.648981;
+    floating_t distanceToAbsorptionBeforeCorrection = 31.514143;
+    floating_t distancePropagated = distancePropagatedBeforeCorrection;
+    floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
 }
