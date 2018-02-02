@@ -240,11 +240,14 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           cylinderPositionsAndRadii[i].w // radius
         };
 
+        const floating_t scatteringEntryPointRatio = intersection_s1(p);
+        const floating_t scatterintTerminationPointRatio = intersection_s2(p);
+
         HoleIceProblemParameters_t scatteringCorrectionParameters = {
           *distancePropagated,
           holeIceScatteringLengthFactor,
-          intersection_s1(p), // entry_point_ratio
-          intersection_s2(p), // termination_point_ratio
+          scatteringEntryPointRatio, // entry_point_ratio
+          scatterintTerminationPointRatio, // termination_point_ratio
           intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
           0 // number_of_medium_changes (will be calculated)
         };
@@ -269,18 +272,37 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           printf("    starts_within_hole_ice = false\n");
         }
 
-        const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
-        p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
-        p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
-        const floating_t absorptionTerminationPointRatio = my_is_nan(intersection_s2(p)) ? my_nan() : min(
-          *distancePropagated / *distanceToAbsorption,
-          intersection_s2(p)
-        );
+
+        // For the absorption, there are special cases where the photon is scattered before
+        // reaching either the first or the second absorption intersection point.
+        floating_t absorptionEntryPointRatio;
+        floating_t absorptionTerminationPointRatio;
+        if (my_is_nan(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice) {
+          // The photon comes from outside, but does not reach the hole ice
+          // because it is scattered away before that.
+          absorptionEntryPointRatio = my_nan();
+          absorptionTerminationPointRatio = my_nan();
+        } else {
+          // The photon reaches the hole ice, i.e. the absorption correction
+          // needs to be calculated.
+          const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
+          p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
+          p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
+
+          // If the photon is scattered away before reaching the far and of
+          // the hole ice, the affected trajectory is limited by the
+          // point where the photon is scattered away.
+          absorptionEntryPointRatio = intersection_s1(p);
+          absorptionTerminationPointRatio = my_is_nan(intersection_s2(p)) ? my_nan() : min(
+            *distancePropagated / *distanceToAbsorption,
+            intersection_s2(p)
+          );
+        }
 
         HoleIceProblemParameters_t absorptionCorrectionParameters = {
           *distanceToAbsorption,
           holeIceAbsorptionLengthFactor,
-          intersection_s1(p), // entry_point_ratio
+          absorptionEntryPointRatio, // entry_point_ratio
           absorptionTerminationPointRatio, // termination_point_ratio
           intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
           0 // number_of_medium_changes (will be calculated)
