@@ -293,10 +293,11 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           // the hole ice, the affected trajectory is limited by the
           // point where the photon is scattered away.
           absorptionEntryPointRatio = intersection_s1(p);
-          absorptionTerminationPointRatio = my_is_nan(intersection_s2(p)) ? my_nan() : min(
+          absorptionTerminationPointRatio = (scatteringCorrectionParameters.starts_within_hole_ice && my_is_nan(intersection_s2(p))) ? my_nan() : min(
             *distancePropagated / *distanceToAbsorption,
             intersection_s2(p)
           );
+          if (absorptionTerminationPointRatio >= 1.0) { absorptionTerminationPointRatio = my_nan(); }
         }
 
         HoleIceProblemParameters_t absorptionCorrectionParameters = {
