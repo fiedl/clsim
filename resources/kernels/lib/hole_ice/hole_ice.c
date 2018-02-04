@@ -4,12 +4,20 @@
 #include "hole_ice.h"
 #include "../intersection/intersection.c"
 
+inline bool is_between_zero_and_one(floating_t a) {
+  return ((a > 0.0) && (a < 1.0));
+}
+
+inline bool not_between_zero_and_one(floating_t a) {
+  return (! is_between_zero_and_one(a));
+}
+
 inline unsigned int number_of_medium_changes(HoleIceProblemParameters_t p)
 {
   // These are ordered by their frequency of occurrance in order
   // to optimize for performance.
-  if (my_is_nan(p.entry_point_ratio) && my_is_nan(p.termination_point_ratio)) return 0;
-  if (my_is_nan(p.entry_point_ratio) || my_is_nan(p.termination_point_ratio)) return 1;
+  if (not_between_zero_and_one(p.entry_point_ratio) && not_between_zero_and_one(p.termination_point_ratio)) return 0;
+  if (not_between_zero_and_one(p.entry_point_ratio) || not_between_zero_and_one(p.termination_point_ratio)) return 1;
   if (p.entry_point_ratio == p.termination_point_ratio) return 0; // tangent
   return 2;
 }
@@ -154,8 +162,8 @@ inline floating_t hole_ice_distance_correction_for_intersection_problem(floating
   HoleIceProblemParameters_t hip = {
     distance,
     interaction_length_factor,
-    intersection_s1(p), // entry_point_ratio
-    intersection_s2(p), // termination_point_ratio
+    intersection_s1_for_lines(p), // entry_point_ratio
+    intersection_s2_for_lines(p), // termination_point_ratio
     intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
     0 // number_of_medium_changes (will be calculated)
   };
@@ -240,8 +248,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           cylinderPositionsAndRadii[i].w // radius
         };
 
-        const floating_t scatteringEntryPointRatio = intersection_s1(p);
-        const floating_t scatterintTerminationPointRatio = intersection_s2(p);
+        const floating_t scatteringEntryPointRatio = intersection_s1_for_lines(p);
+        const floating_t scatterintTerminationPointRatio = intersection_s2_for_lines(p);
 
         HoleIceProblemParameters_t scatteringCorrectionParameters = {
           *distancePropagated,
@@ -277,12 +285,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         // reaching either the first or the second absorption intersection point.
         floating_t absorptionEntryPointRatio;
         floating_t absorptionTerminationPointRatio;
-        if (my_is_nan(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice) {
-          // The photon comes from outside, but does not reach the hole ice
-          // because it is scattered away before that.
-          absorptionEntryPointRatio = my_nan();
-          absorptionTerminationPointRatio = my_nan();
-        } else {
+        floating_t absCorrection = 0.0;
+        if (!(not_between_zero_and_one(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice)) {
           // The photon reaches the hole ice, i.e. the absorption correction
           // needs to be calculated.
           const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
@@ -292,42 +296,42 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           // If the photon is scattered away before reaching the far and of
           // the hole ice, the affected trajectory is limited by the
           // point where the photon is scattered away.
-          absorptionEntryPointRatio = intersection_s1(p);
-          absorptionTerminationPointRatio = (scatteringCorrectionParameters.starts_within_hole_ice && my_is_nan(intersection_s2(p))) ? my_nan() : min(
+          absorptionEntryPointRatio = intersection_s1_for_lines(p);
+          absorptionTerminationPointRatio = min(
             *distancePropagated / *distanceToAbsorption,
-            intersection_s2(p)
+            intersection_s2_for_lines(p)
           );
-          if (absorptionTerminationPointRatio >= 1.0) { absorptionTerminationPointRatio = my_nan(); }
+
+          HoleIceProblemParameters_t absorptionCorrectionParameters = {
+            *distanceToAbsorption,
+            holeIceAbsorptionLengthFactor,
+            absorptionEntryPointRatio, // entry_point_ratio
+            absorptionTerminationPointRatio, // termination_point_ratio
+            intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
+            0 // number_of_medium_changes (will be calculated)
+          };
+
+          absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
+
+          printf("  ABSORPTION CORRECTION:\n");
+          printf("    absCorrection = %f\n", absCorrection);
+          printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
+          printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+          printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+          printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
+          printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
+          printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+          printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
+          printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
+          printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
+          if (absorptionCorrectionParameters.starts_within_hole_ice) {
+            printf("    starts_within_hole_ice = true\n");
+          } else {
+            printf("    starts_within_hole_ice = false\n");
+          }
+
         }
-
-        HoleIceProblemParameters_t absorptionCorrectionParameters = {
-          *distanceToAbsorption,
-          holeIceAbsorptionLengthFactor,
-          absorptionEntryPointRatio, // entry_point_ratio
-          absorptionTerminationPointRatio, // termination_point_ratio
-          intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
-          0 // number_of_medium_changes (will be calculated)
-        };
-
-        const floating_t absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
         *distanceToAbsorption += absCorrection;
-
-        printf("  ABSORPTION CORRECTION:\n");
-        printf("    absCorrection = %f\n", absCorrection);
-        printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
-        printf("    intersection_s1(p) = %f\n", intersection_s1(p));
-        printf("    intersection_s2(p) = %f\n", intersection_s2(p));
-        printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
-        printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
-        printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-        printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
-        printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
-        printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
-        if (absorptionCorrectionParameters.starts_within_hole_ice) {
-          printf("    starts_within_hole_ice = true\n");
-        } else {
-          printf("    starts_within_hole_ice = false\n");
-        }
 
         printf(
           "NAN DEBUG: "
