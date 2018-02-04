@@ -937,4 +937,113 @@ namespace {
     EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
   }
 
+  TEST(ApplyHoleIceCorrection, StartsTowardsScattersInsideScatteringFactorGreaterOne) {
+    // In this scenario, the photon would scatter within the hole ice.
+    //
+    // But the scattering factor is greater than one, i.e. the scattering propability
+    // is smaller within the hole ice, resulting in a hole-ice correction that makes
+    // the photon scatter after leaving the hole ice.
+    //
+    // This is "Case 3b" from
+    // https://github.com/fiedl/hole-ice-study/issues/2.
+
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 100.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.5;
+    floating_t distancePropagated = 40.0;
+    floating_t distanceToAbsorption = 400.0;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection + (1 - 1/100.0) * 20.0, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/0.5) * 20.0, desired_numeric_accuracy);
+  }
+
+  TEST(ApplyHoleIceCorrection, StartsTowardsScattersInsideAbsorptionFactorGreaterOne) {
+    // In this scenario, the photon scatters within the hole ice and would also
+    // be absorbed within the hole ice.
+    //
+    // But the absorption factor is greater than one, i.e. the absorption propability
+    // is smaller within the hole ice, resulting in a hole-ice correction that makes
+    // the photon be absorbed after leaving the hole ice.
+    //
+    // https://github.com/fiedl/hole-ice-study/issues/2.
+
+    floating4_t photonPosAndTime = {-20.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 0.5;
+    floating_t holeIceAbsorptionLengthFactor = 100.0;
+    floating_t distancePropagated = 40.0;
+    floating_t distanceToAbsorption = 45.0;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection - 10.0 * 0.5 , desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/100.0) * (10.0 * 0.5), desired_numeric_accuracy);
+  }
+
+  TEST(ApplyHoleIceCorrection, StartsInsideScattersInsideScatteringFactorGreaterOne) {
+    // In this scenario, the photon starts within the hole ice and
+    // would scatter within the hole ice.
+    //
+    // But the scattering factor is greater than one, i.e. the scattering propability
+    // is smaller within the hole ice, resulting in a hole-ice correction that makes
+    // the photon scatter after leaving the hole ice.
+    //
+    // This is "Case 2b" from
+    // https://github.com/fiedl/hole-ice-study/issues/2.
+
+    floating4_t photonPosAndTime = {15.0, 10.0, 1.0, 0.0};
+    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
+    floating_t holeIceScatteringLengthFactor = 100.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.5;
+    floating_t distancePropagated = 5.0;
+    floating_t distanceToAbsorption = 400.0;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection + (1 - 1/100.0) * 15.0, desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/0.5) * 15.0, desired_numeric_accuracy);
+  }
+
 }
