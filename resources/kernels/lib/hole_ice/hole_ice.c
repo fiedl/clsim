@@ -96,18 +96,6 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
     }
   }
 
-  // Case 6: The trajectory starts in one cylinder, ends in another one.
-  // We ignore this case as the cylinders are too far away from each other.
-  // If this case is reached, this should raise an error.
-  if ((p.number_of_medium_changes == 2) && p.starts_within_hole_ice) {
-    printf("FALL 6\n");
-
-#ifdef PRINTF_ENABLED
-    printf("WARNING: INTERSECTION CASE 6 REACHED. This is not implemented, yet.");
-#endif
-    // TODO: Raise error.
-  }
-
 #ifdef PRINTF_ENABLED
   printf("WARNING: UNHANDLED INTERSECTION CASE. This point should not be reached.");
 #endif
