@@ -64,79 +64,35 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
   const floating_t ac = p.distance * p.termination_point_ratio;
 
-  // Case 4: The trajectory begins inside, but ends outside the hole ice.
-  if ((p.number_of_medium_changes == 1) && p.starts_within_hole_ice) {
-    printf("FALL 4\n");
+  if (p.starts_within_hole_ice) {
 
+    // Case 4: The trajectory begins inside, but ends outside the hole ice.
     if (p.interaction_length_factor * p.distance > ac) {
-      printf("FALL 4a\n");
+      printf("FALL 4\n");
+
       return (1.0 - 1.0 / p.interaction_length_factor) * ac;
+
+    // Case 2: The trajectory is completely within the hole ice.
     } else {
-      printf("FALL 4b\n");
-      // Scaled trajectory is too short for this case. Fall back to case 2.
+      printf("FALL 2\n");
+
       return (p.interaction_length_factor - 1.0) * p.distance;
     }
-  }
 
-  // Case 2: The trajectory is completely within the hole ice.
-  if ((p.number_of_medium_changes == 0) && p.starts_within_hole_ice) {
-    printf("FALL 2\n");
+  } else {
 
-    if (p.interaction_length_factor * p.distance < ac) {
-      printf("FALL 2a\n");
+    const floating_t yb = p.distance * (1.0 - p.entry_point_ratio);
+    const floating_t yc = p.distance * (p.termination_point_ratio - p.entry_point_ratio);
 
-      return (p.interaction_length_factor - 1.0) * p.distance;
-    } else {
-      printf("FALL 2b\n");
-
-      // Scaled trajectory is too long for this case. Fall back to case 4.
-      return (1.0 - 1.0 / p.interaction_length_factor) * ac;
-    }
-  }
-
-  // p.distance_ratio_inside_hole_ice = distance_ratio_inside_hole_ice(p);
-  // const floating_t distance_within_hole_ice = p.distance * p.distance_ratio_inside_hole_ice;
-
-  // #ifdef PRINTF_ENABLED
-  //   printf("HOLE ICE DISTANCE CORRECTION DEBUG:\n");
-  //   printf("  p.distance_ratio_inside_hole_ice = %f\n", p.distance_ratio_inside_hole_ice);
-  //   printf("  p.distance_within_hole_ice = %f\n", distance_within_hole_ice);
-  // #endif
-
-  //const floating_t ab = p.distance;
-
-  const floating_t yb = p.distance * (1.0 - p.entry_point_ratio);
-  const floating_t yc = p.distance * (p.termination_point_ratio - p.entry_point_ratio);
-
-  // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
-  if ((p.number_of_medium_changes == 2) && !p.starts_within_hole_ice) {
-    printf("FALL 5\n");
-
+    // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
     if (p.interaction_length_factor * yb > yc) {
-      printf("FALL 5a\n");
+      printf("FALL 5\n");
 
       return (1.0 - 1.0 / p.interaction_length_factor) * yc;
     } else {
-      printf("FALL 5b\n");
-
-      // Scaled trajectory is too short for this case. Fall back to case 3.
-      return (p.interaction_length_factor - 1.0) * yb;
-    }
-  }
-
-  // Case 3: The trajectory begins outside, but ends inside the hole ice.
-  if ((p.number_of_medium_changes == 1) && !p.starts_within_hole_ice) {
-    printf("FALL 3\n");
-
-    if (p.interaction_length_factor * yb < yc) {
-      printf("FALL 3a\n");
+      printf("FALL 3\n");
 
       return (p.interaction_length_factor - 1.0) * p.distance * (1.0 - p.entry_point_ratio);
-    } else {
-      printf("FALL 3b\n");
-
-      // Scaled trajectory is too long for this case. Fall back to case 5.
-      return (1.0 - 1.0 / p.interaction_length_factor) * yc;
     }
   }
 
