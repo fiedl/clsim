@@ -186,7 +186,6 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
     const floating_t distancePropagatedBeforeCorrection = *distancePropagated;
     const floating_t distanceToAbsorptionBeforeCorrection = *distanceToAbsorption;
 
-
     for (unsigned int i = 0; i < numberOfCylinders; i++) {
 
       // Is the cylinder in range?
@@ -214,113 +213,117 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           cylinderPositionsAndRadii[i].w // radius
         };
 
-        const floating_t scatteringEntryPointRatio = intersection_s1_for_lines(p);
-        const floating_t scatterintTerminationPointRatio = intersection_s2_for_lines(p);
+        // Are intersection points possible?
+        if (intersection_discriminant(p) > 0) {
 
-        HoleIceProblemParameters_t scatteringCorrectionParameters = {
-          *distancePropagated,
-          holeIceScatteringLengthFactor,
-          scatteringEntryPointRatio, // entry_point_ratio
-          scatterintTerminationPointRatio, // termination_point_ratio
-          intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
-          0 // number_of_medium_changes (will be calculated)
-        };
+          const floating_t scatteringEntryPointRatio = intersection_s1_for_lines(p);
+          const floating_t scatterintTerminationPointRatio = intersection_s2_for_lines(p);
 
-        const floating_t scaCorrection = hole_ice_distance_correction(scatteringCorrectionParameters);
-        *distancePropagated += scaCorrection;
-
-        printf("  SCATTERING CORRECTION:\n");
-        printf("    scaCorrection = %f\n", scaCorrection);
-        printf("    *distancePropagated = %f\n", *distancePropagated);
-        printf("    intersection_s1(p) = %f\n", intersection_s1(p));
-        printf("    intersection_s2(p) = %f\n", intersection_s2(p));
-        printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
-        printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
-        printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-        printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
-        printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
-        printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
-        if (scatteringCorrectionParameters.starts_within_hole_ice) {
-          printf("    starts_within_hole_ice = true\n");
-        } else {
-          printf("    starts_within_hole_ice = false\n");
-        }
-
-
-        // For the absorption, there are special cases where the photon is scattered before
-        // reaching either the first or the second absorption intersection point.
-        floating_t absorptionEntryPointRatio;
-        floating_t absorptionTerminationPointRatio;
-        floating_t absCorrection = 0.0;
-        if (!(not_between_zero_and_one(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice)) {
-          // The photon reaches the hole ice, i.e. the absorption correction
-          // needs to be calculated.
-          const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
-          p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
-          p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
-
-          // If the photon is scattered away before reaching the far and of
-          // the hole ice, the affected trajectory is limited by the
-          // point where the photon is scattered away.
-          absorptionEntryPointRatio = intersection_s1_for_lines(p);
-          absorptionTerminationPointRatio = min(
-            *distancePropagated / *distanceToAbsorption,
-            intersection_s2_for_lines(p)
-          );
-
-          HoleIceProblemParameters_t absorptionCorrectionParameters = {
-            *distanceToAbsorption,
-            holeIceAbsorptionLengthFactor,
-            absorptionEntryPointRatio, // entry_point_ratio
-            absorptionTerminationPointRatio, // termination_point_ratio
+          HoleIceProblemParameters_t scatteringCorrectionParameters = {
+            *distancePropagated,
+            holeIceScatteringLengthFactor,
+            scatteringEntryPointRatio, // entry_point_ratio
+            scatterintTerminationPointRatio, // termination_point_ratio
             intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
             0 // number_of_medium_changes (will be calculated)
           };
 
-          absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
+          const floating_t scaCorrection = hole_ice_distance_correction(scatteringCorrectionParameters);
+          *distancePropagated += scaCorrection;
 
-          printf("  ABSORPTION CORRECTION:\n");
-          printf("    absCorrection = %f\n", absCorrection);
-          printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
+          printf("  SCATTERING CORRECTION:\n");
+          printf("    scaCorrection = %f\n", scaCorrection);
+          printf("    *distancePropagated = %f\n", *distancePropagated);
           printf("    intersection_s1(p) = %f\n", intersection_s1(p));
           printf("    intersection_s2(p) = %f\n", intersection_s2(p));
           printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
           printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
           printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-          printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
-          printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
-          printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
-          if (absorptionCorrectionParameters.starts_within_hole_ice) {
+          printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
+          printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
+          printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
+          if (scatteringCorrectionParameters.starts_within_hole_ice) {
             printf("    starts_within_hole_ice = true\n");
           } else {
             printf("    starts_within_hole_ice = false\n");
           }
 
-        }
-        *distanceToAbsorption += absCorrection;
 
-        printf(
-          "NAN DEBUG: "
-          "scaCorrection=%f, "
-          "absCorrection=%f, "
-          "photonPosAndTime=(%f,%f,%f,.), "
-          "photonDirAndWlen=(%f,%f,%f,.), "
-          "cylinderPositionsAndRadii={{%f,%f,%f,%f}}, "
-          "holeIceScatteringLengthFactor=%f, "
-          "holeIceAbsorptionLengthFactor=%f, "
-          "distancePropagatedBeforeCorrection=%f, "
-          "distanceToAbsorptionBeforeCorrection=%f"
-          "\n",
-          scaCorrection,
-          absCorrection,
-          photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z,
-          photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
-          cylinderPositionsAndRadii[0].x, cylinderPositionsAndRadii[0].y, cylinderPositionsAndRadii[0].z, cylinderPositionsAndRadii[0].w,
-          holeIceScatteringLengthFactor,
-          holeIceAbsorptionLengthFactor,
-          distancePropagatedBeforeCorrection,
-          distanceToAbsorptionBeforeCorrection
-        );
+          // For the absorption, there are special cases where the photon is scattered before
+          // reaching either the first or the second absorption intersection point.
+          floating_t absorptionEntryPointRatio;
+          floating_t absorptionTerminationPointRatio;
+          floating_t absCorrection = 0.0;
+          if (!(not_between_zero_and_one(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice)) {
+            // The photon reaches the hole ice, i.e. the absorption correction
+            // needs to be calculated.
+            const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
+            p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
+            p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
+
+            // If the photon is scattered away before reaching the far and of
+            // the hole ice, the affected trajectory is limited by the
+            // point where the photon is scattered away.
+            absorptionEntryPointRatio = intersection_s1_for_lines(p);
+            absorptionTerminationPointRatio = min(
+              *distancePropagated / *distanceToAbsorption,
+              intersection_s2_for_lines(p)
+            );
+
+            HoleIceProblemParameters_t absorptionCorrectionParameters = {
+              *distanceToAbsorption,
+              holeIceAbsorptionLengthFactor,
+              absorptionEntryPointRatio, // entry_point_ratio
+              absorptionTerminationPointRatio, // termination_point_ratio
+              intersecting_trajectory_starts_inside(p), // starts_within_hole_ice
+              0 // number_of_medium_changes (will be calculated)
+            };
+
+            absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
+
+            printf("  ABSORPTION CORRECTION:\n");
+            printf("    absCorrection = %f\n", absCorrection);
+            printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
+            printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+            printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+            printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
+            printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
+            printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+            printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
+            printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
+            printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
+            if (absorptionCorrectionParameters.starts_within_hole_ice) {
+              printf("    starts_within_hole_ice = true\n");
+            } else {
+              printf("    starts_within_hole_ice = false\n");
+            }
+
+          }
+          *distanceToAbsorption += absCorrection;
+
+          printf(
+            "NAN DEBUG: "
+            "scaCorrection=%f, "
+            "absCorrection=%f, "
+            "photonPosAndTime=(%f,%f,%f,.), "
+            "photonDirAndWlen=(%f,%f,%f,.), "
+            "cylinderPositionsAndRadii={{%f,%f,%f,%f}}, "
+            "holeIceScatteringLengthFactor=%f, "
+            "holeIceAbsorptionLengthFactor=%f, "
+            "distancePropagatedBeforeCorrection=%f, "
+            "distanceToAbsorptionBeforeCorrection=%f"
+            "\n",
+            scaCorrection,
+            absCorrection,
+            photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z,
+            photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
+            cylinderPositionsAndRadii[0].x, cylinderPositionsAndRadii[0].y, cylinderPositionsAndRadii[0].z, cylinderPositionsAndRadii[0].w,
+            holeIceScatteringLengthFactor,
+            holeIceAbsorptionLengthFactor,
+            distancePropagatedBeforeCorrection,
+            distanceToAbsorptionBeforeCorrection
+          );
+        }
 
 
                   // We don't need to calculate a correction for `abs_lens_left` and `sca_step_left`, because
