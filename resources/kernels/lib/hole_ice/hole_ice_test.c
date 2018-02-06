@@ -935,8 +935,41 @@ namespace {
       &distanceToAbsorption
     );
 
-      EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
-      EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
+  TEST(ApplyHoleIceCorrection, AnotherNanIssue14) {
+    // This is a reproduction of this issue:
+    // https://github.com/fiedl/hole-ice-study/issues/14#issuecomment-363432459
+    //
+    // Example dataset from the logs:
+    // NAN DEBUG: scaCorrection=0.000000, absCorrection=nan, photonPosAndTime=(-255.095627,-521.281860,500.002075,.), photonDirAndWlen=(-0.898932,0.426471,0.100219,.), cylinderPositionsAndRadii={{-256.023010,-521.281982,0.000000,0.300000}}, holeIceScatteringLengthFactor=0.100000, holeIceAbsorptionLengthFactor=0.100000, distancePropagatedBeforeCorrection=0.636836, distanceToAbsorptionBeforeCorrection=155.735428
+
+    floating4_t photonPosAndTime = {-255.095627, -521.281860, 500.002075, 0.0};
+    floating4_t photonDirAndWlen = {-0.898932, 0.426471, 0.100219, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
+    floating_t holeIceScatteringLengthFactor = 0.1;
+    floating_t holeIceAbsorptionLengthFactor = 0.1;
+    floating_t distancePropagatedBeforeCorrection = 0.636836;
+    floating_t distanceToAbsorptionBeforeCorrection = 155.735428;
+    floating_t distancePropagated = distancePropagatedBeforeCorrection;
+    floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+    EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
   }
 
   TEST(ApplyHoleIceCorrection, SignIssue17) {
