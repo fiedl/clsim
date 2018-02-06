@@ -906,6 +906,39 @@ namespace {
     EXPECT_NEAR(distanceToAbsorption, distance_to_first_intersection_point, desired_numeric_accuracy);
   }
 
+  TEST(ApplyHoleIceCorrection, NewNanIssue14) {
+    // This is a reproduction of this issue:
+    // https://github.com/fiedl/hole-ice-study/issues/14#issuecomment-363432459
+    //
+    // Example dataset from the logs:
+    // NAN DEBUG: scaCorrection=0.000000, absCorrection=nan, photonPosAndTime=(-256.090363,-523.684937,503.091675,.), photonDirAndWlen=(0.841316,0.526975,-0.120350,.), cylinderPositionsAndRadii={{-256.023010,-521.281982,0.000000,0.300000}}, holeIceScatteringLengthFactor=0.100000, holeIceAbsorptionLengthFactor=0.100000, distancePropagatedBeforeCorrection=2.708774, distanceToAbsorptionBeforeCorrection=63.779461
+
+    floating4_t photonPosAndTime = {-256.090363, -523.684937, 503.091675, 0.0};
+    floating4_t photonDirAndWlen = {0.841316, 0.526975, -0.120350, 700e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
+    floating_t holeIceScatteringLengthFactor = 0.1;
+    floating_t holeIceAbsorptionLengthFactor = 0.1;
+    floating_t distancePropagatedBeforeCorrection = 2.708774;
+    floating_t distanceToAbsorptionBeforeCorrection = 63.779461;
+    floating_t distancePropagated = distancePropagatedBeforeCorrection;
+    floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+      EXPECT_TRUE(distancePropagated == distancePropagatedBeforeCorrection);
+      EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
+  }
+
   TEST(ApplyHoleIceCorrection, SignIssue17) {
     // In this scenario the photon is scattered away before reaching the hole ice.
     // Absorption and scattering should not be corrected in this case.

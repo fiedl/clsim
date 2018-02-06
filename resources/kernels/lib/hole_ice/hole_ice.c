@@ -14,6 +14,12 @@ inline bool not_between_zero_and_one(floating_t a) {
 
 inline unsigned int number_of_medium_changes(HoleIceProblemParameters_t p)
 {
+  // This case where the discriminant is negative and therer are no intersection,
+  // needs to come first, because `not_between_zero_and_one(nan)` may differ
+  // with different gpu drivers.
+  // https://github.com/fiedl/hole-ice-study/issues/14#issuecomment-363432459
+  if (my_is_nan(p.entry_point_ratio) && my_is_nan(p.termination_point_ratio)) return 0;
+
   // These are ordered by their frequency of occurrance in order
   // to optimize for performance.
   if (not_between_zero_and_one(p.entry_point_ratio) && not_between_zero_and_one(p.termination_point_ratio)) return 0;
