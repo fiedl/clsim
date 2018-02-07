@@ -1112,4 +1112,32 @@ namespace {
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/0.5) * 15.0, desired_numeric_accuracy);
   }
 
+  TEST(ApplyHoleIceCorrection, GeoGebraTestIssue22) {
+    // https://github.com/fiedl/hole-ice-study/issues/22
+
+    floating4_t photonPosAndTime = {10.0, 15.0, 1.2, 0.0};
+    floating4_t photonDirAndWlen = {(8.12 - 10.0) / 17.9, (28.91 - 15.0) / 17.9, (12.3 - 1.2) / 17.9, 73542800e-9};
+    unsigned int numberOfCylinders = 1;
+    floating4_t cylinderPositionsAndRadii[] = {{10.2, 20.5, 0.0, 2.76}};
+    floating_t holeIceScatteringLengthFactor = 0.0;
+    floating_t holeIceAbsorptionLengthFactor = 0.0;
+    floating_t distancePropagated = 17.9;
+    floating_t distanceToAbsorption = 17.9;
+    floating_t distancePropagatedBeforeCorrection = distancePropagated;
+    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
+
+    apply_hole_ice_correction(
+      photonPosAndTime,
+      photonDirAndWlen,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
+      holeIceScatteringLengthFactor,
+      holeIceAbsorptionLengthFactor,
+      &distancePropagated,
+      &distanceToAbsorption
+    );
+
+    EXPECT_NEAR(distancePropagated, 3.6, desired_numeric_accuracy);
+  }
+
 }
