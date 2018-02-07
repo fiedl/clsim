@@ -194,9 +194,6 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
             sqr(*distancePropagated + cylinderPositionsAndRadii[i].w /* radius */))
       {
 
-        const floating_t xyProjectionFactor = my_sqrt(1 - sqr(photonDirAndWlen.z));
-        const floating_t projectedDistancePropagated = *distancePropagated * xyProjectionFactor;
-
         // TODO: Update algorithm description above.
 
         printf("HOLE ICE DEBUG:\n");
@@ -206,8 +203,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
         IntersectionProblemParameters_t p = {
           photonPosAndTime.x,
           photonPosAndTime.y,
-          photonPosAndTime.x + photonDirAndWlen.x * projectedDistancePropagated,
-          photonPosAndTime.y + photonDirAndWlen.y * projectedDistancePropagated,
+          photonPosAndTime.x + photonDirAndWlen.x * *distancePropagated,
+          photonPosAndTime.y + photonDirAndWlen.y * *distancePropagated,
           cylinderPositionsAndRadii[i].x,
           cylinderPositionsAndRadii[i].y,
           cylinderPositionsAndRadii[i].w // radius
@@ -257,9 +254,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           if (!(not_between_zero_and_one(scatteringCorrectionParameters.entry_point_ratio) && !scatteringCorrectionParameters.starts_within_hole_ice)) {
             // The photon reaches the hole ice, i.e. the absorption correction
             // needs to be calculated.
-            const floating_t projectedDistanceToAbsorption = *distanceToAbsorption * xyProjectionFactor;
-            p.bx = photonPosAndTime.x + photonDirAndWlen.x * projectedDistanceToAbsorption;
-            p.by = photonPosAndTime.y + photonDirAndWlen.y * projectedDistanceToAbsorption;
+            p.bx = photonPosAndTime.x + photonDirAndWlen.x * *distanceToAbsorption;
+            p.by = photonPosAndTime.y + photonDirAndWlen.y * *distanceToAbsorption;
 
             // If the photon is scattered away before reaching the far and of
             // the hole ice, the affected trajectory is limited by the

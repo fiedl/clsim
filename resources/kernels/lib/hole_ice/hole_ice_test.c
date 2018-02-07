@@ -12,7 +12,7 @@ inline floating_t my_nan() { return NAN; }
 inline bool my_is_nan(floating_t a) { return (a != a); }
 inline floating_t min(floating_t a, floating_t b) { return fmin(a, b); }
 
-const floating_t desired_numeric_accuracy = 0.001;
+const floating_t desired_numeric_accuracy = 0.005;
 
 IntersectionProblemParameters_t p = {
   0.0, 0.0, // A
@@ -882,10 +882,9 @@ namespace {
     floating_t distancePropagated = 0.485262;
     floating_t distanceToAbsorption = 59.835110;
 
-    const floating_t xyProjectionFactor = my_sqrt(1 - sqr(photonDirAndWlen.z));
     IntersectionProblemParameters_t intersection_problem = {
       -255.680984, -521.281982, // A
-      -255.680984 + (-0.352114 * distancePropagated * xyProjectionFactor), -521.281982 + (-0.008777 * distancePropagated * xyProjectionFactor), // B
+      -255.680984 + (-0.352114 * distancePropagated), -521.281982 + (-0.008777 * distancePropagated), // B
       -256.023010, -521.281982, // M
       0.300000 // r
     };
@@ -983,7 +982,7 @@ namespace {
     floating4_t cylinderPositionsAndRadii[] = {{-256.023010, -521.281982, 0.0, 0.300000}};
     floating_t holeIceScatteringLengthFactor = 0.1;
     floating_t holeIceAbsorptionLengthFactor = 0.1;
-    floating_t distancePropagatedBeforeCorrection = 0.648981;
+    floating_t distancePropagatedBeforeCorrection = 0.348981;
     floating_t distanceToAbsorptionBeforeCorrection = 31.514143;
     floating_t distancePropagated = distancePropagatedBeforeCorrection;
     floating_t distanceToAbsorption = distanceToAbsorptionBeforeCorrection;
