@@ -301,6 +301,13 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           }
           *distanceToAbsorption += absCorrection;
 
+          // If the photon is absorbed before scattering, also cut `distancePropagated`.
+          // Otherwise, the photon is propagated too far and may accidentally be detected
+          // by a DOM. See: https://github.com/fiedl/hole-ice-study/issues/24
+          if (*distanceToAbsorption < *distancePropagated) {
+            *distancePropagated = *distanceToAbsorption;
+          }
+
           printf(
             "NAN DEBUG: "
             "scaCorrection=%f, "
