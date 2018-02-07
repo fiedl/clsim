@@ -366,7 +366,7 @@ namespace {
     EXPECT_TRUE(distanceToAbsorption == distanceToAbsorptionBeforeCorrection);
   }
 
-  TEST(ApplyHoleIceCorrection, StartInsideAndEndInsideAbsorbBeforeScatter) {
+  TEST(ApplyHoleIceCorrection, StartInsideAndEndInside) {
     // This is case (e.i) from https://github.com/fiedl/hole-ice-study/issues/20.
 
     floating4_t photonPosAndTime = {15.0, 10.0, 1.0, 0.0};
@@ -391,37 +391,8 @@ namespace {
       &distanceToAbsorption
     );
 
-    EXPECT_NEAR(distanceToAbsorption, 11 * 0.2, desired_numeric_accuracy);
-    EXPECT_NEAR(distancePropagated, distanceToAbsorption, desired_numeric_accuracy);
-  }
-
-  TEST(ApplyHoleIceCorrection, StartInsideAndEndInside) {
-    // This is case (e.i) from https://github.com/fiedl/hole-ice-study/issues/20.
-
-    floating4_t photonPosAndTime = {15.0, 10.0, 1.0, 0.0};
-    floating4_t photonDirAndWlen = {1.0,  0.0, 0.0, 700e-9};
-    unsigned int numberOfCylinders = 1;
-    floating4_t cylinderPositionsAndRadii[] = {{20.0, 10.0, 0.0, 10.0}};
-    floating_t holeIceScatteringLengthFactor = 0.5;
-    floating_t holeIceAbsorptionLengthFactor = 0.5;
-    floating_t distancePropagated = 10;
-    floating_t distanceToAbsorption = 11;
-    floating_t distancePropagatedBeforeCorrection = distancePropagated;
-    floating_t distanceToAbsorptionBeforeCorrection = distanceToAbsorption;
-
-    apply_hole_ice_correction(
-      photonPosAndTime,
-      photonDirAndWlen,
-      numberOfCylinders,
-      cylinderPositionsAndRadii,
-      holeIceScatteringLengthFactor,
-      holeIceAbsorptionLengthFactor,
-      &distancePropagated,
-      &distanceToAbsorption
-    );
-
     EXPECT_NEAR(distancePropagated, 10 * 0.5, desired_numeric_accuracy);
-    EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/0.5) * (10 * 0.5), desired_numeric_accuracy);
+    EXPECT_NEAR(distanceToAbsorption, 11 * 0.2, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, StartsOutsideAndFaceAway) {
@@ -592,8 +563,8 @@ namespace {
       &distanceToAbsorption
     );
 
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection + (1 - 1/0.5) * 15.0, desired_numeric_accuracy);
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection * 0.2, desired_numeric_accuracy);
-    EXPECT_NEAR(distancePropagated, distanceToAbsorption, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, StartsTowardsScatterInsideButAbsorbBeforeHoleIce) {
@@ -621,7 +592,7 @@ namespace {
       &distanceToAbsorption
     );
 
-    EXPECT_NEAR(distancePropagated, distanceToAbsorptionBeforeCorrection, desired_numeric_accuracy);
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection - 10 * 0.5, desired_numeric_accuracy); // Will be calculated anyway, but the photon will not scatter again, because it is absorbed before that.
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection, desired_numeric_accuracy);
   }
 
@@ -735,7 +706,7 @@ namespace {
       &distanceToAbsorption
     );
 
-    EXPECT_NEAR(distancePropagated, distanceToAbsorptionBeforeCorrection, desired_numeric_accuracy);
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection + (1 - 1/0.5) * 20.0, desired_numeric_accuracy); // Will be calculated anyway, but the photon will not scatter again, because it is absorbed before that.
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection, desired_numeric_accuracy);
   }
 
@@ -764,8 +735,8 @@ namespace {
       &distanceToAbsorption
     );
 
+    EXPECT_NEAR(distancePropagated, distancePropagatedBeforeCorrection + (1 - 1/0.5) * 20.0, desired_numeric_accuracy); // Will be calculated anyway, but the photon will not scatter again, because it is absorbed before that.
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection - (1 - 0.8) * 10.0, desired_numeric_accuracy);
-    EXPECT_NEAR(distancePropagated, distanceToAbsorption, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, StartsTowardsScatterAndAbsorbAfterHoleIce) {
@@ -816,8 +787,8 @@ namespace {
       &distanceToAbsorption
     );
 
+    EXPECT_NEAR(distancePropagated, 60.0, desired_numeric_accuracy); // Will not be corrected, because this case is already dealt with after the hole ice code in the propagation kernel.
     EXPECT_NEAR(distanceToAbsorption, 20.0 + 10.0, desired_numeric_accuracy);
-    EXPECT_NEAR(distancePropagated, distanceToAbsorption, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, PhotonStartsOnRightCylinderBoarder) {
@@ -931,8 +902,8 @@ namespace {
       &distanceToAbsorption
     );
 
+    EXPECT_NEAR(distancePropagated, 0.485262, desired_numeric_accuracy);
     EXPECT_NEAR(distanceToAbsorption, distance_to_first_intersection_point, desired_numeric_accuracy);
-    EXPECT_NEAR(distancePropagated, distanceToAbsorption, desired_numeric_accuracy);
   }
 
   TEST(ApplyHoleIceCorrection, NewNanIssue14) {
