@@ -143,6 +143,41 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floating4_t photonDirAndWlen, unsigned int numberOfCylinders, __constant floating4_t *cylinderPositionsAndRadii, floating_t holeIceScatteringLengthFactor, floating_t holeIceAbsorptionLengthFactor, floating_t *distancePropagated, floating_t *distanceToAbsorption)
 #endif
 {
+
+  //const floating_t distance_to_cylinder_center = my_sqrt(sqr(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[0].y));
+  //if (distance_to_cylinder_center <= cylinderPositionsAndRadii[0].w) {
+  //  *distanceToAbsorption = 0;
+  //}
+  //*distancePropagated = 0.01;
+  //return 0;
+
+  //IntersectionProblemParameters_t p = {
+  //  photonPosAndTime.x,
+  //  photonPosAndTime.y,
+  //  photonPosAndTime.x + photonDirAndWlen.x * *distanceToAbsorption,
+  //  photonPosAndTime.y + photonDirAndWlen.y * *distanceToAbsorption,
+  //  cylinderPositionsAndRadii[0].x,
+  //  cylinderPositionsAndRadii[0].y,
+  //  cylinderPositionsAndRadii[0].w // radius
+  //};
+  //
+  //// Are intersection points possible?
+  //if (intersection_discriminant(p) > 0) {
+  //  // Is the photon inside the cylinder?
+  //  if ((intersection_s1_for_lines(p) < 0) && (intersection_s2_for_lines(p) > 0)) {
+  //    *distanceToAbsorption = 0;
+  //  }
+  //}
+  //
+  //*distancePropagated = 0.01;
+  //return 0;
+  //
+  //
+  //
+  //*distanceToAbsorption = *distanceToAbsorption * (my_fabs(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) / my_fabs(photonDirAndWlen.x * *distanceToAbsorption));
+  //return 0;
+
+
   // The algorithm for the hole ice corrections is as follows:
   //
   // 1. intersection problem p = (vec A, vec B, vec M, r)
@@ -285,6 +320,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
             printf("    intersection_s1_for_lines(p) = %f\n", intersection_s1_for_lines(p));
             printf("    intersection_s2_for_lines(p) = %f\n", intersection_s2_for_lines(p));
             printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+            printf("    my_sqrt(intersection_discriminant(p)) = %f\n", my_sqrt(intersection_discriminant(p)));
             printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
             printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
             printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
