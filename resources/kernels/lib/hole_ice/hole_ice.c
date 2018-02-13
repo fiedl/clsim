@@ -82,7 +82,12 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   } else {
 
     const floating_t yb = p.distance * (1.0 - p.entry_point_ratio);
-    const floating_t yc = p.distance * (p.termination_point_ratio - p.entry_point_ratio);
+    floating_t yc = p.distance * (p.termination_point_ratio - p.entry_point_ratio);
+
+    if (yc < 0) {
+      printf("WARNING: YC SHOULD NOT BE NEGATIVE, BUT YC=%f\n", yc);
+      yc = 0;
+    }
 
     // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
     if (p.interaction_length_factor * yb > yc) {
