@@ -226,13 +226,36 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
     const floating_t distancePropagatedBeforeCorrection = *distancePropagated;
     const floating_t distanceToAbsorptionBeforeCorrection = *distanceToAbsorption;
 
-    for (unsigned int i = 0; i < numberOfCylinders; i++) {
-
-      // Is the cylinder in range?
-      if (sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) +
-          sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <=
+    // Find out which cylinders are in range in a separate loop
+    // in order to improve parallelism and thereby performance.
+    //
+    // See: https://github.com/fiedl/hole-ice-study/issues/30
+    //
+    int indices_of_cylinders_in_range[numberOfCylinders];
+    {
+      unsigned int j = 0;
+      for (unsigned int i = 0; i < numberOfCylinders; i++) {
+        indices_of_cylinders_in_range[i] = -1;
+      }
+      for (unsigned int i = 0; i < numberOfCylinders; i++) {
+        if (sqr(photonPosAndTime.x - cylinderPositionsAndRadii[i].x) +
+            sqr(photonPosAndTime.y - cylinderPositionsAndRadii[i].y) <=
             sqr(*distancePropagated + cylinderPositionsAndRadii[i].w /* radius */))
-      {
+        {
+          indices_of_cylinders_in_range[j] = i;
+          j += 1;
+        }
+      }
+    }
+
+    // Now loop over all cylinders in range and calculate corrections
+    // for `distancePropagated` and `distanceToAbsorption`.
+    //
+    for (unsigned int j = 0; j < numberOfCylinders; j++) {
+      const int i = indices_of_cylinders_in_range[j];
+      if (i == -1) {
+        break;
+      } else {
 
         // TODO: Update algorithm description above.
 
