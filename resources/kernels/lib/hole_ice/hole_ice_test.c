@@ -11,14 +11,22 @@ inline floating_t sqr(floating_t a) {return a * a;}
 inline floating_t my_nan() { return NAN; }
 inline bool my_is_nan(floating_t a) { return (a != a); }
 inline floating_t min(floating_t a, floating_t b) { return fmin(a, b); }
+inline floating_t dot(floating4_t a, floating4_t b)
+{
+  return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
 
-const floating_t desired_numeric_accuracy = 0.005;
+const floating_t desired_numeric_accuracy = 0.008;
 
 IntersectionProblemParameters_t p = {
-  0.0, 0.0, // A
-  0.0, 0.0, // B
-  0.0, 0.0, // M
-  10.0      // r
+  0.0, 0.0,             // A
+  0.0, 0.0,             // M
+  10.0,                 // r
+  {1.0, 0.0, 0.0, 0.0}, // direction
+  0.0,                  // distance
+  0.0,                  // discriminant
+  0.0,                  // s1
+  0.0,                  // s2
 };
 
 HoleIceProblemParameters_t hip = {
@@ -26,41 +34,35 @@ HoleIceProblemParameters_t hip = {
   0.0,   // interaction_length_factor
   0.0,   // entry_point_ratio
   0.0,   // termination_point_ratio
-  false, // starts_within_hole_ice
-  0      // number_of_medium_changes (will be calculated)
+  false  // starts_within_hole_ice
 };
 
 namespace {
   floating_t extremeInteractionFactor = 0.0;
 
   TEST(ExtremeDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
-    p.ax = 15.0; p.bx = 20.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, extremeInteractionFactor, p), 0.0, desired_numeric_accuracy);
+    p.ax = 15.0; p.distance = 20.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, extremeInteractionFactor, p), 0.0, desired_numeric_accuracy);
   }
 
   TEST(ExtremeDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
-    p.ax = -5.0; p.bx = 5.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, extremeInteractionFactor, p), -10.0, desired_numeric_accuracy);
+    p.ax = -5.0; p.distance = 5.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, extremeInteractionFactor, p), -10.0, desired_numeric_accuracy);
   }
 
   TEST(ExtremeDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
-    p.ax = -15.0; p.bx = 0.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, extremeInteractionFactor, p), -10.0, desired_numeric_accuracy);
+    p.ax = -15.0; p.distance = 0.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, extremeInteractionFactor, p), -10.0, desired_numeric_accuracy);
   }
 
   TEST(ExtremeDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = 15.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, extremeInteractionFactor, p), -15.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = 15.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, extremeInteractionFactor, p), -15.0, desired_numeric_accuracy);
   }
 
   TEST(ExtremeDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = -15.0; p.bx = 15.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, extremeInteractionFactor, p), -25.0, desired_numeric_accuracy);
+    p.ax = -15.0; p.distance = 15.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, extremeInteractionFactor, p), -25.0, desired_numeric_accuracy);
   }
 }
 
@@ -68,45 +70,38 @@ namespace {
   floating_t interactionFactor = 0.5;
 
   TEST(DistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
-    p.ax = 15.0; p.bx = 20.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), 0.0, desired_numeric_accuracy);
+    p.ax = 15.0; p.distance = 20.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), 0.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsInsideWithoutIntersections) {
-    p.ax = -5.0; p.bx = 5.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -5.0, desired_numeric_accuracy);
+    p.ax = -5.0; p.distance = 5.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -5.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
-    p.ax = -15.0; p.bx = 0.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -5.0, desired_numeric_accuracy);
+    p.ax = -15.0; p.distance = 0.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -5.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = 30.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -10.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = 30.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -10.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
-    p.ax = 0.0; p.bx = 12.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -6.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = 12.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -6.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = -35.0; p.bx = 35.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -20.0, desired_numeric_accuracy);
+    p.ax = -35.0; p.distance = 35.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -20.0, desired_numeric_accuracy);
   }
 
   TEST(DistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
-    p.ax = -20.0; p.bx = 12.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, interactionFactor, p), -11.0, desired_numeric_accuracy);
+    p.ax = -20.0; p.distance = 12.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, interactionFactor, p), -11.0, desired_numeric_accuracy);
   }
 }
 
@@ -114,45 +109,38 @@ namespace {
   floating_t asymInteractionFactor = 0.25;
 
   TEST(AsymDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
-    p.ax = 15.0; p.bx = 20.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), 0.0, desired_numeric_accuracy);
+    p.ax = 15.0; p.distance = 20.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), 0.0, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
-    p.ax = -5.0; p.bx = 5.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -7.5, desired_numeric_accuracy);
+    p.ax = -5.0; p.distance = 5.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -7.5, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
-    p.ax = -15.0; p.bx = 0.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -7.5, desired_numeric_accuracy);
+    p.ax = -15.0; p.distance = 0.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -7.5, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = 100.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -30.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = 100.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -30.0, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
-    p.ax = 0.0; p.bx = 12.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -9.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = 12.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -9.0, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = -100.0; p.bx = 100.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -60.0, desired_numeric_accuracy);
+    p.ax = -100.0; p.distance = 100.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -60.0, desired_numeric_accuracy);
   }
 
   TEST(AsymDistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
-    p.ax = -20.0; p.bx = 12.0;
-    const floating_t dst = p.bx - p.ax;
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, asymInteractionFactor, p), -16.5, desired_numeric_accuracy);
+    p.ax = -20.0; p.distance = 12.0 - p.ax;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, asymInteractionFactor, p), -16.5, desired_numeric_accuracy);
   }
 }
 
@@ -160,45 +148,38 @@ namespace {
   floating_t rtlInteractionFactor = 0.5;
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
-    p.ax = -15.0; p.bx = -20.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), 0.0, desired_numeric_accuracy);
+    p.ax = -15.0; p.distance = -(-20.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), 0.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
-    p.ax = 5.0; p.bx = -5.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -5.0, desired_numeric_accuracy);
+    p.ax = 5.0; p.distance = -(-5.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -5.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
-    p.ax = 15.0; p.bx = 0.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -5.0, desired_numeric_accuracy);
+    p.ax = 15.0; p.distance = -(0.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -5.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = -30.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -10.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = -(-30.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -10.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
-    p.ax = 0.0; p.bx = -12.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -6.0, desired_numeric_accuracy);
+    p.ax = 0.0; p.distance = -(-12.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -6.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = 35.0; p.bx = -35.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -20.0, desired_numeric_accuracy);
+    p.ax = 35.0; p.distance = -(-35.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -20.0, desired_numeric_accuracy);
   }
 
   TEST(RightToLeftDistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
-    p.ax = 20.0; p.bx = -12.0;
-    const floating_t dst = -(p.bx - p.ax);
-    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, rtlInteractionFactor, p), -11.0, desired_numeric_accuracy);
+    p.ax = 20.0; p.distance = -(-12.0 - p.ax); p.direction.x = -1;
+    EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(p.distance, rtlInteractionFactor, p), -11.0, desired_numeric_accuracy);
   }
 }
 
@@ -207,44 +188,44 @@ namespace {
   floating_t threeDScalingFactor = 2.0;
 
   TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithoutIntersections) {
-    p.ax = 15.0; p.bx = 20.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = 15.0; p.distance = 20.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), 0.0, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithoutIntersections) {
-    p.ax = -5.0; p.bx = 5.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = -5.0; p.distance = 5.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-5.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithOneIntersection) {
-    p.ax = -15.0; p.bx = 0.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = -15.0; p.distance = 0.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-5.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithOneIntersection) {
-    p.ax = 0.0; p.bx = 30.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = 0.0; p.distance = 30.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-10.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsInsideWithOneIntersectionButNoIntersectionAfterScaling) {
-    p.ax = 0.0; p.bx = 12.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = 0.0; p.distance = 12.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-6.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithTwoIntersections) {
-    p.ax = -35.0; p.bx = 35.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = -35.0; p.distance = 35.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-20.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 
   TEST(ThreeDDistanceCorrectionTest, BeginsOutsideWithTwoIntersectionsButOnlyOneIntersectionAfterScaling) {
-    p.ax = -20.0; p.bx = 12.0;
-    const floating_t dst = threeDScalingFactor * (p.bx - p.ax);
+    p.ax = -20.0; p.distance = 12.0 - p.ax; p.direction.x = 1.0;
+    const floating_t dst = threeDScalingFactor * (p.distance);
     EXPECT_NEAR(hole_ice_distance_correction_for_intersection_problem(dst, threeDInteractionFactor, p), (-11.0) * threeDScalingFactor, desired_numeric_accuracy);
   }
 }
@@ -884,10 +865,13 @@ namespace {
 
     IntersectionProblemParameters_t intersection_problem = {
       -255.680984, -521.281982, // A
-      -255.680984 + (-0.352114 * distancePropagated), -521.281982 + (-0.008777 * distancePropagated), // B
       -256.023010, -521.281982, // M
-      0.300000 // r
+      0.300000,                 // r
+      photonDirAndWlen,         // direction
+      distancePropagated,       // distance
+      0,0,0                     // (will be filled)
     };
+    calculate_intersections(&intersection_problem);
     const floating_t distance_to_first_intersection_point = intersection_s1(intersection_problem) * distancePropagated;
 
     apply_hole_ice_correction(
@@ -1111,8 +1095,8 @@ namespace {
     EXPECT_NEAR(distanceToAbsorption, distanceToAbsorptionBeforeCorrection + (1 - 1/0.5) * 15.0, desired_numeric_accuracy);
   }
 
-  TEST(ApplyHoleIceCorrection, GeoGebraTestIssue22) {
-    // https://github.com/fiedl/hole-ice-study/issues/22
+  TEST(ApplyHoleIceCorrection, GeoGebraTestIssue25) {
+    // https://github.com/fiedl/hole-ice-study/issues/25
 
     floating4_t photonPosAndTime = {10.0, 15.0, 1.2, 0.0};
     floating4_t photonDirAndWlen = {(8.12 - 10.0) / 17.9, (28.91 - 15.0) / 17.9, (12.3 - 1.2) / 17.9, 73542800e-9};
@@ -1138,5 +1122,4 @@ namespace {
 
     EXPECT_NEAR(distancePropagated, 3.6, desired_numeric_accuracy);
   }
-
 }

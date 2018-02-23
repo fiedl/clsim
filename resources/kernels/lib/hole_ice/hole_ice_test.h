@@ -15,5 +15,6 @@ extern inline floating_t sqr(floating_t);
 extern inline floating_t my_nan();
 extern inline bool my_is_nan(floating_t);
 extern inline floating_t min(floating_t, floating_t);
+extern inline floating_t dot(floating4_t, floating4_t);
 
 #endif
