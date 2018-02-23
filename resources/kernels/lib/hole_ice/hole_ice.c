@@ -132,47 +132,6 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 #endif
 {
 
-  // // https://github.com/fiedl/hole-ice-study/issues/28#issuecomment-366277409
-  // const floating_t photon_direction_recip_length = my_rsqrt(sqr(photonDirAndWlen.x) + sqr(photonDirAndWlen.y) + sqr(photonDirAndWlen.z));
-  // printf("DIRECTION VECTOR RECIP LENGTH = %f\n", photon_direction_recip_length);
-  // photonDirAndWlen.x *= photon_direction_recip_length;
-  // photonDirAndWlen.y *= photon_direction_recip_length;
-  // photonDirAndWlen.z *= photon_direction_recip_length;
-
-  //const floating_t distance_to_cylinder_center = my_sqrt(sqr(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[0].y));
-  //if (distance_to_cylinder_center <= cylinderPositionsAndRadii[0].w) {
-  //  *distanceToAbsorption = 0;
-  //}
-  //*distancePropagated = 0.01;
-  //return 0;
-
-  //IntersectionProblemParameters_t p = {
-  //  photonPosAndTime.x,
-  //  photonPosAndTime.y,
-  //  photonPosAndTime.x + photonDirAndWlen.x * *distanceToAbsorption,
-  //  photonPosAndTime.y + photonDirAndWlen.y * *distanceToAbsorption,
-  //  cylinderPositionsAndRadii[0].x,
-  //  cylinderPositionsAndRadii[0].y,
-  //  cylinderPositionsAndRadii[0].w // radius
-  //};
-  //
-  //// Are intersection points possible?
-  //if (intersection_discriminant(p) > 0) {
-  //  // Is the photon inside the cylinder?
-  //  if ((intersection_s1_for_lines(p) < 0) && (intersection_s2_for_lines(p) > 0)) {
-  //    *distanceToAbsorption = 0;
-  //  }
-  //}
-  //
-  //*distancePropagated = 0.01;
-  //return 0;
-  //
-  //
-  //
-  //*distanceToAbsorption = *distanceToAbsorption * (my_fabs(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) / my_fabs(photonDirAndWlen.x * *distanceToAbsorption));
-  //return 0;
-
-
   // The algorithm for the hole ice corrections is as follows:
   //
   // 1. intersection problem p = (vec A, vec B, vec M, r)
@@ -249,9 +208,9 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 
         // TODO: Update algorithm description above.
 
-        printf("HOLE ICE DEBUG:\n");
-        printf("  *distancePropagated = %f\n", *distancePropagated);
-        printf("  *distanceToAbsorption = %f\n", *distanceToAbsorption);
+        // printf("HOLE ICE DEBUG:\n");
+        // printf("  *distancePropagated = %f\n", *distancePropagated);
+        // printf("  *distanceToAbsorption = %f\n", *distanceToAbsorption);
 
         IntersectionProblemParameters_t p = {
 
@@ -273,9 +232,6 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 
         calculate_intersections(&p);
 
-        printf("  discriminant = %f\n", p.discriminant);
-        printf("  len(direction) = %f\n", my_sqrt(dot(p.direction, p.direction)));
-
         // Are intersection points possible?
         if (intersection_discriminant(p) > 0) {
 
@@ -293,20 +249,20 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           const floating_t scaCorrection = hole_ice_distance_correction(scatteringCorrectionParameters);
           *distancePropagated += scaCorrection;
 
-          printf("  SCATTERING CORRECTION:\n");
-          printf("    scaCorrection = %f\n", scaCorrection);
-          printf("    *distancePropagated = %f\n", *distancePropagated);
-          printf("    intersection_s1(p) = %f\n", intersection_s1(p));
-          printf("    intersection_s2(p) = %f\n", intersection_s2(p));
-          printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-          printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
-          printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
-          printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
-          if (scatteringCorrectionParameters.starts_within_hole_ice) {
-            printf("    starts_within_hole_ice = true\n");
-          } else {
-            printf("    starts_within_hole_ice = false\n");
-          }
+          // printf("  SCATTERING CORRECTION:\n");
+          // printf("    scaCorrection = %f\n", scaCorrection);
+          // printf("    *distancePropagated = %f\n", *distancePropagated);
+          // printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+          // printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+          // printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+          // printf("    entry_point_ratio = %f\n", scatteringCorrectionParameters.entry_point_ratio);
+          // printf("    termination_point_ratio = %f\n", scatteringCorrectionParameters.termination_point_ratio);
+          // printf("    number_of_medium_changes = %i\n", number_of_medium_changes(scatteringCorrectionParameters));
+          // if (scatteringCorrectionParameters.starts_within_hole_ice) {
+          //   printf("    starts_within_hole_ice = true\n");
+          // } else {
+          //   printf("    starts_within_hole_ice = false\n");
+          // }
 
 
           // For the absorption, there are special cases where the photon is scattered before
@@ -339,49 +295,49 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 
             absCorrection = hole_ice_distance_correction(absorptionCorrectionParameters);
 
-            printf("  ABSORPTION CORRECTION:\n");
-            printf("    absCorrection = %f\n", absCorrection);
-            printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
-            printf("    intersection_s1(p) = %f\n", intersection_s1(p));
-            printf("    intersection_s2(p) = %f\n", intersection_s2(p));
-            printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
-            printf("    my_sqrt(intersection_discriminant(p)) = %f\n", my_sqrt(intersection_discriminant(p)));
-            printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
-            printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
-            printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
-            if (absorptionCorrectionParameters.starts_within_hole_ice) {
-              printf("    starts_within_hole_ice = true\n");
-            } else {
-              printf("    starts_within_hole_ice = false\n");
-            }
+            // printf("  ABSORPTION CORRECTION:\n");
+            // printf("    absCorrection = %f\n", absCorrection);
+            // printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
+            // printf("    intersection_s1(p) = %f\n", intersection_s1(p));
+            // printf("    intersection_s2(p) = %f\n", intersection_s2(p));
+            // printf("    intersection_discriminant(p) = %f\n", intersection_discriminant(p));
+            // printf("    my_sqrt(intersection_discriminant(p)) = %f\n", my_sqrt(intersection_discriminant(p)));
+            // printf("    number_of_medium_changes = %i\n", number_of_medium_changes(absorptionCorrectionParameters));
+            // printf("    entry_point_ratio = %f\n", absorptionCorrectionParameters.entry_point_ratio);
+            // printf("    termination_point_ratio = %f\n", absorptionCorrectionParameters.termination_point_ratio);
+            // if (absorptionCorrectionParameters.starts_within_hole_ice) {
+            //   printf("    starts_within_hole_ice = true\n");
+            // } else {
+            //   printf("    starts_within_hole_ice = false\n");
+            // }
 
           }
           *distanceToAbsorption += absCorrection;
 
-          printf("    new *distanceToAbsorption = %f\n", *distanceToAbsorption);
-
-          printf(
-            "NAN DEBUG: "
-            "scaCorrection=%f, "
-            "absCorrection=%f, "
-            "photonPosAndTime=(%f,%f,%f,.), "
-            "photonDirAndWlen=(%f,%f,%f,.), "
-            "cylinderPositionsAndRadii={{%f,%f,%f,%f}}, "
-            "holeIceScatteringLengthFactor=%f, "
-            "holeIceAbsorptionLengthFactor=%f, "
-            "distancePropagatedBeforeCorrection=%f, "
-            "distanceToAbsorptionBeforeCorrection=%f"
-            "\n",
-            scaCorrection,
-            absCorrection,
-            photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z,
-            photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
-            cylinderPositionsAndRadii[0].x, cylinderPositionsAndRadii[0].y, cylinderPositionsAndRadii[0].z, cylinderPositionsAndRadii[0].w,
-            holeIceScatteringLengthFactor,
-            holeIceAbsorptionLengthFactor,
-            distancePropagatedBeforeCorrection,
-            distanceToAbsorptionBeforeCorrection
-          );
+          // printf("    new *distanceToAbsorption = %f\n", *distanceToAbsorption);
+          //
+          // printf(
+          //   "NAN DEBUG: "
+          //   "scaCorrection=%f, "
+          //   "absCorrection=%f, "
+          //   "photonPosAndTime=(%f,%f,%f,.), "
+          //   "photonDirAndWlen=(%f,%f,%f,.), "
+          //   "cylinderPositionsAndRadii={{%f,%f,%f,%f}}, "
+          //   "holeIceScatteringLengthFactor=%f, "
+          //   "holeIceAbsorptionLengthFactor=%f, "
+          //   "distancePropagatedBeforeCorrection=%f, "
+          //   "distanceToAbsorptionBeforeCorrection=%f"
+          //   "\n",
+          //   scaCorrection,
+          //   absCorrection,
+          //   photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z,
+          //   photonDirAndWlen.x, photonDirAndWlen.y, photonDirAndWlen.z,
+          //   cylinderPositionsAndRadii[0].x, cylinderPositionsAndRadii[0].y, cylinderPositionsAndRadii[0].z, cylinderPositionsAndRadii[0].w,
+          //   holeIceScatteringLengthFactor,
+          //   holeIceAbsorptionLengthFactor,
+          //   distancePropagatedBeforeCorrection,
+          //   distanceToAbsorptionBeforeCorrection
+          // );
         }
 
 
