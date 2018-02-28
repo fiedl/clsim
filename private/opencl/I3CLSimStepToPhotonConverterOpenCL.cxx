@@ -416,12 +416,17 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         // To define the hole ice positions in the kernel,
         // produce some kernel code like this:
         //
+        //     #define NUMBER_OF_CYLINDERS 2
         //     __constant const unsigned int numberOfCylinders = 2;
         //     __constant floating4_t cylinderPositionsAndRadii[numberOfCylinders] = {
         //       {0, 1.2, 3.4, 18.0},
         //       {0, -1.2, -3.4, 18.0}
         //     };
         //
+        preamble += "#define NUMBER_OF_CYLINDERS "
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + "\n";
+
         preamble += "__constant const unsigned int numberOfCylinders = "
             + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
             + ";\n";

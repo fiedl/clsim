@@ -180,7 +180,17 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
     //
     // See: https://github.com/fiedl/hole-ice-study/issues/30
     //
-    int indices_of_cylinders_in_range[numberOfCylinders];
+    #ifdef NUMBER_OF_CYLINDERS
+      // When running this on OpenCL, defining arrays using a constant
+      // as array size is not possible. Therefore, we need to use a
+      // pre-processor makro here.
+      //
+      // See: https://github.com/fiedl/hole-ice-study/issues/38
+      //
+      int indices_of_cylinders_in_range[NUMBER_OF_CYLINDERS];
+    #else
+      int indices_of_cylinders_in_range[numberOfCylinders];
+    #endif
     {
       unsigned int j = 0;
       for (unsigned int i = 0; i < numberOfCylinders; i++) {
