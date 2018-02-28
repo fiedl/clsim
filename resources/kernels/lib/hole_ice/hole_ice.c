@@ -130,39 +130,7 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
 #endif
 {
 
-  // The algorithm for the hole ice corrections is as follows:
-  //
-  // 1. intersection problem p = (vec A, vec B, vec M, r)
-  //
-  //    vec A is the position of the photon at the beginning of this
-  //    simulation step.
-  //
-  //    vec B is the position of the photon at the end of this simulation
-  //    step:
-  //
-  //        vec B = vec photonPosition + vec photonDirection * distancePropagated
-  //
-  // 2. distancePropagated += hole_ice_distance_correction(distancePropagated,
-  //        holeIceScatteringLengthFactor, p)
-  //
-  // 3. Gamma = min(distancePropagated, distanceToAbsorption)
-  //
-  //    distancePropagated is the already corrected distance until the next
-  //    scattering point.
-  //
-  //    Gamma is the distance between vec A and vec B that is used to calculate
-  //    the hole ice correction for the distance to absorption. We need to take
-  //    the min here, because, if the photon is scattered away before reaching
-  //    the point of absorption, only a fraction of the path, i.e. Gamma rather
-  //    then the whole distance to absorption, is affected by the hole ice.
-  //
-  // 4. p.vec B = vec photonPosition + vec photonDirection * Gamma
-  //
-  // 5. distanceToAbsorption += hole_ice_distance_correction(Gamma,
-  //        holeIceAbsorptionLengthFactor, p)
-  //
-  // After these steps, both `distancePropagated` and `distanceToAbsorption`
-  // have been properly corrected for this simulation step.
+  // TODO: Write algorithm description here.
 
   // For some reason, there are photons with photonPosAndTime coordinates
   // nan. I will have to ignore them.
@@ -213,8 +181,6 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
       if (i == -1) {
         break;
       } else {
-
-        // TODO: Update algorithm description above.
 
         // printf("HOLE ICE DEBUG:\n");
         // printf("  *distancePropagated = %f\n", *distancePropagated);
