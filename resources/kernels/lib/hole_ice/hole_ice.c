@@ -53,12 +53,10 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
   //   printf("  p.distance = %f\n", p.distance);
   // #endif
 
-  //printf("num_of_medium_changes = %i\n", num_of_medium_changes);
-
   // Case 1: The trajectory is completely outside of the hole ice.
   // Thus, needs no correction.
   if ((num_of_medium_changes == 0) && !p.starts_within_hole_ice) {
-    printf("FALL 1\n");
+    // printf("FALL 1\n");
     return 0;
   }
 
@@ -68,13 +66,13 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
     // Case 4: The trajectory begins inside, but ends outside the hole ice.
     if (p.interaction_length_factor * p.distance > ac) {
-      printf("FALL 4\n");
+      // printf("FALL 4\n");
 
       return (1.0 - 1.0 / p.interaction_length_factor) * ac;
 
     // Case 2: The trajectory is completely within the hole ice.
     } else {
-      printf("FALL 2\n");
+      // printf("FALL 2\n");
 
       return (p.interaction_length_factor - 1.0) * p.distance;
     }
@@ -91,11 +89,11 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 
     // Case 5: The trajectory starts and ends outside, but passes through the hole ice.
     if (p.interaction_length_factor * yb > yc) {
-      printf("FALL 5\n");
+      // printf("FALL 5\n");
 
       return (1.0 - 1.0 / p.interaction_length_factor) * yc;
     } else {
-      printf("FALL 3\n");
+      // printf("FALL 3\n");
 
       return (p.interaction_length_factor - 1.0) * p.distance * (1.0 - p.entry_point_ratio);
     }
@@ -106,7 +104,7 @@ inline floating_t hole_ice_distance_correction(HoleIceProblemParameters_t p)
 #endif
   // TODO: Raise error if `num_of_medium_changes` is anything else.
 
-  printf("FALL 0\n");
+  // printf("FALL 0\n");
 
   return my_nan();
 }
