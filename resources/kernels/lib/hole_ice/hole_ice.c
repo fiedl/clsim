@@ -171,7 +171,8 @@ inline floating_t apply_hole_ice_correction(floating4_t photonPosAndTime, floati
           // If the cylinder has a z-range check if we consider that cylinder
           // to be in range. https://github.com/fiedl/hole-ice-study/issues/34
           //
-          if ((cylinderPositionsAndRadii[i].z != 0) && !(((photonPosAndTime.z < cylinderPositionsAndRadii[i].z - 0.5) && (photonPosAndTime.z + *distancePropagated * photonDirAndWlen.z < cylinderPositionsAndRadii[i].z - 0.5)) || ((photonPosAndTime.z > cylinderPositionsAndRadii[i].z + 0.5) && (photonPosAndTime.z + *distancePropagated * photonDirAndWlen.z > cylinderPositionsAndRadii[i].z + 0.5)))) {
+          if ((cylinderPositionsAndRadii[i].z == 0) || ((cylinderPositionsAndRadii[i].z != 0) && !(((photonPosAndTime.z < cylinderPositionsAndRadii[i].z - 0.5) && (photonPosAndTime.z + *distancePropagated * photonDirAndWlen.z < cylinderPositionsAndRadii[i].z - 0.5)) || ((photonPosAndTime.z > cylinderPositionsAndRadii[i].z + 0.5) && (photonPosAndTime.z + *distancePropagated * photonDirAndWlen.z > cylinderPositionsAndRadii[i].z + 0.5)))))
+          {
             indices_of_cylinders_in_range[j] = i;
             j += 1;
           }
