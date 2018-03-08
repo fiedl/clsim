@@ -580,123 +580,34 @@ __kernel void propKernel(
 #endif
         }
 
-        // this block is along the lines of the PPC kernel
-        floating_t distancePropagated;
+        // PROPAGATION THROUGH DIFFERENT MEDIA 2018: Layers, Cylinders
+        // -----------------------------------------------------------------------------
+
+        // After this code, we need:
+        // - abs_lens_left
+        // - distancePropagated
+
+        // abs_lens_left is already given.
+        floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
+        int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
+        floating_t distancePropagated = sca_step_left * getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
+        floating_t distanceToAbsorption = abs_lens_left * getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
         {
-#ifdef getTiltZShift_IS_CONSTANT
-#define effective_z (photonPosAndTime.z-getTiltZShift_IS_CONSTANT)
-#else
-            // apply ice tilt
-            const floating_t effective_z = photonPosAndTime.z - getTiltZShift(photonPosAndTime);
-            int currentPhotonLayer = min(max(findLayerForGivenZPos(effective_z), 0), MEDIUM_LAYERS-1);
-#endif
+          if (distanceToAbsorption < distancePropagated)
+          {
+            distanceToAbsorption = ZERO;
+          } else {
+            distanceToAbsorption -= distancePropagated;
+          }
 
-            const floating_t photon_dz=photonDirAndWlen.z;
+          abs_lens_left = distanceToAbsorption / getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
+        }
 
-            // add a correction factor to the number of absorption lengths abs_lens_left
-            // before the photon is absorbed. This factor will be taken out after this
-            // propagation step. Usually the factor is 1 and thus has no effect, but it
-            // is used in a direction-dependent way for our model of ice anisotropy.
-            const floating_t abs_len_correction_factor = getDirectionalAbsLenCorrFactor(photonDirAndWlen);
-
-            abs_lens_left *= abs_len_correction_factor;
-
-            // the "next" medium boundary (either top or bottom, depending on step direction)
-            floating_t mediumBoundary = (photon_dz<ZERO)?(mediumLayerBoundary(currentPhotonLayer)):(mediumLayerBoundary(currentPhotonLayer)+(floating_t)MEDIUM_LAYER_THICKNESS);
-
-            // track this thing to the next scattering point
-            floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
-#ifdef PRINTF_ENABLED
-            //dbg_printf("   - next scatter in %f scattering lengths\n", sca_step_left);
-#endif
-
-            floating_t currentScaLen = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
-            floating_t currentAbsLen = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
-
-            floating_t ais=( photon_dz*sca_step_left - my_divide((mediumBoundary-effective_z),currentScaLen) )*(ONE/(floating_t)MEDIUM_LAYER_THICKNESS);
-            floating_t aia=( photon_dz*abs_lens_left - my_divide((mediumBoundary-effective_z),currentAbsLen) )*(ONE/(floating_t)MEDIUM_LAYER_THICKNESS);
-
-#ifdef PRINTF_ENABLED
-            //dbg_printf("   - ais=%f, aia=%f, j_initial=%i\n", ais, aia, currentPhotonLayer);
-#endif
-
-            // propagate through layers
-            int j=currentPhotonLayer;
-            if(photon_dz<0) {
-                for (; (j>0) && (ais<ZERO) && (aia<ZERO);
-                     mediumBoundary-=(floating_t)MEDIUM_LAYER_THICKNESS,
-                     currentScaLen=getScatteringLength(j, photonDirAndWlen.w),
-                     currentAbsLen=getAbsorptionLength(j, photonDirAndWlen.w),
-                     ais+=my_recip(currentScaLen),
-                     aia+=my_recip(currentAbsLen)) --j;
-            } else {
-                for (; (j<MEDIUM_LAYERS-1) && (ais>ZERO) && (aia>ZERO);
-                     mediumBoundary+=(floating_t)MEDIUM_LAYER_THICKNESS,
-                     currentScaLen=getScatteringLength(j, photonDirAndWlen.w),
-                     currentAbsLen=getAbsorptionLength(j, photonDirAndWlen.w),
-                     ais-=my_recip(currentScaLen),
-                     aia-=my_recip(currentAbsLen)) ++j;
-            }
-
-#ifdef PRINTF_ENABLED
-            //dbg_printf("   - j_final=%i\n", j);
-#endif
-
-            floating_t distanceToAbsorption;
-            if ((currentPhotonLayer==j) || ((my_fabs(photon_dz))<EPSILON)) {
-                distancePropagated=sca_step_left*currentScaLen;
-                distanceToAbsorption=abs_lens_left*currentAbsLen;
-            } else {
-                const floating_t recip_photon_dz = my_recip(photon_dz);
-                distancePropagated=(ais*((floating_t)MEDIUM_LAYER_THICKNESS)*currentScaLen+mediumBoundary-effective_z)*recip_photon_dz;
-                distanceToAbsorption=(aia*((floating_t)MEDIUM_LAYER_THICKNESS)*currentAbsLen+mediumBoundary-effective_z)*recip_photon_dz;
-            }
-#ifdef getTiltZShift_IS_CONSTANT
-            currentPhotonLayer=j;
-#endif
-
-#ifdef PRINTF_ENABLED
-            //dbg_printf("   - distancePropagated=%f\n", distancePropagated);
-#endif
-
-#ifdef HOLE_ICE
-            // The `holeIceScatteringLengthFactor` and the `holeIceAbsorptionLengthFactor`
-            // are set during kernel compilation and can be changed by setting the
-            // correpsonding icetray module parameters.
-
-            // To account for the hole ice, we need to calculate corrections for both
-            // `distancePropagated` and `distanceToAbsorption`. But neither `sca_step_left`
-            // nor `abs_lens_left` need to be corrected, because both are recalculated
-            // outside the hole ice code before they are used.
-            
-            apply_hole_ice_correction(
-              photonPosAndTime,
-              photonDirAndWlen,
-              numberOfCylinders,
-              cylinderPositionsAndRadii,
-              holeIceScatteringLengthFactor,
-              holeIceAbsorptionLengthFactor,
-              &distancePropagated,
-              &distanceToAbsorption
-            );
-#endif
-  
-
-
-            // get overburden for distance
-            if (distanceToAbsorption<distancePropagated) {
-                distancePropagated=distanceToAbsorption;
-                abs_lens_left=ZERO;
-            } else {
-                abs_lens_left=my_divide(distanceToAbsorption-distancePropagated, currentAbsLen);
-            }
-
-            // hoist the correction factor back out of the absorption length
-            abs_lens_left=my_divide(abs_lens_left, abs_len_correction_factor);
-
-
-
-  }
+        printf("HOLE ICE 2018 DEBUG\n");
+        printf("  sca_step_left = %f\n", sca_step_left);
+        printf("  distancePropagated = %f\n", distancePropagated);
+        printf("  abs_lens_left = %f\n", abs_lens_left);
+        printf("  distanceToAbsorption = %f\n", distanceToAbsorption);
 
 
 #ifndef SAVE_ALL_PHOTONS
