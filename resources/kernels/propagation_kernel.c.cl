@@ -583,6 +583,11 @@ __kernel void propKernel(
         // PROPAGATION THROUGH DIFFERENT MEDIA 2018: Layers, Cylinders
         // -----------------------------------------------------------------------------
 
+        // We know how many scattering and absorption lengths the photon will
+        // travel in this step. But these lengths are local properties.
+        // Therefore, we need to loop over all media in range and convert
+        // these into geometrical distances.
+
         // After this code, we need:
         // - abs_lens_left
         // - distancePropagated
@@ -590,24 +595,62 @@ __kernel void propKernel(
         // abs_lens_left is already given.
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
         int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
-        floating_t distancePropagated = sca_step_left * getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
-        floating_t distanceToAbsorption = abs_lens_left * getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
+        floating_t distancePropagated = 0;
+        floating_t distanceToAbsorption = 0;
         {
-          if (distanceToAbsorption < distancePropagated)
-          {
-            distanceToAbsorption = ZERO;
-          } else {
-            distanceToAbsorption -= distancePropagated;
+          int number_of_medium_changes = 2;
+          floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0, 1.0, 1.5};
+          //floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), 0.01};
+          //floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), 0.0};
+          floating_t local_scattering_lengths[MEDIUM_LAYERS] = {100.0, 100.0, 100.0};
+          floating_t local_absorption_lengths[MEDIUM_LAYERS] = {100.0, 100.0, 0.0};
+
+
+          printf("HOLE ICE 2018 DEBUG\n");
+          printf("  before:\n");
+          printf("    sca_step_left = %f\n", sca_step_left);
+          printf("    abs_lens_left = %f\n", abs_lens_left);
+
+          // For each medium, calculate the distance in that medium
+          // and modify `distancePropagated`, `distanceToAbsorption`,
+          // `sca_step_left` and `abs_lens_left`.
+          for (int j = 0; (j < number_of_medium_changes) && (sca_step_left > 0); j++) {
+            const floating_t max_distance_in_current_medium = distances_to_medium_changes[j+1] - distances_to_medium_changes[j];
+            sca_step_left -= my_divide(max_distance_in_current_medium, local_scattering_lengths[j]);
+            abs_lens_left -= my_divide(max_distance_in_current_medium, local_absorption_lengths[j]);
+            distancePropagated += max_distance_in_current_medium;
+            distanceToAbsorption += max_distance_in_current_medium;
+            if (sca_step_left < 0) {
+              distancePropagated += sca_step_left * max_distance_in_current_medium;
+              sca_step_left = 0;
+            }
+            if (abs_lens_left < 0) {
+              distanceToAbsorption += abs_lens_left * max_distance_in_current_medium;
+              abs_lens_left = 0;
+            }
+            printf("  within:\n");
+            printf("    sca_step_left = %f\n", sca_step_left);
+            printf("    abs_lens_left = %f\n", abs_lens_left);
+            printf("    distancePropagated = %f\n", distancePropagated);
+            printf("    distanceToAbsorption = %f\n", distanceToAbsorption);
           }
 
-          abs_lens_left = distanceToAbsorption / getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
-        }
+          // Spend the rest of the budget with the last medium properties.
+          distancePropagated += sca_step_left * local_scattering_lengths[number_of_medium_changes];
+          distanceToAbsorption += abs_lens_left * local_absorption_lengths[number_of_medium_changes];
 
-        printf("HOLE ICE 2018 DEBUG\n");
-        printf("  sca_step_left = %f\n", sca_step_left);
-        printf("  distancePropagated = %f\n", distancePropagated);
-        printf("  abs_lens_left = %f\n", abs_lens_left);
-        printf("  distanceToAbsorption = %f\n", distanceToAbsorption);
+          if (distanceToAbsorption < distancePropagated) {
+            distancePropagated = distanceToAbsorption;
+            distanceToAbsorption = ZERO;
+            abs_lens_left = ZERO;
+          }
+
+          printf("  after:\n");
+          printf("    distancePropagated = %f\n", distancePropagated);
+          printf("    distanceToAbsorption = %f\n", distanceToAbsorption);
+          printf("    sca_step_left = %f\n", sca_step_left);
+          printf("    abs_lens_left = %f\n", abs_lens_left);
+        }
 
 
 #ifndef SAVE_ALL_PHOTONS
