@@ -45,8 +45,6 @@
 #include <stdlib.h>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 
 #include <icetray/I3Units.h>
 
@@ -462,10 +460,12 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
 
         preamble += "};\n";
 
-        std::string cylinder_scattering_lengths_str = boost::algorithm::join(
-            holeIceCylinderScatteringLengths_ |
-              boost::adaptors::transformed(static_cast<std::string(*)(float)>(std::to_string)),
-            ", ");
+        std::string cylinder_scattering_lengths_str = "";
+        for (int i = 0; i < holeIceCylinderPositions_.size(); i++) {
+          cylinder_scattering_lengths_str +=
+              boost::lexical_cast<std::string>(holeIceCylinderScatteringLengths_[i]);
+          if (i < holeIceCylinderPositions_.size() - 1) cylinder_scattering_lengths_str += ", ";
+        }
         log_info("Hole ice cylinder scattering lengths: %s\n", cylinder_scattering_lengths_str.c_str());
         preamble += "__constant floating_t cylinderScatteringLengths["
             + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
@@ -473,10 +473,12 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
             + cylinder_scattering_lengths_str
             + "};\n";
 
-        std::string cylinder_absorption_lengths_str = boost::algorithm::join(
-            holeIceCylinderAbsorptionLengths_ |
-              boost::adaptors::transformed(static_cast<std::string(*)(float)>(std::to_string)),
-            ", ");
+        std::string cylinder_absorption_lengths_str = "";
+        for (int i = 0; i < holeIceCylinderPositions_.size(); i++) {
+          cylinder_absorption_lengths_str +=
+              boost::lexical_cast<std::string>(holeIceCylinderAbsorptionLengths_[i]);
+          if (i < holeIceCylinderPositions_.size() - 1) cylinder_absorption_lengths_str += ", ";
+        }
         log_info("Hole ice cylinder absorption lengths: %s\n", cylinder_absorption_lengths_str.c_str());
         preamble += "__constant floating_t cylinderAbsorptionLengths["
             + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
