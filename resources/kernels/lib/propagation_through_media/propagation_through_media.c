@@ -1,6 +1,7 @@
 #ifndef PROPAGATION_THROUGH_MEDIA_C
 #define PROPAGATION_THROUGH_MEDIA_C
 
+#include "propagation_through_media.h"
 #include "../intersection/intersection.c"
 
 
@@ -125,27 +126,12 @@ inline void apply_propagation_through_different_media(floating4_t photonPosAndTi
     }
   }
 
-  // Sort the arrays `distances_to_medium_changes`, `local_scattering_lengths` and
-  // `local_absorption_lengths` by ascending distance to have the medium changes
-  // in the right order.
-  //
-  // https://en.wikiversity.org/wiki/C_Source_Code/Sorting_array_in_ascending_and_descending_order
-  //
-  for (int k = 0; k < number_of_medium_changes; k++) {
-    for (int l = 0; l < number_of_medium_changes; l++) {
-      if (distances_to_medium_changes[l] > distances_to_medium_changes[k]) {
-        floating_t tmp_distance = distances_to_medium_changes[k];
-        floating_t tmp_scattering = local_scattering_lengths[k];
-        floating_t tmp_absorption = local_absorption_lengths[k];
-        distances_to_medium_changes[k] = distances_to_medium_changes[l];
-        local_scattering_lengths[k] = local_scattering_lengths[l];
-        local_absorption_lengths[k] = local_absorption_lengths[l];
-        distances_to_medium_changes[l] = tmp_distance;
-        local_scattering_lengths[l] = tmp_scattering;
-        local_absorption_lengths[l] = tmp_absorption;
-      }
-    }
-  }
+  sort_medium_changes_by_ascending_distance(
+    number_of_medium_changes,
+    distances_to_medium_changes,
+    local_scattering_lengths,
+    local_absorption_lengths
+  );
 
   //printf("  before medium-changes loop:\n");
   //printf("    number_of_medium_changes = %i\n", number_of_medium_changes);
@@ -198,6 +184,33 @@ inline void apply_propagation_through_different_media(floating4_t photonPosAndTi
   //printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
   //printf("    *sca_step_left = %f\n", *sca_step_left);
   //printf("    *abs_lens_left = %f\n", *abs_lens_left);
+}
+
+inline void sort_medium_changes_by_ascending_distance(int number_of_medium_changes, floating_t *distances_to_medium_changes, floating_t *local_scattering_lengths, floating_t *local_absorption_lengths)
+{
+  // Sort the arrays `distances_to_medium_changes`, `local_scattering_lengths` and
+  // `local_absorption_lengths` by ascending distance to have the medium changes
+  // in the right order.
+  //
+  // https://en.wikiversity.org/wiki/C_Source_Code/Sorting_array_in_ascending_and_descending_order
+  //
+  for (int k = 0; k < number_of_medium_changes; k++) {
+    for (int l = 0; l < number_of_medium_changes; l++) {
+      if (distances_to_medium_changes[l] > distances_to_medium_changes[k]) {
+        floating_t tmp_distance = distances_to_medium_changes[k];
+        floating_t tmp_scattering = local_scattering_lengths[k];
+        floating_t tmp_absorption = local_absorption_lengths[k];
+
+        distances_to_medium_changes[k] = distances_to_medium_changes[l];
+        local_scattering_lengths[k] = local_scattering_lengths[l];
+        local_absorption_lengths[k] = local_absorption_lengths[l];
+
+        distances_to_medium_changes[l] = tmp_distance;
+        local_scattering_lengths[l] = tmp_scattering;
+        local_absorption_lengths[l] = tmp_absorption;
+      }
+    }
+  }
 }
 
 #endif
