@@ -709,6 +709,10 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
             = frame->Get< I3Vector<I3Position> >("HoleIceCylinderPositions");
         holeIceCylinderRadii_
             = frame->Get< I3Vector<float> >("HoleIceCylinderRadii");
+        holeIceCylinderScatteringLengths_
+            = frame->Get< I3Vector<float> >("HoleIceCylinderScatteringLengths");
+        holeIceCylinderAbsorptionLengths_
+            = frame->Get< I3Vector<float> >("HoleIceCylinderAbsorptionLengths");
     }
 
     log_debug("Converting geometry..");
@@ -796,7 +800,9 @@ void I3CLSimModule::DigestGeometry(I3FramePtr frame)
                                                     photonHistoryEntries_,
                                                     limitWorkgroupSize_,
                                                     holeIceCylinderPositions_,
-                                                    holeIceCylinderRadii_
+                                                    holeIceCylinderRadii_,
+                                                    holeIceCylinderScatteringLengths_,
+                                                    holeIceCylinderAbsorptionLengths_
                                                 } );
         if (!openCLStepsToPhotonsConverter)
             log_fatal("Could not initialize OpenCL!");

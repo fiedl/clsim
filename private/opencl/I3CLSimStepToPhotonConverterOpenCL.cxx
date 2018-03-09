@@ -45,6 +45,8 @@
 #include <stdlib.h>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include <icetray/I3Units.h>
 
@@ -422,6 +424,10 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         //       {0, 1.2, 3.4, 18.0},
         //       {0, -1.2, -3.4, 18.0}
         //     };
+        //     __constant floating_t cylinderScatteringLengths[numberOfCylinders] =
+        //       {0.001, 100.0};
+        //     __constant floating_t cylinderAbsorptionLengths[numberOfCylinders] =
+        //       {100.0, 0.0};
         //
         preamble += "#define NUMBER_OF_CYLINDERS "
             + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
@@ -455,6 +461,28 @@ std::string I3CLSimStepToPhotonConverterOpenCL::GetPreambleSource()
         }
 
         preamble += "};\n";
+
+        std::string cylinder_scattering_lengths_str = boost::algorithm::join(
+            holeIceCylinderScatteringLengths_ |
+              boost::adaptors::transformed(static_cast<std::string(*)(float)>(std::to_string)),
+            ", ");
+        log_info("Hole ice cylinder scattering lengths: %s\n", cylinder_scattering_lengths_str.c_str());
+        preamble += "__constant floating_t cylinderScatteringLengths["
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + "] = {"
+            + cylinder_scattering_lengths_str
+            + "};\n";
+
+        std::string cylinder_absorption_lengths_str = boost::algorithm::join(
+            holeIceCylinderAbsorptionLengths_ |
+              boost::adaptors::transformed(static_cast<std::string(*)(float)>(std::to_string)),
+            ", ");
+        log_info("Hole ice cylinder absorption lengths: %s\n", cylinder_absorption_lengths_str.c_str());
+        preamble += "__constant floating_t cylinderAbsorptionLengths["
+            + boost::lexical_cast<std::string>(holeIceCylinderPositions_.size())
+            + "] = {"
+            + cylinder_absorption_lengths_str
+            + "};\n";
     }
 
     // Instead of sampling the number of absorption lengths from an
@@ -1585,6 +1613,26 @@ void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderRadii(I3Vector<float>
 I3Vector<float> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderRadii()
 {
     return holeIceCylinderRadii_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderScatteringLengths(I3Vector<float> holeIceCylinderScatteringLengths)
+{
+    holeIceCylinderScatteringLengths_ = holeIceCylinderScatteringLengths;
+}
+
+I3Vector<float> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderScatteringLengths()
+{
+    return holeIceCylinderScatteringLengths_;
+}
+
+void I3CLSimStepToPhotonConverterOpenCL::SetHoleIceCylinderAbsorptionLengths(I3Vector<float> holeIceCylinderAbsorptionLengths)
+{
+    holeIceCylinderAbsorptionLengths_ = holeIceCylinderAbsorptionLengths;
+}
+
+I3Vector<float> I3CLSimStepToPhotonConverterOpenCL::GetHoleIceCylinderAbsorptionLengths()
+{
+    return holeIceCylinderAbsorptionLengths_;
 }
 
 

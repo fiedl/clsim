@@ -310,14 +310,18 @@ public:
     double GetDOMPancakeFactor() const;
 
     /**
-     * Setters and getters for the hole ice cylinder positions and
-     * radii that are set in the geometry frame and passed to the
+     * Setters and getters for the hole ice cylinder configurations
+     * that are set in the geometry frame and passed to the
      * propagation kernel.
      */
     void SetHoleIceCylinderPositions(I3Vector<I3Position> holeIceCylinderPositions);
     void SetHoleIceCylinderRadii(I3Vector<float> holeIceCylinderRadii);
+    void SetHoleIceCylinderScatteringLengths(I3Vector<float> holeIceCylinderScatteringLengths);
+    void SetHoleIceCylinderAbsorptionLengths(I3Vector<float> holeIceCylinderAbsorptionLengths);
     I3Vector<I3Position> GetHoleIceCylinderPositions();
     I3Vector<float>      GetHoleIceCylinderRadii();
+    I3Vector<float>      GetHoleIceCylinderScatteringLengths();
+    I3Vector<float>      GetHoleIceCylinderAbsorptionLengths();
 
     /**
      * Sets the wavelength generators.
@@ -516,9 +520,11 @@ private:
 
     uint32_t photonHistoryEntries_;
 
-    // hole ice cylinder positions and radii
+    // hole ice cylinder configurations
     I3Vector<I3Position> holeIceCylinderPositions_;
     I3Vector<float>      holeIceCylinderRadii_;
+    I3Vector<float>      holeIceCylinderScatteringLengths_;
+    I3Vector<float>      holeIceCylinderAbsorptionLengths_;
 
     // some kernel sources loaded on construction
     std::string prependSource_;

@@ -595,8 +595,6 @@ __kernel void propKernel(
         // abs_lens_left is already given.
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
         int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
-        const floating_t cylinder_scattering_lengths[2] = {0.001, 100.0};
-        const floating_t cylinder_absorption_lengths[2] = {100.0, 0.0};
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
         {
@@ -683,14 +681,14 @@ __kernel void propKernel(
               if (intersection_discriminant(p) > 0) {
                 if ((intersection_s1(p) <= 0) && (intersection_s2(p) >= 0)) {
                   // The photon is already within the hole ice.
-                  local_scattering_lengths[number_of_medium_changes] = cylinder_scattering_lengths[i];
-                  local_absorption_lengths[number_of_medium_changes] = cylinder_absorption_lengths[i];
+                  local_scattering_lengths[number_of_medium_changes] = cylinderScatteringLengths[i];
+                  local_absorption_lengths[number_of_medium_changes] = cylinderAbsorptionLengths[i];
                 } else if (intersection_s1(p) > 0) {
                   // The photon enters the hole ice on its way.
                   number_of_medium_changes += 1;
                   distances_to_medium_changes[number_of_medium_changes] = intersection_s1(p);
-                  local_scattering_lengths[number_of_medium_changes] = cylinder_scattering_lengths[i];
-                  local_absorption_lengths[number_of_medium_changes] = cylinder_absorption_lengths[i];
+                  local_scattering_lengths[number_of_medium_changes] = cylinderScatteringLengths[i];
+                  local_absorption_lengths[number_of_medium_changes] = cylinderAbsorptionLengths[i];
                 }
                 if (intersection_s2(p) > 0) {
                   // The photon leaves the hole ice on its way.

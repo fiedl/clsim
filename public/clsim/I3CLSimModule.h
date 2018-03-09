@@ -304,6 +304,8 @@ private:
     /// Hole ice information read from geometry frame.
     I3Vector<I3Position> holeIceCylinderPositions_;
     I3Vector<float>      holeIceCylinderRadii_;
+    I3Vector<float>      holeIceCylinderScatteringLengths_;
+    I3Vector<float>      holeIceCylinderAbsorptionLengths_;
 
 
 private:

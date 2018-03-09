@@ -357,6 +357,8 @@ namespace I3CLSimModuleHelper {
 
         conv->SetHoleIceCylinderPositions(options.holeIceCylinderPositions);
         conv->SetHoleIceCylinderRadii(options.holeIceCylinderRadii);
+        conv->SetHoleIceCylinderScatteringLengths(options.holeIceCylinderScatteringLengths);
+        conv->SetHoleIceCylinderAbsorptionLengths(options.holeIceCylinderAbsorptionLengths);
 
         conv->Compile();
         //log_trace("%s", conv.GetFullSource().c_str());

@@ -70,6 +70,8 @@ namespace I3CLSimModuleHelper {
         uint32_t limitWorkgroupSize;
         I3Vector<I3Position> holeIceCylinderPositions;
         I3Vector<float> holeIceCylinderRadii;
+        I3Vector<float> holeIceCylinderScatteringLengths;
+        I3Vector<float> holeIceCylinderAbsorptionLengths;
     };
 
     I3CLSimStepToPhotonConverterOpenCLPtr
