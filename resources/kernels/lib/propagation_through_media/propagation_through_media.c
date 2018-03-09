@@ -128,56 +128,25 @@ inline void apply_propagation_through_different_media(floating4_t photonPosAndTi
 
   sort_medium_changes_by_ascending_distance(
     number_of_medium_changes,
+
+    // These values will be updates within this function:
     distances_to_medium_changes,
     local_scattering_lengths,
     local_absorption_lengths
   );
 
-  //printf("  before medium-changes loop:\n");
-  //printf("    number_of_medium_changes = %i\n", number_of_medium_changes);
-  //printf("    *sca_step_left = %f\n", *sca_step_left);
-  //printf("    *abs_lens_left = %f\n", *abs_lens_left);
+  loop_over_media_and_calculate_geometrical_distances_up_to_the_next_scattering_point(
+    number_of_medium_changes,
+    distances_to_medium_changes,
+    local_scattering_lengths,
+    local_absorption_lengths,
 
-  // For each medium, calculate the distance in that medium
-  // and modify `*distancePropagated`, `*distanceToAbsorption`,
-  // `*sca_step_left` and `*abs_lens_left`.
-  for (int j = 0; (j < number_of_medium_changes) && (*sca_step_left > 0); j++) {
-    const floating_t max_distance_in_current_medium = distances_to_medium_changes[j+1] - distances_to_medium_changes[j];
-    if (*sca_step_left * local_scattering_lengths[j] > max_distance_in_current_medium) {
-      *sca_step_left -= my_divide(max_distance_in_current_medium, local_scattering_lengths[j]);
-      *distancePropagated += max_distance_in_current_medium;
-    } else {
-      *distancePropagated += *sca_step_left * local_scattering_lengths[j];
-      *sca_step_left = 0;
-    }
-    if (*abs_lens_left * local_absorption_lengths[j] > max_distance_in_current_medium) {
-      *abs_lens_left -= my_divide(max_distance_in_current_medium, local_absorption_lengths[j]);
-      *distanceToAbsorption += max_distance_in_current_medium;
-    } else {
-      *distanceToAbsorption += *abs_lens_left * local_absorption_lengths[j];
-      *abs_lens_left = 0;
-    }
-    //printf("  within:\n");
-    //printf("    j = %i\n", j);
-    //printf("    local_scattering_length = %f\n", local_scattering_lengths[j]);
-    //printf("    local_absorption_lengths = %f\n", local_absorption_lengths[j]);
-    //printf("    *sca_step_left = %f\n", *sca_step_left);
-    //printf("    *abs_lens_left = %f\n", *abs_lens_left);
-    //printf("    *distancePropagated = %f\n", *distancePropagated);
-    //printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
-  }
-
-  // Spend the rest of the budget with the last medium properties.
-  *distancePropagated += *sca_step_left * local_scattering_lengths[number_of_medium_changes];
-  *distanceToAbsorption += *abs_lens_left * local_absorption_lengths[number_of_medium_changes];
-
-  if (*distanceToAbsorption < *distancePropagated) {
-    *distancePropagated = *distanceToAbsorption;
-    *distanceToAbsorption = ZERO;
-    *abs_lens_left = ZERO;
-  } else {
-    *abs_lens_left -= my_divide(*distancePropagated, local_absorption_lengths[number_of_medium_changes]);
-  }
+    // These values will be updates within this function:
+    sca_step_left,
+    abs_lens_left,
+    distancePropagated,
+    distanceToAbsorption
+  );
 
   //printf("  after:\n");
   //printf("    *distancePropagated = %f\n", *distancePropagated);
@@ -210,6 +179,58 @@ inline void sort_medium_changes_by_ascending_distance(int number_of_medium_chang
         local_absorption_lengths[l] = tmp_absorption;
       }
     }
+  }
+}
+
+inline void loop_over_media_and_calculate_geometrical_distances_up_to_the_next_scattering_point(int number_of_medium_changes, floating_t *distances_to_medium_changes, floating_t *local_scattering_lengths, floating_t *local_absorption_lengths, floating_t *sca_step_left, floating_t *abs_lens_left, floating_t *distancePropagated, floating_t *distanceToAbsorption)
+{
+  // We know how many scattering lengths (`sca_step_left`) and how many
+  // absorption lengths (`abs_lens_left`) we may spend when propagating
+  // through the different media.
+  //
+  // Convert these into the geometrical distances `distancePropagated` (scattering)
+  // and `distanceToAbsorption` (absorption) and decrease `sca_step_left` and
+  // `abs_lens_left` accordingly.
+  //
+  // Abort when the next scattering point is reached, i.e. `sca_step_left == 0`.
+  // At this point, `abs_lens_left` may still be greater than zero, because
+  // the photon may be scattered several times until it is absorbed.
+  //
+  for (int j = 0; (j < number_of_medium_changes) && (*sca_step_left > 0); j++) {
+    const floating_t max_distance_in_current_medium = distances_to_medium_changes[j+1] - distances_to_medium_changes[j];
+
+    if (*sca_step_left * local_scattering_lengths[j] > max_distance_in_current_medium) {
+      // The photon scatters after leaving this medium.
+      *sca_step_left -= my_divide(max_distance_in_current_medium, local_scattering_lengths[j]);
+      *distancePropagated += max_distance_in_current_medium;
+    } else {
+      // The photon scatters within this medium.
+      *distancePropagated += *sca_step_left * local_scattering_lengths[j];
+      *sca_step_left = 0;
+    }
+
+    if (*abs_lens_left * local_absorption_lengths[j] > max_distance_in_current_medium) {
+      // The photon is absorbed after leaving this medium.
+      *abs_lens_left -= my_divide(max_distance_in_current_medium, local_absorption_lengths[j]);
+      *distanceToAbsorption += max_distance_in_current_medium;
+    } else {
+      // The photon is absorbed within this medium.
+      *distanceToAbsorption += *abs_lens_left * local_absorption_lengths[j];
+      *abs_lens_left = 0;
+    }
+  }
+
+  // Spend the rest of the budget with the last medium properties.
+  *distancePropagated += *sca_step_left * local_scattering_lengths[number_of_medium_changes];
+  *distanceToAbsorption += *abs_lens_left * local_absorption_lengths[number_of_medium_changes];
+
+  // If the photon is absorbed, only propagate up to the absorption point.
+  if (*distanceToAbsorption < *distancePropagated) {
+    *distancePropagated = *distanceToAbsorption;
+    *distanceToAbsorption = ZERO;
+    *abs_lens_left = ZERO;
+  } else {
+    *abs_lens_left -= my_divide(*distancePropagated, local_absorption_lengths[number_of_medium_changes]);
   }
 }
 
