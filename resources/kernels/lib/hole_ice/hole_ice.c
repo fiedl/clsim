@@ -82,8 +82,8 @@ inline void add_hole_ice_cylinders_on_photon_path_to_medium_changes(floating4_t 
       if (intersection_discriminant(p) > 0) {
         if ((intersection_s1(p) <= 0) && (intersection_s2(p) >= 0)) {
           // The photon is already within the hole ice.
-          local_scattering_lengths[*number_of_medium_changes] = cylinderScatteringLengths[i];
-          local_absorption_lengths[*number_of_medium_changes] = cylinderAbsorptionLengths[i];
+          local_scattering_lengths[0] = cylinderScatteringLengths[i];
+          local_absorption_lengths[0] = cylinderAbsorptionLengths[i];
         } else if (intersection_s1(p) > 0) {
           // The photon enters the hole ice on its way.
           *number_of_medium_changes += 1;
