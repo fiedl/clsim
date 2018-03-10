@@ -95,9 +95,21 @@ inline void add_hole_ice_cylinders_on_photon_path_to_medium_changes(floating4_t 
           // The photon leaves the hole ice on its way.
           *number_of_medium_changes += 1;
           distances_to_medium_changes[*number_of_medium_changes] = intersection_s2(p);
-          int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z + photonDirAndWlen.z * intersection_s2(p)), 0), MEDIUM_LAYERS-1);
-          local_scattering_lengths[*number_of_medium_changes] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
-          local_absorption_lengths[*number_of_medium_changes] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
+          if (i == 0) // there is no larger cylinder
+          {
+            const int photonLayerAtTheCylinderBorder =
+                photon_layer(photonPosAndTime.z + photonDirAndWlen.z * intersection_s2(p));
+            local_scattering_lengths[*number_of_medium_changes] =
+                getScatteringLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
+            local_absorption_lengths[*number_of_medium_changes] =
+                getAbsorptionLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
+          } else {
+            // There is a larger cylinder outside this one, which is the one before in the array.
+            // See: https://github.com/fiedl/hole-ice-study/issues/47
+            //
+            local_scattering_lengths[*number_of_medium_changes] = cylinderScatteringLengths[i - 1];
+            local_absorption_lengths[*number_of_medium_changes] = cylinderAbsorptionLengths[i - 1];
+          }
         }
       }
 
