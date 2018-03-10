@@ -601,10 +601,12 @@ __kernel void propKernel(
         apply_propagation_through_different_media(
           photonPosAndTime,
           photonDirAndWlen,
-          numberOfCylinders,
-          cylinderPositionsAndRadii,
-          cylinderScatteringLengths,
-          cylinderAbsorptionLengths,
+          #ifdef HOLE_ICE
+            numberOfCylinders,
+            cylinderPositionsAndRadii,
+            cylinderScatteringLengths,
+            cylinderAbsorptionLengths,
+          #endif
           &sca_step_left,
           &abs_lens_left,
           &distancePropagated,

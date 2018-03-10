@@ -3,7 +3,9 @@
 
 #include "propagation_through_media.h"
 #include "../ice_layers/ice_layers.c"
-#include "../hole_ice/hole_ice.c"
+#ifdef HOLE_ICE
+  #include "../hole_ice/hole_ice.c"
+#endif
 
 // PROPAGATION THROUGH DIFFERENT MEDIA 2018: Layers, Cylinders
 // -----------------------------------------------------------------------------
@@ -19,7 +21,14 @@
 // where the next interaction point is, i.e. how far to propagate
 // the photon in this step.
 
-inline void apply_propagation_through_different_media(floating4_t photonPosAndTime, floating4_t photonDirAndWlen, unsigned int numberOfCylinders, __constant floating4_t *cylinderPositionsAndRadii, __constant floating_t *cylinderScatteringLengths, __constant floating_t *cylinderAbsorptionLengths, floating_t *sca_step_left, floating_t *abs_lens_left, floating_t *distancePropagated, floating_t *distanceToAbsorption)
+inline void apply_propagation_through_different_media(
+  floating4_t photonPosAndTime, floating4_t photonDirAndWlen,
+  #ifdef HOLE_ICE
+    unsigned int numberOfCylinders, __constant floating4_t *cylinderPositionsAndRadii,
+    __constant floating_t *cylinderScatteringLengths, __constant floating_t *cylinderAbsorptionLengths,
+  #endif
+  floating_t *sca_step_left, floating_t *abs_lens_left,
+  floating_t *distancePropagated, floating_t *distanceToAbsorption)
 {
 
   int number_of_medium_changes = 0;
@@ -56,19 +65,21 @@ inline void apply_propagation_through_different_media(floating4_t photonPosAndTi
     local_absorption_lengths
   );
 
-  add_hole_ice_cylinders_on_photon_path_to_medium_changes(
-    photonPosAndTime,
-    photonDirAndWlen,
-    photonRange,
-    numberOfCylinders,
-    cylinderPositionsAndRadii,
+  #ifdef HOLE_ICE
+    add_hole_ice_cylinders_on_photon_path_to_medium_changes(
+      photonPosAndTime,
+      photonDirAndWlen,
+      photonRange,
+      numberOfCylinders,
+      cylinderPositionsAndRadii,
 
-    // These values will be updates within this function:
-    &number_of_medium_changes,
-    distances_to_medium_changes,
-    local_scattering_lengths,
-    local_absorption_lengths
-  );
+      // These values will be updates within this function:
+      &number_of_medium_changes,
+      distances_to_medium_changes,
+      local_scattering_lengths,
+      local_absorption_lengths
+    );
+  #endif
 
   sort_medium_changes_by_ascending_distance(
     number_of_medium_changes,
