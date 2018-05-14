@@ -716,6 +716,8 @@ __kernel void propKernel(
             // a new one will be generated at the begin of the loop.
             --photonsLeftToPropagate;
 
+            printf("CROSS CHECK: photonTotalPathLength = %f\n", photonTotalPathLength);
+
 #if defined(SAVE_ALL_PHOTONS) && !defined(TABULATE)
             // save every. single. photon.
 
