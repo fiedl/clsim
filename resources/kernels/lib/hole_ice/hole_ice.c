@@ -99,10 +99,10 @@ inline void add_hole_ice_cylinders_on_photon_path_to_medium_changes(floating4_t 
           {
             const int photonLayerAtTheCylinderBorder =
                 photon_layer(photonPosAndTime.z + photonDirAndWlen.z * intersection_s2(p));
-            local_scattering_lengths[*number_of_medium_changes] =
-                getScatteringLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
-            local_absorption_lengths[*number_of_medium_changes] =
-                getAbsorptionLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
+            local_scattering_lengths[*number_of_medium_changes] = 1000000.0;
+                //getScatteringLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
+            local_absorption_lengths[*number_of_medium_changes] = 1.0;
+                //getAbsorptionLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
           } else {
             // There is a larger cylinder outside this one, which is the one before in the array.
             // See: https://github.com/fiedl/hole-ice-study/issues/47
