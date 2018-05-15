@@ -34,11 +34,8 @@ inline void apply_propagation_through_different_media(
   int number_of_medium_changes = 0;
   floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
-  //floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w)};
-  //floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w)};
-
-  floating_t local_scattering_lengths[MEDIUM_LAYERS] = {1000000.0};
-  floating_t local_absorption_lengths[MEDIUM_LAYERS] = {1.0};
+  floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w)};
+  floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w)};
 
   //number_of_medium_changes = 0;
   //floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
@@ -57,17 +54,17 @@ inline void apply_propagation_through_different_media(
   //printf("  sca_step_left = %f\n", *sca_step_left);
   //printf("  abs_lens_left = %f\n", *abs_lens_left);
 
-  //add_ice_layers_on_photon_path_to_medium_changes(
-  //  photonPosAndTime,
-  //  photonDirAndWlen,
-  //  photonRange,
-  //
-  //  // These values will be updates within this function:
-  //  &number_of_medium_changes,
-  //  distances_to_medium_changes,
-  //  local_scattering_lengths,
-  //  local_absorption_lengths
-  //);
+  add_ice_layers_on_photon_path_to_medium_changes(
+    photonPosAndTime,
+    photonDirAndWlen,
+    photonRange,
+
+    // These values will be updates within this function:
+    &number_of_medium_changes,
+    distances_to_medium_changes,
+    local_scattering_lengths,
+    local_absorption_lengths
+  );
 
   #ifdef HOLE_ICE
     add_hole_ice_cylinders_on_photon_path_to_medium_changes(

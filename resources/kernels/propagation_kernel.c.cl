@@ -708,6 +708,11 @@ __kernel void propKernel(
         photonPosAndTime.w += inv_groupvel*distancePropagated;
         photonTotalPathLength += distancePropagated;
 
+        const floating_t squared_distance_to_hole_ice_center = sqr(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[0].y);
+        printf("CROSS CHECK: PROPAGATION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
+        printf("CROSS CHECK: PROPAGATION x = %f\n", photonPosAndTime.x);
+        printf("CROSS CHECK: PROPAGATION y = %f\n", photonPosAndTime.y);
+        printf("CROSS CHECK: PROPAGATION z = %f\n", photonPosAndTime.z);
 
         // absorb or scatter the photon
         if (abs_lens_left < EPSILON)
@@ -716,7 +721,11 @@ __kernel void propKernel(
             // a new one will be generated at the begin of the loop.
             --photonsLeftToPropagate;
 
-            printf("CROSS CHECK: photonTotalPathLength = %f\n", photonTotalPathLength);
+            //printf("CROSS CHECK: photonTotalPathLength = %f\n", photonTotalPathLength);
+            printf("CROSS CHECK: ABSORPTION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
+            printf("CROSS CHECK: ABSORPTION x = %f\n", photonPosAndTime.x);
+            printf("CROSS CHECK: ABSORPTION y = %f\n", photonPosAndTime.y);
+            printf("CROSS CHECK: ABSORPTION z = %f\n", photonPosAndTime.z);
 
 #if defined(SAVE_ALL_PHOTONS) && !defined(TABULATE)
             // save every. single. photon.
