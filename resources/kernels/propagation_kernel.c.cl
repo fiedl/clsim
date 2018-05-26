@@ -384,6 +384,13 @@ inline void saveHit(
 }
 
 
+#ifdef DOUBLE_PRECISION
+    #define EPSILON 0.00000001
+#else
+    #define EPSILON 0.00001f
+#endif
+
+
 // Profiling
 // https://github.com/fiedl/hole-ice-study/issues/69
 //
@@ -403,6 +410,7 @@ typedef unsigned long clock_t;
 
 // `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
 #include "__CLSIM_DIR__/resources/kernels/lib/propagation_through_media/propagation_through_media.c"
+#include "__CLSIM_DIR__/resources/kernels/lib/propagation_through_media/standard_clsim.c"
 
 __kernel void propKernel(
 #ifndef TABULATE
@@ -498,12 +506,6 @@ __kernel void propKernel(
     //    step.posAndTime.w,
     //    step.dirAndLengthAndBeta.z,
     //    step.numPhotons);
-#endif
-
-#ifdef DOUBLE_PRECISION
-    #define EPSILON 0.00000001
-#else
-    #define EPSILON 0.00001f
 #endif
 
     uint photonsLeftToPropagate=step.numPhotons;
@@ -619,20 +621,31 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
-        apply_propagation_through_different_media(
+        // apply_propagation_through_different_media(
+        //   photonPosAndTime,
+        //   photonDirAndWlen,
+        //   #ifdef HOLE_ICE
+        //     numberOfCylinders,
+        //     cylinderPositionsAndRadii,
+        //     cylinderScatteringLengths,
+        //     cylinderAbsorptionLengths,
+        //   #endif
+        //   &sca_step_left,
+        //   &abs_lens_left,
+        //   &distancePropagated,
+        //   &distanceToAbsorption
+        // );
+
+        clock_t t1 = clock();
+        apply_propagation_through_different_media_with_standard_clsim(
           photonPosAndTime,
           photonDirAndWlen,
-          #ifdef HOLE_ICE
-            numberOfCylinders,
-            cylinderPositionsAndRadii,
-            cylinderScatteringLengths,
-            cylinderAbsorptionLengths,
-          #endif
           &sca_step_left,
           &abs_lens_left,
           &distancePropagated,
           &distanceToAbsorption
         );
+        printf("PROFILING apply_propagation_through_different_media_with_standard_clsim %lu\n", clock() - t1);
 
 
 #ifndef SAVE_ALL_PHOTONS
