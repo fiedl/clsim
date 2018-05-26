@@ -383,6 +383,24 @@ inline void saveHit(
 
 }
 
+
+// Profiling
+// https://github.com/fiedl/hole-ice-study/issues/69
+//
+typedef unsigned long clock_t;
+
+// When running on the CPU, the `clock()` function is already defined.
+// When running on nvidia GPUs, define the `clock()` function here.
+// See also: https://stackoverflow.com/a/34252109/2066546
+//
+// inline clock_t clock()
+// {
+//   clock_t n_clock;
+//   asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
+//   return n_clock;
+// }
+
+
 // `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
 #include "__CLSIM_DIR__/resources/kernels/lib/propagation_through_media/propagation_through_media.c"
 
@@ -577,6 +595,9 @@ __kernel void propKernel(
             //dbg_printf("   - total track length will be %f absorption lengths\n", abs_lens_left);
 #endif
         }
+
+        // start profiling the simulation step here
+        clock_t t0 = clock();
 
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
 
@@ -797,7 +818,7 @@ __kernel void propKernel(
 #endif
         }
 
-
+        printf("PROFILING propagation_kernel_simulation_step %lu\n", clock() - t0);
     }
 
 #ifdef PRINTF_ENABLED
