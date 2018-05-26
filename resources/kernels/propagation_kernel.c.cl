@@ -621,6 +621,8 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
+        // clock_t t1 = clock();
+        // clock_t t2 = clock();
         // apply_propagation_through_different_media(
         //   photonPosAndTime,
         //   photonDirAndWlen,
@@ -635,8 +637,11 @@ __kernel void propKernel(
         //   &distancePropagated,
         //   &distanceToAbsorption
         // );
+        // clock_t t3 = clock();
+        // clock_t t4 = clock();
 
         clock_t t1 = clock();
+        clock_t t2 = clock();
         apply_propagation_through_different_media_with_standard_clsim(
           photonPosAndTime,
           photonDirAndWlen,
@@ -645,7 +650,8 @@ __kernel void propKernel(
           &distancePropagated,
           &distanceToAbsorption
         );
-        printf("PROFILING apply_propagation_through_different_media_with_standard_clsim %lu\n", clock() - t1);
+        clock_t t3 = clock();
+        clock_t t4 = clock();
 
 
 #ifndef SAVE_ALL_PHOTONS
@@ -831,7 +837,11 @@ __kernel void propKernel(
 #endif
         }
 
-        printf("PROFILING propagation_kernel_simulation_step %lu\n", clock() - t0);
+        clock_t t5 = clock();
+        printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
+        printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
+        printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
+
     }
 
 #ifdef PRINTF_ENABLED

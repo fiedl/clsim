@@ -60,8 +60,8 @@ inline void apply_propagation_through_different_media(
   //printf("  sca_step_left = %f\n", *sca_step_left);
   //printf("  abs_lens_left = %f\n", *abs_lens_left);
 
-  clock_t t0 = 0;
-  t0 = clock();
+  //clock_t t0 = 0;
+  //t0 = clock();
   add_ice_layers_on_photon_path_to_medium_changes(
     photonPosAndTime,
     photonDirAndWlen,
@@ -73,9 +73,9 @@ inline void apply_propagation_through_different_media(
     local_scattering_lengths,
     local_absorption_lengths
   );
-  printf("PROFILING add_ice_layers %lu\n", clock() - t0);
-
-  t0 = clock();
+  //printf("PROFILING add_ice_layers %lu\n", clock() - t0);
+  //
+  //t0 = clock();
   #ifdef HOLE_ICE
     add_hole_ice_cylinders_on_photon_path_to_medium_changes(
       photonPosAndTime,
@@ -91,7 +91,7 @@ inline void apply_propagation_through_different_media(
       local_absorption_lengths
     );
   #endif
-  printf("PROFILING hole_ice %lu\n", clock() - t0);
+  //printf("PROFILING hole_ice %lu\n", clock() - t0);
 
   // number_of_medium_changes = 1;
   // distances_to_medium_changes[0] = 0.0;
@@ -102,7 +102,7 @@ inline void apply_propagation_through_different_media(
   // local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
   // local_absorption_lengths[1] = 100.0;
 
-  t0 = clock();
+  //t0 = clock();
   sort_medium_changes_by_ascending_distance(
     number_of_medium_changes,
 
@@ -111,9 +111,9 @@ inline void apply_propagation_through_different_media(
     local_scattering_lengths,
     local_absorption_lengths
   );
-  printf("PROFILING sort %lu\n", clock() - t0);
-
-  t0 = clock();
+  //printf("PROFILING sort %lu\n", clock() - t0);
+  //
+  //t0 = clock();
   loop_over_media_and_calculate_geometrical_distances_up_to_the_next_scattering_point(
     number_of_medium_changes,
     distances_to_medium_changes,
@@ -126,7 +126,7 @@ inline void apply_propagation_through_different_media(
     distancePropagated,
     distanceToAbsorption
   );
-  printf("PROFILING media_loop %lu\n", clock() - t0);
+  //printf("PROFILING media_loop %lu\n", clock() - t0);
 
   //printf("  after:\n");
   //printf("    distancePropagated = %f\n", *distancePropagated);
