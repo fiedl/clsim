@@ -400,12 +400,12 @@ typedef unsigned long clock_t;
 // When running on nvidia GPUs, define the `clock()` function here.
 // See also: https://stackoverflow.com/a/34252109/2066546
 //
-// inline clock_t clock()
-// {
-//   clock_t n_clock;
-//   asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
-//   return n_clock;
-// }
+inline clock_t clock()
+{
+  clock_t n_clock;
+  asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
+  return n_clock;
+}
 
 
 // `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
@@ -621,30 +621,17 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
-        // clock_t t1 = clock();
-        // clock_t t2 = clock();
-        // apply_propagation_through_different_media(
-        //   photonPosAndTime,
-        //   photonDirAndWlen,
-        //   #ifdef HOLE_ICE
-        //     numberOfCylinders,
-        //     cylinderPositionsAndRadii,
-        //     cylinderScatteringLengths,
-        //     cylinderAbsorptionLengths,
-        //   #endif
-        //   &sca_step_left,
-        //   &abs_lens_left,
-        //   &distancePropagated,
-        //   &distanceToAbsorption
-        // );
-        // clock_t t3 = clock();
-        // clock_t t4 = clock();
-
         clock_t t1 = clock();
         clock_t t2 = clock();
-        apply_propagation_through_different_media_with_standard_clsim(
+        apply_propagation_through_different_media(
           photonPosAndTime,
           photonDirAndWlen,
+          #ifdef HOLE_ICE
+            numberOfCylinders,
+            cylinderPositionsAndRadii,
+            cylinderScatteringLengths,
+            cylinderAbsorptionLengths,
+          #endif
           &sca_step_left,
           &abs_lens_left,
           &distancePropagated,
@@ -652,6 +639,19 @@ __kernel void propKernel(
         );
         clock_t t3 = clock();
         clock_t t4 = clock();
+
+        // clock_t t1 = clock();
+        // clock_t t2 = clock();
+        // apply_propagation_through_different_media_with_standard_clsim(
+        //   photonPosAndTime,
+        //   photonDirAndWlen,
+        //   &sca_step_left,
+        //   &abs_lens_left,
+        //   &distancePropagated,
+        //   &distanceToAbsorption
+        // );
+        // clock_t t3 = clock();
+        // clock_t t4 = clock();
 
 
 #ifndef SAVE_ALL_PHOTONS
