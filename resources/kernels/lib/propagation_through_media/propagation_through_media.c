@@ -35,10 +35,15 @@ inline void apply_propagation_through_different_media(
   clock_t t0 = clock();
 
   int number_of_medium_changes = 0;
+  clock_t t01 = clock();
   floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
+  clock_t t02 = clock();
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
+  clock_t t03 = clock();
   floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w)};
+  clock_t t04 = clock();
   floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w)};
+  clock_t t05 = clock();
 
   // int number_of_medium_changes = 1;
   // floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0, 1.0};
@@ -147,10 +152,17 @@ inline void apply_propagation_through_different_media(
   //printf("    *abs_lens_left = %f\n", *abs_lens_left);
 
   printf("PROFILING start %lu\n", t1 - t0);
+  printf("PROFILING start_01 %lu\n", t01 - t0);
+  printf("PROFILING start_02 %lu\n", t02 - t01);
+  printf("PROFILING start_03 %lu\n", t03 - t02);
+  printf("PROFILING start_04 %lu\n", t04 - t03);
+  printf("PROFILING start_05 %lu\n", t05 - t04);
+  printf("PROFILING start_1 %lu\n", t1 - t05);
   printf("PROFILING add_ice_layers %lu\n", t2 - t1);
   printf("PROFILING add_hole_ice %lu\n", t3 - t2);
   printf("PROFILING sort %lu\n", t4 - t3);
   printf("PROFILING loop_over_media %lu\n", t5 - t4);
+  printf("PROFILING total %lu\n", t5 - t0);
 
 }
 
