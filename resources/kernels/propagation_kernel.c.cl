@@ -621,30 +621,17 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
-        clock_t t1 = clock();
-        clock_t t2 = clock();
-        apply_propagation_through_different_media(
-          photonPosAndTime,
-          photonDirAndWlen,
-          #ifdef HOLE_ICE
-            numberOfCylinders,
-            cylinderPositionsAndRadii,
-            cylinderScatteringLengths,
-            cylinderAbsorptionLengths,
-          #endif
-          &sca_step_left,
-          &abs_lens_left,
-          &distancePropagated,
-          &distanceToAbsorption
-        );
-        clock_t t3 = clock();
-        clock_t t4 = clock();
-
         // clock_t t1 = clock();
         // clock_t t2 = clock();
-        // apply_propagation_through_different_media_with_standard_clsim(
+        // apply_propagation_through_different_media(
         //   photonPosAndTime,
         //   photonDirAndWlen,
+        //   #ifdef HOLE_ICE
+        //     numberOfCylinders,
+        //     cylinderPositionsAndRadii,
+        //     cylinderScatteringLengths,
+        //     cylinderAbsorptionLengths,
+        //   #endif
         //   &sca_step_left,
         //   &abs_lens_left,
         //   &distancePropagated,
@@ -652,6 +639,19 @@ __kernel void propKernel(
         // );
         // clock_t t3 = clock();
         // clock_t t4 = clock();
+
+        clock_t t1 = clock();
+        clock_t t2 = clock();
+        apply_propagation_through_different_media_with_standard_clsim(
+          photonPosAndTime,
+          photonDirAndWlen,
+          &sca_step_left,
+          &abs_lens_left,
+          &distancePropagated,
+          &distanceToAbsorption
+        );
+        clock_t t3 = clock();
+        clock_t t4 = clock();
 
 
 #ifndef SAVE_ALL_PHOTONS
