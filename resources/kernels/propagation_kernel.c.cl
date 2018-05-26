@@ -598,8 +598,8 @@ __kernel void propKernel(
 #endif
         }
 
-        // start profiling the simulation step here
-        clock_t t0 = clock();
+        // // start profiling the simulation step here
+        // clock_t t0 = clock();
 
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
 
@@ -623,15 +623,28 @@ __kernel void propKernel(
 
         // clock_t t1 = clock();
         // clock_t t2 = clock();
-        // apply_propagation_through_different_media(
+        apply_propagation_through_different_media(
+          photonPosAndTime,
+          photonDirAndWlen,
+          #ifdef HOLE_ICE
+            numberOfCylinders,
+            cylinderPositionsAndRadii,
+            cylinderScatteringLengths,
+            cylinderAbsorptionLengths,
+          #endif
+          &sca_step_left,
+          &abs_lens_left,
+          &distancePropagated,
+          &distanceToAbsorption
+        );
+        // clock_t t3 = clock();
+        // clock_t t4 = clock();
+
+        // clock_t t1 = clock();
+        // clock_t t2 = clock();
+        // apply_propagation_through_different_media_with_standard_clsim(
         //   photonPosAndTime,
         //   photonDirAndWlen,
-        //   #ifdef HOLE_ICE
-        //     numberOfCylinders,
-        //     cylinderPositionsAndRadii,
-        //     cylinderScatteringLengths,
-        //     cylinderAbsorptionLengths,
-        //   #endif
         //   &sca_step_left,
         //   &abs_lens_left,
         //   &distancePropagated,
@@ -639,19 +652,6 @@ __kernel void propKernel(
         // );
         // clock_t t3 = clock();
         // clock_t t4 = clock();
-
-        clock_t t1 = clock();
-        clock_t t2 = clock();
-        apply_propagation_through_different_media_with_standard_clsim(
-          photonPosAndTime,
-          photonDirAndWlen,
-          &sca_step_left,
-          &abs_lens_left,
-          &distancePropagated,
-          &distanceToAbsorption
-        );
-        clock_t t3 = clock();
-        clock_t t4 = clock();
 
 
 #ifndef SAVE_ALL_PHOTONS
@@ -837,10 +837,10 @@ __kernel void propKernel(
 #endif
         }
 
-        clock_t t5 = clock();
-        printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
-        printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
-        printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
+        // clock_t t5 = clock();
+        // printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
+        // printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
+        // printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
 
     }
 

@@ -32,6 +32,8 @@ inline void apply_propagation_through_different_media(
   floating_t *distancePropagated, floating_t *distanceToAbsorption)
 {
 
+  clock_t t0 = clock();
+
   int number_of_medium_changes = 0;
   floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
@@ -60,8 +62,7 @@ inline void apply_propagation_through_different_media(
   //printf("  sca_step_left = %f\n", *sca_step_left);
   //printf("  abs_lens_left = %f\n", *abs_lens_left);
 
-  //clock_t t0 = 0;
-  //t0 = clock();
+  clock_t t1 = clock();
   add_ice_layers_on_photon_path_to_medium_changes(
     photonPosAndTime,
     photonDirAndWlen,
@@ -73,9 +74,8 @@ inline void apply_propagation_through_different_media(
     local_scattering_lengths,
     local_absorption_lengths
   );
-  //printf("PROFILING add_ice_layers %lu\n", clock() - t0);
-  //
-  //t0 = clock();
+
+  clock_t t2 = clock();
   #ifdef HOLE_ICE
     add_hole_ice_cylinders_on_photon_path_to_medium_changes(
       photonPosAndTime,
@@ -91,7 +91,6 @@ inline void apply_propagation_through_different_media(
       local_absorption_lengths
     );
   #endif
-  //printf("PROFILING hole_ice %lu\n", clock() - t0);
 
   // number_of_medium_changes = 1;
   // distances_to_medium_changes[0] = 0.0;
@@ -102,7 +101,7 @@ inline void apply_propagation_through_different_media(
   // local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
   // local_absorption_lengths[1] = 100.0;
 
-  //t0 = clock();
+  clock_t t3 = clock();
   sort_medium_changes_by_ascending_distance(
     number_of_medium_changes,
 
@@ -111,9 +110,8 @@ inline void apply_propagation_through_different_media(
     local_scattering_lengths,
     local_absorption_lengths
   );
-  //printf("PROFILING sort %lu\n", clock() - t0);
-  //
-  //t0 = clock();
+
+  clock_t t4 = clock();
   loop_over_media_and_calculate_geometrical_distances_up_to_the_next_scattering_point(
     number_of_medium_changes,
     distances_to_medium_changes,
@@ -126,7 +124,7 @@ inline void apply_propagation_through_different_media(
     distancePropagated,
     distanceToAbsorption
   );
-  //printf("PROFILING media_loop %lu\n", clock() - t0);
+  clock_t t5 = clock();
 
   //printf("  after:\n");
   //printf("    distancePropagated = %f\n", *distancePropagated);
@@ -147,6 +145,13 @@ inline void apply_propagation_through_different_media(
   //printf("    *distanceToAbsorption = %f\n", *distanceToAbsorption);
   //printf("    *sca_step_left = %f\n", *sca_step_left);
   //printf("    *abs_lens_left = %f\n", *abs_lens_left);
+
+  printf("PROFILING start %lu\n", t1 - t0);
+  printf("PROFILING add_ice_layers %lu\n", t2 - t1);
+  printf("PROFILING add_hole_ice %lu\n", t3 - t2);
+  printf("PROFILING sort %lu\n", t4 - t3);
+  printf("PROFILING loop_over_media %lu\n", t5 - t4);
+
 }
 
 inline void sort_medium_changes_by_ascending_distance(int number_of_medium_changes, floating_t *distances_to_medium_changes, floating_t *local_scattering_lengths, floating_t *local_absorption_lengths)
