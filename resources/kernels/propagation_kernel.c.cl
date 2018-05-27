@@ -463,6 +463,13 @@ __kernel void propKernel(
     float4 currentPhotonHistory[NUM_PHOTONS_IN_HISTORY];
 #endif
 
+    // Prepare some large arrays here because declaring them
+    // for each scattering step locally is really expensive.
+    // https://github.com/fiedl/hole-ice-study/issues/70
+    floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {};
+    floating_t local_scattering_lengths[MEDIUM_LAYERS] = {};
+    floating_t local_absorption_lengths[MEDIUM_LAYERS] = {};
+
     //download MWC RNG state
     ulong real_rnd_x = MWC_RNG_x[i];
     uint real_rnd_a = MWC_RNG_a[i];
@@ -632,6 +639,9 @@ __kernel void propKernel(
             cylinderScatteringLengths,
             cylinderAbsorptionLengths,
           #endif
+          distances_to_medium_changes,
+          local_scattering_lengths,
+          local_absorption_lengths,
           &sca_step_left,
           &abs_lens_left,
           &distancePropagated,

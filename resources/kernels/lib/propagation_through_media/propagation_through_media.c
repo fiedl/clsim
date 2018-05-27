@@ -28,6 +28,7 @@ inline void apply_propagation_through_different_media(
     unsigned int numberOfCylinders, __constant floating4_t *cylinderPositionsAndRadii,
     __constant floating_t *cylinderScatteringLengths, __constant floating_t *cylinderAbsorptionLengths,
   #endif
+  floating_t *distances_to_medium_changes, floating_t *local_scattering_lengths, floating_t *local_absorption_lengths,
   floating_t *sca_step_left, floating_t *abs_lens_left,
   floating_t *distancePropagated, floating_t *distanceToAbsorption)
 {
@@ -36,13 +37,13 @@ inline void apply_propagation_through_different_media(
 
   int number_of_medium_changes = 0;
   clock_t t01 = clock();
-  floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
+  distances_to_medium_changes[0] = 0.0;
   clock_t t02 = clock();
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
   clock_t t03 = clock();
-  floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w)};
+  local_scattering_lengths[0] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
   clock_t t04 = clock();
-  floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w)};
+  local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
   clock_t t05 = clock();
 
   // int number_of_medium_changes = 1;
