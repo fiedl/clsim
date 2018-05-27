@@ -605,8 +605,8 @@ __kernel void propKernel(
 #endif
         }
 
-        // // start profiling the simulation step here
-        // clock_t t0 = clock();
+        // start profiling the simulation step here
+        clock_t t0 = clock();
 
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
 
@@ -628,8 +628,8 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
-        // clock_t t1 = clock();
-        // clock_t t2 = clock();
+        clock_t t1 = clock();
+        clock_t t2 = clock();
         apply_propagation_through_different_media(
           photonPosAndTime,
           photonDirAndWlen,
@@ -647,8 +647,8 @@ __kernel void propKernel(
           &distancePropagated,
           &distanceToAbsorption
         );
-        // clock_t t3 = clock();
-        // clock_t t4 = clock();
+        clock_t t3 = clock();
+        clock_t t4 = clock();
 
         // clock_t t1 = clock();
         // clock_t t2 = clock();
@@ -847,10 +847,10 @@ __kernel void propKernel(
 #endif
         }
 
-        // clock_t t5 = clock();
-        // printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
-        // printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
-        // printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
+        clock_t t5 = clock();
+        printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
+        printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
+        printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
 
     }
 
