@@ -391,21 +391,21 @@ inline void saveHit(
 #endif
 
 
-// Profiling
-// https://github.com/fiedl/hole-ice-study/issues/69
+// // Profiling
+// // https://github.com/fiedl/hole-ice-study/issues/69
+// //
+// typedef unsigned long clock_t;
 //
-typedef unsigned long clock_t;
-
-// When running on the CPU, the `clock()` function is already defined.
-// When running on nvidia GPUs, define the `clock()` function here.
-// See also: https://stackoverflow.com/a/34252109/2066546
-//
-inline clock_t clock()
-{
-  clock_t n_clock;
-  asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
-  return n_clock;
-}
+// // When running on the CPU, the `clock()` function is already defined.
+// // When running on nvidia GPUs, define the `clock()` function here.
+// // See also: https://stackoverflow.com/a/34252109/2066546
+// //
+// inline clock_t clock()
+// {
+//   clock_t n_clock;
+//   asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
+//   return n_clock;
+// }
 
 
 // `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
@@ -605,8 +605,8 @@ __kernel void propKernel(
 #endif
         }
 
-        // start profiling the simulation step here
-        clock_t t0 = clock();
+        //// start profiling the simulation step here
+        //clock_t t0 = clock();
 
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
 
@@ -628,8 +628,8 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
-        clock_t t1 = clock();
-        clock_t t2 = clock();
+        //clock_t t1 = clock();
+        //clock_t t2 = clock();
         apply_propagation_through_different_media(
           photonPosAndTime,
           photonDirAndWlen,
@@ -647,8 +647,8 @@ __kernel void propKernel(
           &distancePropagated,
           &distanceToAbsorption
         );
-        clock_t t3 = clock();
-        clock_t t4 = clock();
+        //clock_t t3 = clock();
+        //clock_t t4 = clock();
 
         // clock_t t1 = clock();
         // clock_t t2 = clock();
@@ -847,10 +847,10 @@ __kernel void propKernel(
 #endif
         }
 
-        clock_t t5 = clock();
-        printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
-        printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
-        printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
+        //clock_t t5 = clock();
+        //printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
+        //printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
+        //printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
 
     }
 
