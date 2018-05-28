@@ -69,18 +69,18 @@ inline void apply_propagation_through_different_media(
   //printf("  sca_step_left = %f\n", *sca_step_left);
   //printf("  abs_lens_left = %f\n", *abs_lens_left);
 
-  //clock_t t1 = clock();
-  add_ice_layers_on_photon_path_to_medium_changes(
-    photonPosAndTime,
-    photonDirAndWlen,
-    photonRange,
-
-    // These values will be updates within this function:
-    &number_of_medium_changes,
-    distances_to_medium_changes,
-    local_scattering_lengths,
-    local_absorption_lengths
-  );
+  ////clock_t t1 = clock();
+  //add_ice_layers_on_photon_path_to_medium_changes(
+  //  photonPosAndTime,
+  //  photonDirAndWlen,
+  //  photonRange,
+  //
+  //  // These values will be updates within this function:
+  //  &number_of_medium_changes,
+  //  distances_to_medium_changes,
+  //  local_scattering_lengths,
+  //  local_absorption_lengths
+  //);
 
   //clock_t t2 = clock();
   #ifdef HOLE_ICE
