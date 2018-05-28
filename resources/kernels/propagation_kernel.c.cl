@@ -383,8 +383,34 @@ inline void saveHit(
 
 }
 
+
+#ifdef DOUBLE_PRECISION
+    #define EPSILON 0.00000001
+#else
+    #define EPSILON 0.00001f
+#endif
+
+
+// // Profiling
+// // https://github.com/fiedl/hole-ice-study/issues/69
+// //
+// typedef unsigned long clock_t;
+//
+// // When running on the CPU, the `clock()` function is already defined.
+// // When running on nvidia GPUs, define the `clock()` function here.
+// // See also: https://stackoverflow.com/a/34252109/2066546
+// //
+// inline clock_t clock()
+// {
+//   clock_t n_clock;
+//   asm volatile("mov.u64 %0, %%clock64;" : "=l" (n_clock)); // make sure the compiler will not reorder this
+//   return n_clock;
+// }
+
+
 // `__CLSIM_DIR__` is replaced in `I3CLSimStepToPhotonConverterOpenCL::loadKernel`.
 #include "__CLSIM_DIR__/resources/kernels/lib/propagation_through_media/propagation_through_media.c"
+#include "__CLSIM_DIR__/resources/kernels/lib/propagation_through_media/standard_clsim.c"
 
 __kernel void propKernel(
 #ifndef TABULATE
@@ -437,6 +463,13 @@ __kernel void propKernel(
     float4 currentPhotonHistory[NUM_PHOTONS_IN_HISTORY];
 #endif
 
+    // Prepare some large arrays here because declaring them
+    // for each scattering step locally is really expensive.
+    // https://github.com/fiedl/hole-ice-study/issues/70
+    floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {};
+    floating_t local_scattering_lengths[MEDIUM_LAYERS] = {};
+    floating_t local_absorption_lengths[MEDIUM_LAYERS] = {};
+
     //download MWC RNG state
     ulong real_rnd_x = MWC_RNG_x[i];
     uint real_rnd_a = MWC_RNG_a[i];
@@ -480,12 +513,6 @@ __kernel void propKernel(
     //    step.posAndTime.w,
     //    step.dirAndLengthAndBeta.z,
     //    step.numPhotons);
-#endif
-
-#ifdef DOUBLE_PRECISION
-    #define EPSILON 0.00000001
-#else
-    #define EPSILON 0.00001f
 #endif
 
     uint photonsLeftToPropagate=step.numPhotons;
@@ -578,6 +605,9 @@ __kernel void propKernel(
 #endif
         }
 
+        //// start profiling the simulation step here
+        //clock_t t0 = clock();
+
         floating_t sca_step_left = -my_log(RNG_CALL_UNIFORM_OC);
 
         // Propagation throuh different media
@@ -598,6 +628,8 @@ __kernel void propKernel(
         floating_t distancePropagated = 0;
         floating_t distanceToAbsorption = 0;
 
+        //clock_t t1 = clock();
+        //clock_t t2 = clock();
         apply_propagation_through_different_media(
           photonPosAndTime,
           photonDirAndWlen,
@@ -607,11 +639,29 @@ __kernel void propKernel(
             cylinderScatteringLengths,
             cylinderAbsorptionLengths,
           #endif
+          distances_to_medium_changes,
+          local_scattering_lengths,
+          local_absorption_lengths,
           &sca_step_left,
           &abs_lens_left,
           &distancePropagated,
           &distanceToAbsorption
         );
+        //clock_t t3 = clock();
+        //clock_t t4 = clock();
+
+        // clock_t t1 = clock();
+        // clock_t t2 = clock();
+        // apply_propagation_through_different_media_with_standard_clsim(
+        //   photonPosAndTime,
+        //   photonDirAndWlen,
+        //   &sca_step_left,
+        //   &abs_lens_left,
+        //   &distancePropagated,
+        //   &distanceToAbsorption
+        // );
+        // clock_t t3 = clock();
+        // clock_t t4 = clock();
 
 
 #ifndef SAVE_ALL_PHOTONS
@@ -808,6 +858,10 @@ __kernel void propKernel(
 #endif
         }
 
+        //clock_t t5 = clock();
+        //printf("PROFILING propagation_kernel_simulation_step %lu\n", t5 - t0);
+        //printf("PROFILING apply_propagation_through_different_media %lu\n", t3 - t2);
+        //printf("PROFILING apply_propagation_through_different_media_outer %lu\n", t4 - t1);
 
     }
 

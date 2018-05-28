@@ -1195,16 +1195,18 @@ I3CLSimStepToPhotonConverterOpenCL::DumpStatistics(const cl::Event &kernelFinish
 
 #ifdef I3_LOG4CPLUS_LOGGING
     // use LOG_IMPL here to make it log this even when in Release build mode.
-    LOG_IMPL(INFO, "kernel statistics: %s%g nanoseconds/photon (util: %.0f%%) (%s %s) %s",
+    LOG_IMPL(INFO, "kernel statistics: %s%g nanoseconds/photon, %lu photons (util: %.0f%%) (%s %s) %s",
              (timeStart==timeEnd)?"<=":"",
              static_cast<double>(kernel_duration_in_nanoseconds)/static_cast<double>(totalNumberOfPhotons),
+             totalNumberOfPhotons,
              utilization*100.,
              platformName.c_str(), deviceName.c_str(),
              (starving?"[starving]":""));
 #else
-    log_info("kernel statistics: %s%g nanoseconds/photon (util: %.0f%%) (%s %s) %s",
+    log_info("kernel statistics: %s%g nanoseconds/photon, %lu photons (util: %.0f%%) (%s %s) %s",
              (timeStart==timeEnd)?"<=":"",
              static_cast<double>(kernel_duration_in_nanoseconds)/static_cast<double>(totalNumberOfPhotons),
+             totalNumberOfPhotons,
              utilization*100.,
              platformName.c_str(), deviceName.c_str(),
              (starving?"[starving]":""));
