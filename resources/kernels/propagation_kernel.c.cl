@@ -759,7 +759,9 @@ __kernel void propKernel(
         photonTotalPathLength += distancePropagated;
 
         const floating_t squared_distance_to_hole_ice_center = sqr(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[0].y);
+        printf("CROSS CHECK: PROPAGATION distancePropagated = %f\n", distancePropagated);
         printf("CROSS CHECK: PROPAGATION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
+        printf("CROSS CHECK: PROPAGATION distancePropagated_and_squared_distance_to_hole_ice_center = %f %f\n", distancePropagated, squared_distance_to_hole_ice_center);
         printf("CROSS CHECK: PROPAGATION x = %f\n", photonPosAndTime.x);
         printf("CROSS CHECK: PROPAGATION y = %f\n", photonPosAndTime.y);
         printf("CROSS CHECK: PROPAGATION z = %f\n", photonPosAndTime.z);
