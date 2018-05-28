@@ -759,12 +759,10 @@ __kernel void propKernel(
         photonTotalPathLength += distancePropagated;
 
         const floating_t squared_distance_to_hole_ice_center = sqr(photonPosAndTime.x - cylinderPositionsAndRadii[0].x) + sqr(photonPosAndTime.y - cylinderPositionsAndRadii[0].y);
-        printf("CROSS CHECK: PROPAGATION distancePropagated = %f\n", distancePropagated);
-        printf("CROSS CHECK: PROPAGATION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
-        printf("CROSS CHECK: PROPAGATION distancePropagated_and_squared_distance_to_hole_ice_center = %f %f\n", distancePropagated, squared_distance_to_hole_ice_center);
-        printf("CROSS CHECK: PROPAGATION x = %f\n", photonPosAndTime.x);
-        printf("CROSS CHECK: PROPAGATION y = %f\n", photonPosAndTime.y);
-        printf("CROSS CHECK: PROPAGATION z = %f\n", photonPosAndTime.z);
+        //printf("CROSS CHECK: PROPAGATION distancePropagated = %f\n", distancePropagated);
+        //printf("CROSS CHECK: PROPAGATION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
+        //printf("CROSS CHECK: PROPAGATION distancePropagated_and_squared_distance_to_hole_ice_center = %f %f\n", distancePropagated, squared_distance_to_hole_ice_center);
+        printf("CROSS CHECK: PROPAGATION x,y,z %f %f %f\n", photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z);
 
         // absorb or scatter the photon
         if (abs_lens_left < EPSILON)
@@ -774,10 +772,8 @@ __kernel void propKernel(
             --photonsLeftToPropagate;
 
             //printf("CROSS CHECK: photonTotalPathLength = %f\n", photonTotalPathLength);
-            printf("CROSS CHECK: ABSORPTION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
-            printf("CROSS CHECK: ABSORPTION x = %f\n", photonPosAndTime.x);
-            printf("CROSS CHECK: ABSORPTION y = %f\n", photonPosAndTime.y);
-            printf("CROSS CHECK: ABSORPTION z = %f\n", photonPosAndTime.z);
+            //printf("CROSS CHECK: ABSORPTION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
+            printf("CROSS CHECK: ABSORPTION x,y,z %f %f %f\n", photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z);
 
 #if defined(SAVE_ALL_PHOTONS) && !defined(TABULATE)
             // save every. single. photon.

@@ -52,10 +52,10 @@ inline void apply_propagation_through_different_media(
   // floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
   // floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
 
-  //number_of_medium_changes = 0;
-  //floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0};
-  //floating_t local_scattering_lengths[MEDIUM_LAYERS] = {1000000.0};
-  //floating_t local_absorption_lengths[MEDIUM_LAYERS] = {5.0};
+  number_of_medium_changes = 0;
+  distances_to_medium_changes[0] = 0.0;
+  local_scattering_lengths[0] = 1000000.0;
+  local_absorption_lengths[0] = 1000000.0;
 
   // To check which medium boundaries are in range, we need to estimate
   // how far the photon can travel in this step.
