@@ -33,29 +33,68 @@ inline void apply_propagation_through_different_media(
   floating_t *distancePropagated, floating_t *distanceToAbsorption)
 {
 
-  //clock_t t0 = clock();
-
-  int number_of_medium_changes = 0;
-  //clock_t t01 = clock();
-  distances_to_medium_changes[0] = 0.0;
-  //clock_t t02 = clock();
-  int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
-  //clock_t t03 = clock();
-  local_scattering_lengths[0] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
-  //clock_t t04 = clock();
-  local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
-  //clock_t t05 = clock();
-
-  // int number_of_medium_changes = 1;
-  // floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0, 1.0};
+  // //clock_t t0 = clock();
+  //
+  // int number_of_medium_changes = 0;
+  // //clock_t t01 = clock();
+  // distances_to_medium_changes[0] = 0.0;
+  // //clock_t t02 = clock();
   // int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
-  // floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
-  // floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
+  // //clock_t t03 = clock();
+  // local_scattering_lengths[0] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
+  // //clock_t t04 = clock();
+  // local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
+  // //clock_t t05 = clock();
+  //
+  // // int number_of_medium_changes = 1;
+  // // floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0, 1.0};
+  // // int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
+  // // floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
+  // // floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
+  //
+  // //number_of_medium_changes = 0;
+  // //distances_to_medium_changes[0] = 0.0;
+  // local_scattering_lengths[0] = 100.0;
+  // local_absorption_lengths[0] = 0.1;
 
-  //number_of_medium_changes = 0;
-  //distances_to_medium_changes[0] = 0.0;
-  local_scattering_lengths[0] = 100.0;
-  local_absorption_lengths[0] = 0.1;
+
+  // Medium change at x = x0 := -256.02301025390625
+  int number_of_medium_changes = 0;
+  const floating_t x0 = -256.02301025390625;
+  const floating_t absorption_inside = 100.0;
+  const floating_t effective_scattering_inside = 1.0;
+  const floating_t scattering_inside = effective_scattering_inside * (1 - 0.94);
+
+  distances_to_medium_changes[0] = 0;
+  local_scattering_lengths[0] = scattering_inside;
+  local_absorption_lengths[0] = absorption_inside;
+
+  //if ((photonDirAndWlen.x > 0) && (photonPosAndTime.x < x0)) {
+  //  number_of_medium_changes = 1;
+  //  distances_to_medium_changes[0] = 0;
+  //  local_scattering_lengths[0] = 100.0;
+  //  local_absorption_lengths[0] = 100.0;
+  //  distances_to_medium_changes[1] = x0 - photonPosAndTime.x;
+  //  local_scattering_lengths[1] = scattering_inside;
+  //  local_absorption_lengths[1] = absorption_inside;
+  //} else if ((photonDirAndWlen.x < 0) && (photonPosAndTime.x < x0)) {
+  //  distances_to_medium_changes[0] = 0;
+  //  local_scattering_lengths[0] = 100.0;
+  //  local_absorption_lengths[0] = 100.0;
+  //} else if ((photonDirAndWlen.x > 0) && (photonPosAndTime.x > x0)) {
+  //  distances_to_medium_changes[0] = 0;
+  //  local_scattering_lengths[0] = scattering_inside;
+  //  local_absorption_lengths[0] = absorption_inside;
+  //} else {
+  //  number_of_medium_changes = 1;
+  //  distances_to_medium_changes[0] = 0;
+  //  local_scattering_lengths[0] = scattering_inside;
+  //  local_absorption_lengths[0] = absorption_inside;
+  //  distances_to_medium_changes[1] = photonPosAndTime.x - x0;
+  //  local_scattering_lengths[1] = 100.0;
+  //  local_absorption_lengths[1] = 100.0;
+  //}
+
 
   // To check which medium boundaries are in range, we need to estimate
   // how far the photon can travel in this step.
@@ -82,22 +121,22 @@ inline void apply_propagation_through_different_media(
   //  local_absorption_lengths
   //);
 
-  //clock_t t2 = clock();
-  #ifdef HOLE_ICE
-    add_hole_ice_cylinders_on_photon_path_to_medium_changes(
-      photonPosAndTime,
-      photonDirAndWlen,
-      photonRange,
-      numberOfCylinders,
-      cylinderPositionsAndRadii,
-
-      // These values will be updates within this function:
-      &number_of_medium_changes,
-      distances_to_medium_changes,
-      local_scattering_lengths,
-      local_absorption_lengths
-    );
-  #endif
+  // //clock_t t2 = clock();
+  // #ifdef HOLE_ICE
+  //   add_hole_ice_cylinders_on_photon_path_to_medium_changes(
+  //     photonPosAndTime,
+  //     photonDirAndWlen,
+  //     photonRange,
+  //     numberOfCylinders,
+  //     cylinderPositionsAndRadii,
+  //
+  //     // These values will be updates within this function:
+  //     &number_of_medium_changes,
+  //     distances_to_medium_changes,
+  //     local_scattering_lengths,
+  //     local_absorption_lengths
+  //   );
+  // #endif
 
   // number_of_medium_changes = 1;
   // distances_to_medium_changes[0] = 0.0;

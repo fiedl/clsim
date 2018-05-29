@@ -762,7 +762,7 @@ __kernel void propKernel(
         //printf("CROSS CHECK: PROPAGATION distancePropagated = %f\n", distancePropagated);
         //printf("CROSS CHECK: PROPAGATION squared_distance_to_hole_ice_center = %f\n", squared_distance_to_hole_ice_center);
         //printf("CROSS CHECK: PROPAGATION distancePropagated_and_squared_distance_to_hole_ice_center = %f %f\n", distancePropagated, squared_distance_to_hole_ice_center);
-        printf("CROSS CHECK: PROPAGATION x,y,z %f %f %f\n", photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z);
+        //printf("CROSS CHECK: PROPAGATION x,y,z %f %f %f\n", photonPosAndTime.x, photonPosAndTime.y, photonPosAndTime.z);
 
         // absorb or scatter the photon
         if (abs_lens_left < EPSILON)
