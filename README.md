@@ -1,3 +1,5 @@
+# THIS IS WORK-IN-PROGRESS. Do not use this, yet!
+
 # clsim
 
 An OpenCL-based photon-tracking simulation using a (source-based) ray tracing algorithm

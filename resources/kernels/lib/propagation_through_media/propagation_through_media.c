@@ -33,6 +33,8 @@ inline void apply_propagation_through_different_media(
   floating_t *distancePropagated, floating_t *distanceToAbsorption)
 {
 
+  printf("Hole-ice code: THIS IS WORK-IN-PROGRESS. Do not use this, yet! See https://github.com/fiedl/hole-ice-study.\n");
+
   //clock_t t0 = clock();
 
   int number_of_medium_changes = 0;
