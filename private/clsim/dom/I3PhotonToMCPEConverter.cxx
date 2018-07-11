@@ -464,6 +464,16 @@ void I3PhotonToMCPEConverter::DAQ(I3FramePtr frame)
                      hitProbability);
 #endif
 
+            // If the photon's weight is > 1, we need to scale the weight down to 1 as the
+            // hit probability cannot be > 1. But we remember the factor and add more hits
+            // accordingly at the bottom of this file.
+            //
+            float scaleUpPhotonsFactor = 1.0;
+            if (hitProbability > 1.0) {
+              scaleUpPhotonsFactor = hitProbability;
+              hitProbability = 1.0;
+            }
+
             hitProbability *= wavelengthAcceptance_->GetValue(photon.GetWavelength());
             log_trace("After wlen acceptance: prob=%g (wlen acceptance is %f)",
                      hitProbability, wavelengthAcceptance_->GetValue(photon.GetWavelength()));
@@ -542,16 +552,19 @@ void I3PhotonToMCPEConverter::DAQ(I3FramePtr frame)
                 correctedTime += bringForward/photon.GetGroupVelocity();
             }
 
-            // add a new hit
-            if(particle)
-                hits->push_back(I3MCPE(*particle));
-            else
-                hits->push_back(I3MCPE());
-            I3MCPE &hit = hits->back();
+            for (int i = 0; i < scaleUpPhotonsFactor; i++)
+            {
+              // add a new hit
+              if(particle)
+                  hits->push_back(I3MCPE(*particle));
+              else
+                  hits->push_back(I3MCPE());
+              I3MCPE &hit = hits->back();
 
-            // fill in all information
-            hit.time=correctedTime;
-            hit.npe=1;
+              // fill in all information
+              hit.time=correctedTime;
+              hit.npe=1;
+            }
         }
 
         if (hits) {
