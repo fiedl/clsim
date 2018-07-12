@@ -468,6 +468,8 @@ void I3PhotonToMCPEConverter::DAQ(I3FramePtr frame)
             // hit probability cannot be > 1. Clsim will not scale up the number of hits
             // accordingly. Please do so after reading out the hits.
             //
+            // https://github.com/fiedl/hole-ice-study/issues/85
+            //
             if (hitProbability > 1.0) hitProbability = 1.0;
 
             hitProbability *= wavelengthAcceptance_->GetValue(photon.GetWavelength());
