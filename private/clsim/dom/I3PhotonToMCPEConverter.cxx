@@ -476,24 +476,24 @@ void I3PhotonToMCPEConverter::DAQ(I3FramePtr frame)
             log_trace("After wlen acceptance: prob=%g (wlen acceptance is %f)",
                      hitProbability, wavelengthAcceptance_->GetValue(photon.GetWavelength()));
 
-            // hitProbability *= angularAcceptance_->GetValue(photonCosAngle);
-            // log_trace("After wlen&angular acceptance: prob=%g (angular acceptance is %f)",
-            //           hitProbability, angularAcceptance_->GetValue(photonCosAngle));
+            hitProbability *= angularAcceptance_->GetValue(photonCosAngle);
+            log_trace("After wlen&angular acceptance: prob=%g (angular acceptance is %f)",
+                      hitProbability, angularAcceptance_->GetValue(photonCosAngle));
 
-            // Hardcoded direct detection method.
-            // https://github.com/fiedl/hole-ice-study/issues/32
-            //
-            // The photon needs to intersect the dom in the sensitive area to count as a hit.
-            // The coordinate system is such that the z-direction points up.
-            //
-            if (photon.GetPos().GetZ() < om.position.GetZ() - 0.24 * DOMOversizeFactor_ * DOMRadiusWithoutOversize_) {
-              log_trace("Photon has hit the dom in the PMT area. Photon z=%fm",
-                       photon.GetPos().GetZ()/I3Units::m);
-            } else {
-              hitProbability = 0;
-              log_trace("Photon did not hit the dom in the PMT area. Photon z=%fm",
-                       photon.GetPos().GetZ()/I3Units::m);
-            }
+            // // Hardcoded direct detection method.
+            // // https://github.com/fiedl/hole-ice-study/issues/32
+            // //
+            // // The photon needs to intersect the dom in the sensitive area to count as a hit.
+            // // The coordinate system is such that the z-direction points up.
+            // //
+            // if (photon.GetPos().GetZ() < om.position.GetZ() - 0.24 * DOMOversizeFactor_ * DOMRadiusWithoutOversize_) {
+            //   log_trace("Photon has hit the dom in the PMT area. Photon z=%fm",
+            //            photon.GetPos().GetZ()/I3Units::m);
+            // } else {
+            //   hitProbability = 0;
+            //   log_trace("Photon did not hit the dom in the PMT area. Photon z=%fm",
+            //            photon.GetPos().GetZ()/I3Units::m);
+            // }
 
             hitProbability *= efficiency_from_calibration;
             log_trace("After efficiency from calibration: prob=%g (efficiency_from_calibration=%f)",
