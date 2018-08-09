@@ -20,7 +20,8 @@ inline void add_ice_layers_on_photon_path_to_medium_changes(floating4_t photonPo
   int next_photon_layer =
       photon_layer(z_of_closest_ice_layer_boundary + photonDirAndWlen.z);
   local_scattering_lengths[*number_of_medium_changes] =
-      getScatteringLength(next_photon_layer, photonDirAndWlen.w);
+      10000.0;
+      //getScatteringLength(next_photon_layer, photonDirAndWlen.w);
   local_absorption_lengths[*number_of_medium_changes] =
       getAbsorptionLength(next_photon_layer, photonDirAndWlen.w);
 
@@ -45,7 +46,8 @@ inline void add_ice_layers_on_photon_path_to_medium_changes(floating4_t photonPo
     next_photon_layer = photon_layer(photonPosAndTime.z
         + (distances_to_medium_changes[*number_of_medium_changes] + 0.01) * photonDirAndWlen.z);
     local_scattering_lengths[*number_of_medium_changes] =
-        getScatteringLength(next_photon_layer, photonDirAndWlen.w);
+        10000.0;
+        //getScatteringLength(next_photon_layer, photonDirAndWlen.w);
     local_absorption_lengths[*number_of_medium_changes] =
         getAbsorptionLength(next_photon_layer, photonDirAndWlen.w);
   }

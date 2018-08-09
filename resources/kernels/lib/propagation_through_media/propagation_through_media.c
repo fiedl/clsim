@@ -41,10 +41,13 @@ inline void apply_propagation_through_different_media(
   //clock_t t02 = clock();
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
   //clock_t t03 = clock();
-  local_scattering_lengths[0] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
+  local_scattering_lengths[0] = 10000.0; // getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
   //clock_t t04 = clock();
   local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
   //clock_t t05 = clock();
+
+  // printf("sca = %f\n", local_scattering_lengths[0]);
+  // printf("abs = %f\n", local_absorption_lengths[0]);
 
   // int number_of_medium_changes = 1;
   // floating_t distances_to_medium_changes[MEDIUM_LAYERS] = {0.0, 1.0};
