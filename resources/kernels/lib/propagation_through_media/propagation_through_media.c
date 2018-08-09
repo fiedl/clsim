@@ -41,7 +41,7 @@ inline void apply_propagation_through_different_media(
   //clock_t t02 = clock();
   int currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
   //clock_t t03 = clock();
-  local_scattering_lengths[0] = 10000.0; // getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
+  local_scattering_lengths[0] = 100.0; // getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
   //clock_t t04 = clock();
   local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
   //clock_t t05 = clock();
@@ -55,8 +55,8 @@ inline void apply_propagation_through_different_media(
   // floating_t local_scattering_lengths[MEDIUM_LAYERS] = {getScatteringLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
   // floating_t local_absorption_lengths[MEDIUM_LAYERS] = {getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w), 100.0};
 
-  //floating_t local_scattering_lengths[MEDIUM_LAYERS] = {1000.0};
-  //floating_t local_absorption_lengths[MEDIUM_LAYERS] = {1000.0};
+  //floating_t local_scattering_lengths[MEDIUM_LAYERS] = {100.0};
+  //floating_t local_absorption_lengths[MEDIUM_LAYERS] = {100.0};
 
 
   // To check which medium boundaries are in range, we need to estimate
@@ -106,9 +106,9 @@ inline void apply_propagation_through_different_media(
   // distances_to_medium_changes[1] = 1.0;
   // currentPhotonLayer = min(max(findLayerForGivenZPos(photonPosAndTime.z), 0), MEDIUM_LAYERS-1);
   // local_scattering_lengths[0] = getScatteringLength(currentPhotonLayer, photonDirAndWlen.w);
-  // local_scattering_lengths[1] = 100.0;
+  // local_scattering_lengths[1] = 1000.0;
   // local_absorption_lengths[0] = getAbsorptionLength(currentPhotonLayer, photonDirAndWlen.w);
-  // local_absorption_lengths[1] = 100.0;
+  // local_absorption_lengths[1] = 1000.0;
 
   //clock_t t3 = clock();
   sort_medium_changes_by_ascending_distance(

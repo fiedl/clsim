@@ -100,7 +100,7 @@ inline void add_hole_ice_cylinders_on_photon_path_to_medium_changes(floating4_t 
             const int photonLayerAtTheCylinderBorder =
                 photon_layer(photonPosAndTime.z + photonDirAndWlen.z * intersection_s2(p));
             local_scattering_lengths[*number_of_medium_changes] =
-                10000.0;
+                100.0;
                 //getScatteringLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
             local_absorption_lengths[*number_of_medium_changes] =
                 getAbsorptionLength(photonLayerAtTheCylinderBorder, photonDirAndWlen.w);
